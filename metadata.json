@@ -1,0 +1,8 @@
+{
+  "name": "EMOS",
+  "description": "Enterprise Modernization Operating System — Decision Intelligence. Turn fragmented enterprise modernization evidence into explainable, evidence-aware decisions with Gemini and Cloud Firestore.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

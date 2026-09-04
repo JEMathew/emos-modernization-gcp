@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile metadata isolated to authenticated owner",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Unique user identifier matching auth.uid" },
+        "displayName": { "type": "string", "description": "Display name of user" },
+        "email": { "type": "string", "description": "Email address of user" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account initialization timestamp" },
+        "lastActiveAt": { "type": "string", "format": "date-time", "description": "Last active session timestamp" }
+      },
+      "required": ["userId", "createdAt"]
+    },
+    "Interaction": {
+      "title": "Interaction",
+      "description": "User journal entry, reflection, or brainstorming session with Gemini AI multi-turn interactions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique interaction document ID" },
+        "userId": { "type": "string", "description": "Owner user ID" },
+        "title": { "type": "string", "description": "Title or summary topic of reflection" },
+        "category": { "type": "string", "description": "Type of reflection (e.g. Reflection, Brainstorm, Summary, Gratitude)" },
+        "content": { "type": "string", "description": "User's initial journal entry" },
+        "geminiResponse": { "type": "string", "description": "Gemini AI response, analysis, or reflection" },
+        "turns": { "type": "array", "description": "Array of multi-turn conversational dialog items" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when entry was created" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp when entry was last updated" }
+      },
+      "required": ["id", "userId", "content", "geminiResponse", "createdAt"]
+    },
+    "ImportedWorkload": {
+      "title": "ImportedWorkload",
+      "description": "User-imported enterprise portfolio workload and structured Enterprise DNA",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique workload identifier" },
+        "name": { "type": "string", "description": "Workload display name" },
+        "type": { "type": "string", "description": "Workload classification (Application, Data Platform)" },
+        "businessCapability": { "type": "string", "description": "Associated business capability" },
+        "businessCriticality": { "type": "string", "description": "Criticality level (High, Medium, Low)" },
+        "currentStack": { "type": "string", "description": "Technology runtime and database stack" },
+        "hosting": { "type": "string", "description": "Current infrastructure hosting environment" },
+        "knownDependencies": { "type": "string", "description": "Known integration summary" },
+        "modernizationSignals": { "type": "array", "description": "List of key architectural and business signals" },
+        "evidenceCompleteness": { "type": "number", "description": "Deterministic completeness percentage" },
+        "dna": { "type": "object", "description": "6-dimension structured Enterprise DNA" },
+        "importedAt": { "type": "string", "format": "date-time", "description": "Timestamp when workload was imported" },
+        "userId": { "type": "string", "description": "Owner user ID" }
+      },
+      "required": ["id", "name", "type", "evidenceCompleteness", "dna"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Top-level private user profile document"
+    },
+    "/users/{userId}/interactions/{interactionId}": {
+      "schema": "Interaction",
+      "description": "User-isolated journal entries and AI reflection chats"
+    },
+    "/users/{userId}/importedWorkloads/{workloadId}": {
+      "schema": "ImportedWorkload",
+      "description": "User-isolated imported enterprise portfolio workloads"
+    }
+  }
+}

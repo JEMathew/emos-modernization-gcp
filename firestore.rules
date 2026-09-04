@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Zero insecure defaults: deny all unmatched reads and writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // User profile document isolated to authenticated user
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // User interaction/journal entries isolated strictly to owning user
+    match /users/{userId}/interactions/{interactionId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // User imported enterprise workloads isolated strictly to owning user
+    match /users/{userId}/importedWorkloads/{workloadId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
