@@ -2,6 +2,7 @@ import React from 'react';
 import { Sparkles, LogOut, Plus, ShieldCheck, Database, User as UserIcon, Layers, FileText } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { signOut } from '../lib/firebase';
+import { ThemeSelector } from './ThemeSelector';
 
 interface NavbarProps {
   user: User | null;
@@ -23,52 +24,52 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenWalkthrough,
 }) => {
   return (
-    <header id="app-header" className="border-b border-[#222] bg-[#0F0F0F]/95 backdrop-blur-md sticky top-0 z-30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+    <header id="app-header" className="border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]/95 backdrop-blur-md sticky top-0 z-30 transition-colors">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#A88554] to-[#E5C492] flex items-center justify-center shadow-lg shadow-[#A88554]/15 shrink-0">
             <Sparkles className="w-4 h-4 text-black" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-serif font-bold text-white tracking-wider text-base sm:text-lg">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="font-serif font-bold text-[var(--emos-text-primary)] tracking-wider text-base sm:text-lg">
                 EMOS
               </span>
-              <span className="text-xs text-[#888] hidden md:inline font-normal">
+              <span className="text-xs text-[var(--emos-text-muted)] hidden md:inline font-normal">
                 Enterprise Modernization Operating System
               </span>
-              <span className="text-[10px] font-sans uppercase tracking-wider text-[#A88554] font-medium px-2 py-0.5 rounded bg-[#A88554]/10 border border-[#A88554]/20 hidden sm:inline">
+              <span className="text-[10px] font-sans uppercase tracking-wider text-[var(--emos-accent)] font-medium px-2 py-0.5 rounded bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] hidden sm:inline">
                 Decision Intelligence
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[10px] text-[#777]">
-              <span className="md:hidden text-[#999] font-normal">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] text-[var(--emos-text-muted)]">
+              <span className="md:hidden text-[var(--emos-text-muted)] font-normal">
                 Enterprise Modernization Operating System •
               </span>
-              <span className="inline-flex items-center gap-1 text-[#A88554] font-medium">
+              <span className="inline-flex items-center gap-1 text-[var(--emos-accent)] font-medium">
                 <ShieldCheck className="w-3 h-3" /> 6R Enterprise Architecture
               </span>
-              <span className="text-[#333]">•</span>
-              <span className="inline-flex items-center gap-1 text-[#777]">
-                <Database className="w-3 h-3 text-[#555]" /> Cloud Firestore
+              <span className="hidden sm:inline text-[var(--emos-border-strong)]">•</span>
+              <span className="hidden sm:inline-flex items-center gap-1 text-[var(--emos-text-muted)]">
+                <Database className="w-3 h-3 text-[var(--emos-text-muted)]" /> Cloud Firestore
               </span>
             </div>
           </div>
         </div>
 
-        {/* Lightweight Navigation: Portfolio, Decision Intelligence, Assessments */}
-        <nav className="hidden sm:flex items-center gap-1 p-1 bg-[#141414] border border-[#262626] rounded-xl">
+        {/* Desktop / Tablet Navigation: Portfolio, Decision Intelligence, Assessments */}
+        <nav className="hidden md:flex items-center gap-1 p-1 bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] rounded-xl">
           <button
             id="nav-tab-portfolio"
             onClick={() => onNavigate('portfolio')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               currentView === 'portfolio' || currentView === 'dna'
-                ? 'bg-[#222] text-[#E5C492] border border-[#333] shadow-sm'
-                : 'text-[#888] hover:text-white'
+                ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+                : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
             }`}
           >
-            <Layers className="w-3.5 h-3.5 text-[#A88554]" />
+            <Layers className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
             <span>Portfolio</span>
           </button>
 
@@ -77,11 +78,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => onNavigate('decision-intelligence')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               currentView === 'workspace' && !selectedId
-                ? 'bg-[#222] text-[#E5C492] border border-[#333] shadow-sm'
-                : 'text-[#888] hover:text-white'
+                ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+                : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#A88554]" />
+            <Sparkles className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
             <span>Decision Intelligence</span>
           </button>
 
@@ -90,14 +91,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => onNavigate('assessments')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               currentView === 'workspace' && selectedId
-                ? 'bg-[#222] text-[#E5C492] border border-[#333] shadow-sm'
-                : 'text-[#888] hover:text-white'
+                ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+                : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
             }`}
           >
-            <FileText className="w-3.5 h-3.5 text-[#A88554]" />
+            <FileText className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
             <span>Assessments</span>
             {assessmentCount !== undefined && assessmentCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-[#181818] border border-[#2E2E2E] text-[10px] text-[#AAA]">
+              <span className="px-1.5 py-0.2 rounded-full bg-[var(--emos-bg-secondary)] border border-[var(--emos-border-subtle)] text-[10px] text-[var(--emos-text-muted)]">
                 {assessmentCount}
               </span>
             )}
@@ -105,11 +106,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         </nav>
 
         {/* Actions & User */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           <button
             id="walkthrough-btn"
             onClick={onOpenWalkthrough}
-            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#333] bg-[#151515] text-[#999] hover:text-white hover:border-[#444] text-xs font-medium transition-colors"
+            className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:border-[var(--emos-border-strong)] text-xs font-medium transition-colors"
             title="View Interactive Test Scenarios & Verification"
           >
             Verification & Test Guide
@@ -118,39 +119,42 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             id="nav-new-assessment-btn"
             onClick={onNewAssessment}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#A88554] hover:bg-[#E5C492] text-black text-xs sm:text-sm font-medium transition-all shadow-md active:scale-98 cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-[#A88554] hover:bg-[#BCA075] dark:hover:bg-[#E5C492] text-black text-xs sm:text-sm font-semibold transition-all shadow-sm active:scale-98 cursor-pointer min-h-[36px] sm:min-h-[38px]"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">New Assessment</span>
             <span className="sm:hidden">New</span>
           </button>
 
+          {/* Theme Appearance Control */}
+          <ThemeSelector />
+
           {user && (
-            <div className="flex items-center gap-3 pl-2 sm:pl-3 border-l border-[#222]">
+            <div className="flex items-center gap-2 sm:gap-3 pl-1.5 sm:pl-2.5 border-l border-[var(--emos-border-subtle)]">
               {user.photoURL ? (
                 <img
                   src={user.photoURL}
                   alt={user.displayName || 'User'}
-                  className="w-8 h-8 rounded-full border border-[#333] object-cover"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-[var(--emos-border-subtle)] object-cover"
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[#A88554] font-serif text-sm font-semibold">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--emos-surface-elevated)] border border-[var(--emos-border-subtle)] flex items-center justify-center text-[var(--emos-accent)] font-serif text-xs sm:text-sm font-semibold">
                   {user.displayName ? user.displayName.slice(0, 1).toUpperCase() : <UserIcon className="w-4 h-4" />}
                 </div>
               )}
 
-              <div className="hidden lg:block text-left max-w-[130px]">
-                <p className="text-xs font-semibold text-white truncate">
+              <div className="hidden lg:block text-left max-w-[120px]">
+                <p className="text-xs font-semibold text-[var(--emos-text-primary)] truncate">
                   {user.displayName || 'Authenticated User'}
                 </p>
-                <p className="text-[10px] text-[#777] truncate">{user.email}</p>
+                <p className="text-[10px] text-[var(--emos-text-muted)] truncate">{user.email}</p>
               </div>
 
               <button
                 id="sign-out-btn"
                 onClick={() => signOut()}
-                className="p-2 rounded-xl text-[#555] hover:text-white hover:bg-[#1A1A1A] transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-xl text-[var(--emos-text-muted)] hover:text-[var(--emos-text-primary)] hover:bg-[var(--emos-surface-hover)] transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
                 title="Sign Out"
                 aria-label="Sign Out"
               >
@@ -159,6 +163,53 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Mobile Secondary Navigation Row (320px - 767px) */}
+      <div className="md:hidden border-t border-[var(--emos-border-subtle)] px-2 py-1.5 bg-[var(--emos-bg-tertiary)] flex items-center justify-around gap-1">
+        <button
+          id="mobile-nav-portfolio"
+          onClick={() => onNavigate('portfolio')}
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+            currentView === 'portfolio' || currentView === 'dna'
+              ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+              : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
+          <span>Portfolio</span>
+        </button>
+
+        <button
+          id="mobile-nav-decision"
+          onClick={() => onNavigate('decision-intelligence')}
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+            currentView === 'workspace' && !selectedId
+              ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+              : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
+          <span>Decision Intel</span>
+        </button>
+
+        <button
+          id="mobile-nav-assessments"
+          onClick={() => onNavigate('assessments')}
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+            currentView === 'workspace' && selectedId
+              ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+              : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+          }`}
+        >
+          <FileText className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
+          <span>Assessments</span>
+          {assessmentCount !== undefined && assessmentCount > 0 && (
+            <span className="px-1.5 py-0.2 rounded-full bg-[var(--emos-bg-secondary)] border border-[var(--emos-border-subtle)] text-[10px] text-[var(--emos-text-muted)]">
+              {assessmentCount}
+            </span>
+          )}
+        </button>
       </div>
     </header>
   );

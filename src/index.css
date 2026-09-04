@@ -1,10 +1,65 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @layer base {
+  :root {
+    /* EMOS Light Theme: Clean enterprise warm-neutral */
+    --emos-bg: #F9F9F8;
+    --emos-bg-secondary: #F2F2F0;
+    --emos-bg-tertiary: #EBEBE8;
+    --emos-surface: #FFFFFF;
+    --emos-surface-elevated: #F6F6F4;
+    --emos-surface-hover: #EFEFEA;
+    --emos-surface-active: #E8E8E2;
+    --emos-text-primary: #141416;
+    --emos-text-secondary: #4A4A50;
+    --emos-text-muted: #71717A;
+    --emos-border-subtle: #E4E4E7;
+    --emos-border-strong: #D1D1D6;
+    --emos-accent: #876637;
+    --emos-accent-hover: #73542A;
+    --emos-accent-subtle: #F6F2EA;
+    --emos-accent-border: #E5D7C2;
+    --emos-accent-text: #785627;
+    --emos-code-bg: #F3F3F0;
+    --emos-code-border: #E2E2E6;
+    --emos-scrollbar-track: #F3F3F1;
+    --emos-scrollbar-thumb: #D1D1D6;
+    --emos-scrollbar-thumb-hover: #B4B4BA;
+  }
+
+  .dark {
+    /* EMOS Dark Theme: Preserved near-black enterprise identity */
+    --emos-bg: #0A0A0A;
+    --emos-bg-secondary: #0F0F0F;
+    --emos-bg-tertiary: #141414;
+    --emos-surface: #121212;
+    --emos-surface-elevated: #181818;
+    --emos-surface-hover: #1E1E1E;
+    --emos-surface-active: #242424;
+    --emos-text-primary: #FFFFFF;
+    --emos-text-secondary: #A3A3A3;
+    --emos-text-muted: #666666;
+    --emos-border-subtle: #222222;
+    --emos-border-strong: #333333;
+    --emos-accent: #A88554;
+    --emos-accent-hover: #E5C492;
+    --emos-accent-subtle: #201A12;
+    --emos-accent-border: #3E3220;
+    --emos-accent-text: #E5C492;
+    --emos-code-bg: #080808;
+    --emos-code-border: #1F1F1F;
+    --emos-scrollbar-track: #0F0F0F;
+    --emos-scrollbar-thumb: #262626;
+    --emos-scrollbar-thumb-hover: #3A3A3A;
+  }
+
   body {
-    background-color: #0A0A0A;
-    color: #D4D4D4;
+    background-color: var(--emos-bg);
+    color: var(--emos-text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 
   .font-serif {
@@ -12,21 +67,31 @@
   }
 }
 
-/* Custom sleek dark scrollbar */
+/* Custom sleek scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0F0F0F;
+  background: var(--emos-scrollbar-track, #0F0F0F);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #262626;
+  background: var(--emos-scrollbar-thumb, #262626);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3A3A3A;
+  background: var(--emos-scrollbar-thumb-hover, #3A3A3A);
+}
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

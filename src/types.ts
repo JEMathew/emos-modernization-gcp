@@ -23,6 +23,13 @@ export type Disposition6R = 'Retain' | 'Retire' | 'Rehost' | 'Replatform' | 'Ref
 
 export type DecisionReadiness = 'READY' | 'NEEDS EVIDENCE';
 
+export interface TrustIndicators {
+  inputValidated: boolean;
+  evidenceGrounded: boolean;
+  schemaValidated: boolean;
+  wasRepaired?: boolean;
+}
+
 export interface Interaction {
   id: string;
   userId: string;
@@ -42,6 +49,7 @@ export interface Interaction {
   confidenceScore?: number;
   evidenceCompleteness?: number;
   decisionReadiness?: DecisionReadiness | string;
+  trustIndicators?: TrustIndicators;
 }
 
 export type DnaEvidenceStatus = 'known' | 'missing' | 'incomplete';
@@ -116,6 +124,7 @@ export interface InvalidImportRow {
   id?: string;
   name?: string;
   errors: string[];
+  status?: 'REJECTED' | 'WARNING';
 }
 
 export interface ImportValidationResult {
@@ -126,6 +135,11 @@ export interface ImportValidationResult {
   warnings: string[];
   detectedWorkloadTypes: string[];
   totalEvidenceGaps: number;
+  rowBreakdown?: {
+    valid: number;
+    warning: number;
+    rejected: number;
+  };
 }
 
 export interface ModernizationStarter {

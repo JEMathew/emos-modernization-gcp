@@ -7,26 +7,21 @@ import type {
   InvalidImportRow,
 } from '../types';
 import { calculateDnaCompleteness } from '../data/samplePortfolio';
+import {
+  sanitizeEvidenceValue,
+  MAX_FIELD_LENGTH,
+  MAX_NAME_LENGTH,
+  MAX_ID_LENGTH,
+} from '../lib/guardrails';
 
-export const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
-export const MAX_IMPORT_WORKLOADS = 50;
+export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+export const MAX_IMPORT_WORKLOADS = 200;
 
 /**
- * Defends against CSV / Spreadsheet formula injection.
- * Strips or prefixes risky characters (=, +, -, @, tab, cr) from values.
+ * Defends against CSV / Spreadsheet formula injection and limits text lengths.
  */
-export function sanitizeInputString(val: unknown): string {
-  if (val === null || val === undefined) return '';
-  let str = String(val).trim();
-
-  // Guard against formula injection execution
-  if (/^[=+\-@\t\r]/.test(str)) {
-    str = `'${str}`;
-  }
-
-  // Strip non-printable control characters except newline and tab
-  str = str.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
-  return str;
+export function sanitizeInputString(val: unknown, maxLength = MAX_FIELD_LENGTH): string {
+  return sanitizeEvidenceValue(val, maxLength);
 }
 
 /**
@@ -153,9 +148,9 @@ export function buildWorkloadFromRawRecord(
   record: RawImportRecord,
   userId?: string
 ): EnterpriseWorkload {
-  const id = sanitizeInputString(record.workload_id || `wl-${Date.now()}`);
-  const name = sanitizeInputString(record.workload_name || 'Unnamed Workload');
-  const typeStr = sanitizeInputString(record.workload_type || 'Application');
+  const id = sanitizeInputString(record.workload_id || `wl-${Date.now()}`, MAX_ID_LENGTH);
+  const name = sanitizeInputString(record.workload_name || 'Unnamed Workload', MAX_NAME_LENGTH);
+  const typeStr = sanitizeInputString(record.workload_type || 'Application', 100);
   const type: 'Application' | 'Data Platform' =
     typeStr.toLowerCase().includes('data') || typeStr.toLowerCase().includes('platform')
       ? 'Data Platform'
@@ -404,6 +399,7 @@ export function parseCsvPortfolio(
         id: id || undefined,
         name: name || undefined,
         errors: rowErrors,
+        status: 'REJECTED',
       });
       return;
     }
@@ -423,6 +419,7 @@ export function parseCsvPortfolio(
         id,
         name,
         errors: [err?.message || 'Failed to process record into Enterprise DNA'],
+        status: 'REJECTED',
       });
     }
   });
@@ -435,6 +432,11 @@ export function parseCsvPortfolio(
     warnings,
     detectedWorkloadTypes: Array.from(detectedWorkloadTypes),
     totalEvidenceGaps,
+    rowBreakdown: {
+      valid: validRecords.length,
+      warning: warnings.length,
+      rejected: invalidRecords.length,
+    },
   };
 }
 
@@ -487,6 +489,7 @@ export function parseJsonPortfolio(
       invalidRecords.push({
         rowNumber,
         errors: ['Item must be a valid JSON object'],
+        status: 'REJECTED',
       });
       return;
     }
@@ -523,6 +526,7 @@ export function parseJsonPortfolio(
         id: id || undefined,
         name: name || undefined,
         errors: rowErrors,
+        status: 'REJECTED',
       });
       return;
     }
@@ -542,6 +546,7 @@ export function parseJsonPortfolio(
         id,
         name,
         errors: [err?.message || 'Failed to process record'],
+        status: 'REJECTED',
       });
     }
   });
@@ -554,5 +559,10 @@ export function parseJsonPortfolio(
     warnings,
     detectedWorkloadTypes: Array.from(detectedWorkloadTypes),
     totalEvidenceGaps,
+    rowBreakdown: {
+      valid: validRecords.length,
+      warning: warnings.length,
+      rejected: invalidRecords.length,
+    },
   };
 }

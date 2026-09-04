@@ -3,15 +3,14 @@ import {
   Sparkles,
   ShieldCheck,
   Lock,
-  MessageSquareText,
   Clock,
   ArrowRight,
   BrainCircuit,
-  Database,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
 import { signInWithGoogle } from '../lib/firebase';
+import { ThemeSelector } from './ThemeSelector';
 
 interface LandingPageProps {
   onOpenWalkthrough: () => void;
@@ -38,9 +37,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough }) =
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#D4D4D4] flex flex-col selection:bg-[#A88554] selection:text-black font-sans">
+    <div className="min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] flex flex-col selection:bg-[#A88554] selection:text-black font-sans transition-colors">
       {/* Top Banner */}
-      <header className="border-b border-[#222] bg-[#0A0A0A]/90 backdrop-blur-md sticky top-0 z-20">
+      <header className="border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]/90 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#A88554] to-[#E5C492] text-black flex items-center justify-center font-serif font-bold text-sm shadow-md">
@@ -48,24 +47,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough }) =
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-serif font-bold tracking-wider text-white text-base">
+                <span className="font-serif font-bold tracking-wider text-[var(--emos-text-primary)] text-base">
                   EMOS
                 </span>
-                <span className="text-xs text-[#888] hidden md:inline font-normal">
+                <span className="text-xs text-[var(--emos-text-secondary)] hidden md:inline font-normal">
                   Enterprise Modernization Operating System
                 </span>
-                <span className="text-[10px] font-sans uppercase tracking-wider text-[#A88554] font-medium px-2 py-0.5 rounded bg-[#A88554]/10 border border-[#A88554]/20 hidden sm:inline">
+                <span className="text-[10px] font-sans uppercase tracking-wider text-[var(--emos-accent-text)] font-medium px-2 py-0.5 rounded bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] hidden sm:inline">
                   Decision Intelligence
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <ThemeSelector />
+
             <button
               id="landing-walkthrough-nav-btn"
               onClick={onOpenWalkthrough}
-              className="text-xs font-medium text-[#888] hover:text-white px-3 py-1.5 rounded-xl border border-[#333] bg-[#141414] hover:bg-[#1A1A1A] transition-colors cursor-pointer"
+              className="text-xs font-medium text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] transition-colors cursor-pointer hidden sm:inline-flex min-h-[34px] items-center"
             >
               Test Scenarios
             </button>
@@ -73,7 +74,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough }) =
               id="landing-header-signin-btn"
               onClick={handleSignIn}
               disabled={isSigningIn}
-              className="text-xs sm:text-sm font-semibold bg-[#A88554] hover:bg-[#E5C492] text-black px-4 py-1.5 rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer"
+              className="text-xs sm:text-sm font-semibold bg-[#A88554] hover:bg-[#BCA075] dark:hover:bg-[#E5C492] text-black px-3.5 sm:px-4 py-1.5 rounded-xl transition-all flex items-center gap-2 shadow-sm cursor-pointer min-h-[34px]"
             >
               {isSigningIn ? 'Connecting...' : 'Sign In with Google'}
             </button>
@@ -82,35 +83,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough }) =
       </header>
 
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col justify-center max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+      <main className="flex-1 flex flex-col justify-center max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <div className="text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#151515] border border-[#333] text-[#A88554] text-xs font-medium">
-            <Sparkles className="w-3.5 h-3.5 text-[#A88554]" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] text-xs font-medium">
+            <Sparkles className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
             <span>Ideathon Release: Decision Intelligence • Enterprise Modernization Operating System</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-white max-w-3xl mx-auto leading-tight">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-[var(--emos-text-primary)] max-w-3xl mx-auto leading-tight">
             Turn fragmented enterprise modernization evidence into explainable, evidence-aware decisions.
           </h1>
 
-          <p className="text-base sm:text-lg text-[#777] max-w-2xl mx-auto font-normal leading-relaxed">
+          <p className="text-sm sm:text-base lg:text-lg text-[var(--emos-text-secondary)] max-w-2xl mx-auto font-normal leading-relaxed">
             Continuous modernization from intelligence to governed action to measurable outcomes. Assess enterprise workloads across canonical 6R dispositions (Retain, Retire, Rehost, Replatform, Refactor, Repurchase) grounded in deterministic Enterprise DNA evidence completeness.
           </p>
 
           {authError && (
-            <div className="max-w-md mx-auto p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-300 text-xs flex items-start gap-2 text-left">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+            <div className="max-w-md mx-auto p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2 text-left">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
               <span>{authError}</span>
             </div>
           )}
 
           {/* Primary Action */}
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               id="primary-google-signin-btn"
               onClick={handleSignIn}
               disabled={isSigningIn}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] hover:opacity-95 text-black font-semibold text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-xl active:scale-98 disabled:opacity-75 cursor-pointer"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] hover:opacity-95 text-black font-semibold text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-md active:scale-98 disabled:opacity-75 cursor-pointer min-h-[44px]"
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                 <path
@@ -137,70 +138,70 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough }) =
             <button
               id="learn-more-walkthrough-btn"
               onClick={onOpenWalkthrough}
-              className="w-full sm:w-auto px-5 py-3.5 rounded-xl border border-[#333] bg-[#141414] hover:bg-[#1A1A1A] text-[#CCC] hover:text-white text-sm font-medium transition-colors cursor-pointer"
+              className="w-full sm:w-auto px-5 py-3.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-[var(--emos-text-primary)] text-sm font-medium transition-colors cursor-pointer min-h-[44px]"
             >
               Architecture & Tests
             </button>
           </div>
 
-          <div className="pt-2 flex items-center justify-center gap-6 text-xs text-[#666]">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-[var(--emos-text-muted)]">
             <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#A88554]" /> Canonical 6R Decisions
+              <CheckCircle2 className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> Canonical 6R Decisions
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#A88554]" /> Owner-Locked Firestore
+              <CheckCircle2 className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> Owner-Locked Firestore
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#A88554]" /> Multi-Turn Evidence Continuity
+              <CheckCircle2 className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> Multi-Turn Evidence Continuity
             </span>
           </div>
         </div>
 
         {/* Core Pillars Grid */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="p-6 rounded-2xl bg-[#0F0F0F] border border-[#222] shadow-xl space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#A88554]">
-              <BrainCircuit className="w-5 h-5 text-[#A88554]" />
+        <div className="mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+          <div className="p-5 sm:p-6 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] flex items-center justify-center text-[var(--emos-accent)]">
+              <BrainCircuit className="w-5 h-5 text-[var(--emos-accent)]" />
             </div>
-            <h3 className="font-serif text-white text-base">Canonical 6R Modernization Engine</h3>
-            <p className="text-[#777] text-xs leading-relaxed">
+            <h3 className="font-serif text-[var(--emos-text-primary)] text-base font-semibold">Canonical 6R Modernization Engine</h3>
+            <p className="text-[var(--emos-text-secondary)] text-xs leading-relaxed">
               Synthesizes legacy codebases and data platforms strictly into Retain, Retire, Rehost, Replatform, Refactor, or Repurchase with explicit rationale.
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-[#0F0F0F] border border-[#222] shadow-xl space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#A88554]">
-              <Lock className="w-5 h-5 text-[#A88554]" />
+          <div className="p-5 sm:p-6 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] flex items-center justify-center text-[var(--emos-accent)]">
+              <Lock className="w-5 h-5 text-[var(--emos-accent)]" />
             </div>
-            <h3 className="font-serif text-white text-base">Zero Cross-Tenant Leakage</h3>
-            <p className="text-[#777] text-xs leading-relaxed">
-              Strict Attribute-Based Access Control (ABAC) in Cloud Firestore guarantees that enterprise assessments are locked to <code className="bg-[#181818] border border-[#2A2A2A] text-[#A88554] px-1 py-0.5 rounded text-[11px]">/users/&#123;uid&#125;</code>.
+            <h3 className="font-serif text-[var(--emos-text-primary)] text-base font-semibold">Zero Cross-Tenant Leakage</h3>
+            <p className="text-[var(--emos-text-secondary)] text-xs leading-relaxed">
+              Strict Attribute-Based Access Control (ABAC) in Cloud Firestore guarantees that enterprise assessments are locked to <code className="bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] px-1 py-0.5 rounded text-[11px]">/users/&#123;uid&#125;</code>.
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-[#0F0F0F] border border-[#222] shadow-xl space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#A88554]">
-              <Clock className="w-5 h-5 text-[#A88554]" />
+          <div className="p-5 sm:p-6 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] shadow-xs space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] flex items-center justify-center text-[var(--emos-accent)]">
+              <Clock className="w-5 h-5 text-[var(--emos-accent)]" />
             </div>
-            <h3 className="font-serif text-white text-base">Evidence & Risk Discovery</h3>
-            <p className="text-[#777] text-xs leading-relaxed">
+            <h3 className="font-serif text-[var(--emos-text-primary)] text-base font-semibold">Evidence & Risk Discovery</h3>
+            <p className="text-[var(--emos-text-secondary)] text-xs leading-relaxed">
               Never turns weak evidence into falsely confident advice. Identifies critical missing data, dependency risks, and evaluates decision readiness.
             </p>
           </div>
         </div>
 
         {/* Security Assurance Banner */}
-        <div className="mt-8 p-5 rounded-2xl bg-[#0F0F0F] border border-[#222] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="mt-6 sm:mt-8 p-4 sm:p-5 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <ShieldCheck className="w-6 h-6 text-[#A88554] shrink-0" />
-            <div className="text-xs text-[#777]">
-              <span className="font-medium text-[#BBB]">Federated Identity Governance:</span> Employs Google Sign-In with zero password storage in application code, ensuring enterprise-grade credential management.
+            <ShieldCheck className="w-6 h-6 text-[var(--emos-accent)] shrink-0" />
+            <div className="text-xs text-[var(--emos-text-secondary)]">
+              <span className="font-medium text-[var(--emos-text-primary)]">Federated Identity Governance:</span> Employs Google Sign-In with zero password storage in application code, ensuring enterprise-grade credential management.
             </div>
           </div>
           <button
             id="test-guide-link"
             onClick={onOpenWalkthrough}
-            className="text-xs font-semibold text-[#A88554] underline underline-offset-4 hover:text-[#E5C492] shrink-0 cursor-pointer"
+            className="text-xs font-semibold text-[var(--emos-accent)] underline underline-offset-4 hover:text-[var(--emos-accent-text)] shrink-0 cursor-pointer"
           >
             Review Security Test Specs →
           </button>
@@ -208,7 +209,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough }) =
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#1C1C1C] py-6 text-center text-xs text-[#555]">
+      <footer className="border-t border-[var(--emos-border-subtle)] py-6 text-center text-xs text-[var(--emos-text-muted)] bg-[var(--emos-bg-secondary)]">
         EMOS — Enterprise Modernization Operating System • Ideathon Release: Decision Intelligence
       </footer>
     </div>

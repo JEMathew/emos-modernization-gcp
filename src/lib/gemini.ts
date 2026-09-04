@@ -1,4 +1,16 @@
-import type { ChatMessage, AssessmentMode, Disposition6R, DecisionReadiness } from '../types';
+import type {
+  ChatMessage,
+  AssessmentMode,
+  Disposition6R,
+  DecisionReadiness,
+  TrustIndicators,
+  EnterpriseDna,
+} from '../types';
+import {
+  validateAndReconcileAssessment,
+  validateOrRepair6RDisposition,
+  redactSecrets,
+} from './guardrails';
 
 export interface AssessmentAttributes {
   recommended6R?: Disposition6R;
@@ -6,12 +18,17 @@ export interface AssessmentAttributes {
   evidenceCompleteness?: number;
   decisionReadiness?: DecisionReadiness;
   workloadName?: string;
+  isGrounded?: boolean;
+  wasRepaired?: boolean;
+  repairedReasons?: string[];
+  trustIndicators?: TrustIndicators;
 }
 
 export interface ChatResponse {
   response: string;
   modelUsed: string;
   attributes?: AssessmentAttributes;
+  trustIndicators?: TrustIndicators;
 }
 
 export interface AssessmentMetaResponse {
@@ -26,19 +43,18 @@ export interface AssessmentMetaResponse {
 
 export type TitleResponse = AssessmentMetaResponse;
 
-// Canonical Assessment Attributes Extractor (Single Source of Truth)
-export function extractAssessmentAttributes(text: string): AssessmentAttributes {
+// Canonical Assessment Attributes Extractor (Single Source of Truth & Guardrail Enforced)
+export function extractAssessmentAttributes(
+  text: string,
+  deterministicCompleteness?: number,
+  workloadDna?: EnterpriseDna
+): AssessmentAttributes {
   if (!text) return {};
 
-  // 1. Recommended 6R Disposition
+  // 1. Recommended 6R Disposition (Raw match)
   const r6Match = text.match(/(?:Recommended\s+6R\s+Disposition|6R\s+Disposition|Recommended\s+Disposition)\s*:\*{0,2}\s*(?:\*\*)?\s*([A-Za-z]+)/i);
-  let recommended6R: Disposition6R | undefined;
-  if (r6Match) {
-    const candidate = r6Match[1].trim();
-    const valid: Disposition6R[] = ['Retain', 'Retire', 'Rehost', 'Replatform', 'Refactor', 'Repurchase'];
-    const found = valid.find((v) => v.toLowerCase() === candidate.toLowerCase());
-    if (found) recommended6R = found;
-  }
+  const rawCandidate = r6Match ? r6Match[1].trim() : undefined;
+  const { disposition, wasRepaired: was6RRepaired, reason: r6Reason } = validateOrRepair6RDisposition(rawCandidate, text);
 
   // 2. Confidence Score
   const confMatch = text.match(/(?:Confidence\s+Score|Confidence)\s*:\*{0,2}\s*(?:\*\*)?\s*(\d{1,3})%?/i);
@@ -67,7 +83,7 @@ export function extractAssessmentAttributes(text: string): AssessmentAttributes 
     decisionReadiness = readyMatch[1].toUpperCase().includes('NEEDS') ? 'NEEDS EVIDENCE' : 'READY';
   }
 
-  // 5. Workload / Application
+  // 5. Workload / Application Name
   const workMatch = text.match(/(?:Workload\s*\/\s*Application|Application|Workload)\s*:\*{0,2}\s*(?:\*\*)?\s*([^\n\r*]+)/i);
   let workloadName: string | undefined;
   if (workMatch) {
@@ -77,12 +93,40 @@ export function extractAssessmentAttributes(text: string): AssessmentAttributes 
     }
   }
 
+  // Run comprehensive guardrail reconciliation
+  const reconciled = validateAndReconcileAssessment({
+    rawText: text,
+    rawAttributes: {
+      recommended6R: disposition,
+      confidenceScore,
+      evidenceCompleteness,
+      decisionReadiness,
+      workloadName,
+    },
+    deterministicCompleteness,
+    workloadDna,
+  });
+
+  const repairedReasons = [...reconciled.repairedReasons];
+  if (was6RRepaired && r6Reason && !repairedReasons.includes(r6Reason)) {
+    repairedReasons.push(r6Reason);
+  }
+
   return {
-    recommended6R,
-    confidenceScore,
-    evidenceCompleteness,
-    decisionReadiness,
-    workloadName,
+    recommended6R: reconciled.recommended6R,
+    confidenceScore: reconciled.confidenceScore,
+    evidenceCompleteness: reconciled.evidenceCompleteness,
+    decisionReadiness: reconciled.decisionReadiness,
+    workloadName: reconciled.workloadName,
+    isGrounded: reconciled.isGrounded,
+    wasRepaired: reconciled.wasRepaired || was6RRepaired,
+    repairedReasons,
+    trustIndicators: {
+      inputValidated: true,
+      evidenceGrounded: reconciled.isGrounded,
+      schemaValidated: true,
+      wasRepaired: reconciled.wasRepaired || was6RRepaired,
+    },
   };
 }
 
@@ -90,6 +134,8 @@ export async function chatWithGemini(params: {
   message: string;
   history?: ChatMessage[];
   mode: AssessmentMode;
+  deterministicCompleteness?: number;
+  workloadDna?: EnterpriseDna;
 }): Promise<ChatResponse> {
   const res = await fetch('/api/chat', {
     method: 'POST',
@@ -100,6 +146,8 @@ export async function chatWithGemini(params: {
       message: params.message,
       history: params.history || [],
       mode: params.mode,
+      deterministicCompleteness: params.deterministicCompleteness,
+      workloadDna: params.workloadDna,
     }),
   });
 
@@ -108,7 +156,13 @@ export async function chatWithGemini(params: {
     throw new Error(data.error || `Server returned error (${res.status}) while generating modernization assessment with Gemini.`);
   }
 
-  return res.json();
+  const json = await res.json();
+  // Ensure client-side secret redaction safety layer
+  if (json.response) {
+    json.response = redactSecrets(json.response);
+  }
+
+  return json;
 }
 
 export async function generateAssessmentMeta(content: string): Promise<AssessmentMetaResponse> {

@@ -15,11 +15,9 @@ import {
   FileCheck2,
   CheckCircle2,
   AlertCircle,
-  HelpCircle,
-  Server,
-  Database,
+  Dna,
   ArrowRight,
-  Dna
+  List
 } from 'lucide-react';
 import type { Interaction, AssessmentMode, Disposition6R, DecisionReadiness } from '../types';
 import { extractAssessmentAttributes } from '../lib/gemini';
@@ -35,6 +33,7 @@ interface ReflectionWorkspaceProps {
   onRetrySave?: (interaction: Interaction) => Promise<void>;
   onOpenPortfolio?: () => void;
   onOpenDna?: (workloadNameOrId: string) => void;
+  onToggleMobileHistory?: () => void;
   isProcessing: boolean;
   saveStatus: 'idle' | 'saving' | 'saved' | 'error';
   errorMessage: string | null;
@@ -75,6 +74,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
   onRetrySave,
   onOpenPortfolio,
   onOpenDna,
+  onToggleMobileHistory,
   isProcessing,
   saveStatus,
   errorMessage,
@@ -173,62 +173,74 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
   const get6RBadgeStyle = (disposition: string) => {
     switch (disposition?.toLowerCase()) {
       case 'replatform':
-        return 'bg-amber-950/40 text-amber-300 border-amber-800/80';
+        return 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/30';
       case 'refactor':
-        return 'bg-purple-950/40 text-purple-300 border-purple-800/80';
+        return 'bg-purple-500/10 text-purple-800 dark:text-purple-300 border-purple-500/30';
       case 'rehost':
-        return 'bg-sky-950/40 text-sky-300 border-sky-800/80';
+        return 'bg-sky-500/10 text-sky-800 dark:text-sky-300 border-sky-500/30';
       case 'repurchase':
-        return 'bg-emerald-950/40 text-emerald-300 border-emerald-800/80';
+        return 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-500/30';
       case 'retire':
-        return 'bg-rose-950/40 text-rose-300 border-rose-800/80';
+        return 'bg-rose-500/10 text-rose-800 dark:text-rose-300 border-rose-500/30';
       case 'retain':
-        return 'bg-stone-800 text-stone-300 border-stone-700';
+        return 'bg-stone-500/10 text-stone-800 dark:text-stone-300 border-stone-500/30';
       default:
-        return 'bg-[#181818] text-[#E5C492] border-[#3D3222]';
+        return 'bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] border-[var(--emos-accent-border)]';
     }
   };
 
   return (
-    <div id="modernization-workspace" className="flex-1 flex flex-col h-[calc(100vh-4rem)] bg-[#0A0A0A] overflow-hidden text-[#D4D4D4]">
+    <div id="modernization-workspace" className="flex-1 flex flex-col h-full lg:h-[calc(100vh-4rem)] bg-[var(--emos-bg)] overflow-hidden text-[var(--emos-text-primary)] transition-colors">
       {/* Top Status & Sync Bar */}
-      <div className="px-6 py-2.5 border-b border-[#222] bg-[#0F0F0F] flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2">
+      <div className="px-4 sm:px-6 py-2.5 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2 min-w-0">
           {saveStatus === 'saving' && (
-            <span className="inline-flex items-center gap-2 text-[#999]">
-              <span className="w-2 h-2 rounded-full bg-[#A88554] animate-pulse" />
+            <span className="inline-flex items-center gap-2 text-[var(--emos-text-secondary)] truncate">
+              <span className="w-2 h-2 rounded-full bg-[var(--emos-accent)] animate-pulse shrink-0" />
               Persisting Assessment to Cloud Firestore...
             </span>
           )}
           {saveStatus === 'saved' && (
-            <span className="inline-flex items-center gap-1.5 text-[#A88554] font-medium">
-              <ShieldCheck className="w-3.5 h-3.5" />
+            <span className="inline-flex items-center gap-1.5 text-[var(--emos-accent)] font-medium truncate">
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
               Assessment Synced & Isolated to Firestore
             </span>
           )}
           {saveStatus === 'error' && (
-            <span className="inline-flex items-center gap-1.5 text-rose-400 font-medium">
-              <AlertTriangle className="w-3.5 h-3.5" />
+            <span className="inline-flex items-center gap-1.5 text-rose-500 font-medium truncate">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
               Sync issue: {errorMessage || 'Could not save assessment to Firestore.'}
             </span>
           )}
           {saveStatus === 'idle' && (
-            <span className="text-[#666] text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="text-[var(--emos-text-muted)] text-[11px] uppercase tracking-wider flex items-center gap-1.5 truncate">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
               EMOS Decision Intelligence • Canonical 6R Modernization Engine
             </span>
           )}
         </div>
 
-        {saveStatus === 'error' && activeInteraction && onRetrySave && (
-          <button
-            id="retry-save-btn"
-            onClick={() => onRetrySave(activeInteraction)}
-            className="px-2.5 py-1 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-          >
-            <RotateCcw className="w-3 h-3" /> Retry Save
-          </button>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {onToggleMobileHistory && (
+            <button
+              onClick={onToggleMobileHistory}
+              className="lg:hidden px-2.5 py-1 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-[var(--emos-text-secondary)] text-[11px] font-medium flex items-center gap-1 transition-colors"
+            >
+              <List className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
+              <span>History</span>
+            </button>
+          )}
+
+          {saveStatus === 'error' && activeInteraction && onRetrySave && (
+            <button
+              id="retry-save-btn"
+              onClick={() => onRetrySave(activeInteraction)}
+              className="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer hover:bg-rose-700"
+            >
+              <RotateCcw className="w-3 h-3" /> Retry Save
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Workspace Body */}
@@ -236,16 +248,16 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
         /* Active Modernization Assessment View */
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header of Active Assessment */}
-          <div className="px-6 sm:px-10 py-4 bg-[#0F0F0F] border-b border-[#222] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+          <div className="px-4 sm:px-8 py-3.5 sm:py-4 bg-[var(--emos-bg-secondary)] border-b border-[var(--emos-border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#181818] border border-[#2E2E2E] text-[10px] text-[#A88554] font-medium">
-                  <span className="font-bold tracking-wider uppercase text-[#E5C492]">DECIDE</span>
-                  <span className="text-[#555]">•</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[10px] text-[var(--emos-accent)] font-medium">
+                  <span className="font-bold tracking-wider uppercase text-[var(--emos-accent-text)]">DECIDE</span>
+                  <span className="text-[var(--emos-text-muted)]">•</span>
                   <span>What should we do with this workload, why, and how trustworthy is the decision?</span>
                 </span>
-                <span className="text-[11px] text-[#666] flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-[#555]" />
+                <span className="text-[11px] text-[var(--emos-text-muted)] flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-[var(--emos-text-muted)]" />
                   {new Date(activeInteraction.createdAt).toLocaleString(undefined, {
                     month: 'short',
                     day: 'numeric',
@@ -254,30 +266,31 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                   })}
                 </span>
               </div>
-              <h2 className="text-lg sm:text-xl font-serif font-semibold tracking-tight text-white">
+              <h2 className="text-lg sm:text-xl font-serif font-semibold tracking-tight text-[var(--emos-text-primary)]">
                 {activeInteraction.title}
               </h2>
             </div>
 
             <div className="flex items-center gap-2">
               {/* Journey Indicator */}
-              <div className="hidden lg:flex items-center gap-1 text-[10px] text-[#666] font-mono bg-[#111] px-2 py-1 rounded-lg border border-[#222] mr-1">
+              <div className="hidden xl:flex items-center gap-1 text-[10px] text-[var(--emos-text-muted)] font-mono bg-[var(--emos-bg-tertiary)] px-2 py-1 rounded-lg border border-[var(--emos-border-subtle)] mr-1">
                 <span>DISCOVER</span>
                 <span>→</span>
                 <span>UNDERSTAND</span>
                 <span>→</span>
-                <span className="text-[#E5C492] font-semibold bg-[#221A10] px-1.5 py-0.5 rounded border border-[#443018]">DECIDE</span>
+                <span className="text-[var(--emos-accent-text)] font-semibold bg-[var(--emos-accent-subtle)] px-1.5 py-0.5 rounded border border-[var(--emos-accent-border)]">DECIDE</span>
                 <span>→</span>
-                <span className="text-emerald-400">TRUST</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">TRUST</span>
               </div>
+
               {onOpenDna && (activeInteraction.workloadId || activeInteraction.workloadName) && (
                 <button
                   id="header-view-dna-btn"
                   onClick={() => onOpenDna(activeInteraction.workloadId || activeInteraction.workloadName || '')}
-                  className="px-3 py-1.5 rounded-xl border border-[#333] bg-[#151515] hover:bg-[#1A1A1A] hover:border-[#A88554]/50 text-[#E5C492] text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] hover:border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px]"
                   title="View Structured Enterprise DNA Evidence Profile"
                 >
-                  <Dna className="w-3.5 h-3.5 text-[#A88554]" />
+                  <Dna className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
                   <span className="hidden sm:inline">Enterprise DNA</span>
                 </button>
               )}
@@ -286,10 +299,10 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                 <button
                   id="header-portfolio-btn"
                   onClick={onOpenPortfolio}
-                  className="px-3 py-1.5 rounded-xl border border-[#333] bg-[#151515] hover:bg-[#1A1A1A] hover:border-[#444] text-[#888] hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] hover:border-[var(--emos-border-strong)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px]"
                   title="Return to Sample Enterprise Portfolio"
                 >
-                  <Layers className="w-3.5 h-3.5 text-[#888]" />
+                  <Layers className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
                   <span className="hidden sm:inline">Portfolio</span>
                 </button>
               )}
@@ -302,115 +315,133 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                     'full'
                   )
                 }
-                className="px-3 py-1.5 rounded-xl border border-[#333] bg-[#151515] hover:bg-[#1A1A1A] hover:border-[#444] text-[#888] hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] hover:border-[var(--emos-border-strong)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px]"
               >
-                {copiedId === 'full' ? <Check className="w-3.5 h-3.5 text-[#A88554]" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedId === 'full' ? 'Copied' : 'Copy Assessment'}</span>
+                {copiedId === 'full' ? <Check className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedId === 'full' ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
           </div>
 
-          {/* Executive 6R Decision Bar (Visually Emphasized Metrics) */}
+          {/* Executive 6R Decision Bar (Visually Emphasized Metrics - Responsive Desktop/Tablet/Mobile) */}
           {metrics && (
-            <div className="px-6 sm:px-10 py-3 bg-[#121212] border-b border-[#222] flex flex-wrap items-center gap-4 text-xs shrink-0">
-              {/* Recommended 6R */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-wider text-[#666] font-semibold">Recommended 6R:</span>
-                <span className={`px-2.5 py-1 rounded-md border font-bold text-xs uppercase tracking-wider ${get6RBadgeStyle(metrics.disposition)}`}>
-                  {metrics.disposition}
-                </span>
-              </div>
-
-              <div className="h-4 w-[1px] bg-[#2A2A2A] hidden sm:block" />
-
-              {/* Confidence Score */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-wider text-[#666] font-semibold">Confidence:</span>
-                <span className="font-mono font-bold text-white bg-[#1A1A1A] px-2 py-0.5 rounded border border-[#2E2E2E]">
-                  {metrics.confidence}%
-                </span>
-              </div>
-
-              <div className="h-4 w-[1px] bg-[#2A2A2A] hidden sm:block" />
-
-              {/* Evidence Completeness */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-wider text-[#666] font-semibold">Evidence:</span>
-                <span className="font-mono font-bold text-[#AAA] bg-[#1A1A1A] px-2 py-0.5 rounded border border-[#2E2E2E]">
-                  {metrics.completeness}%
-                </span>
-              </div>
-
-              <div className="h-4 w-[1px] bg-[#2A2A2A] hidden sm:block" />
-
-              {/* Decision Readiness */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-wider text-[#666] font-semibold">Decision Readiness:</span>
-                {metrics.readiness === 'READY' ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-950/40 text-emerald-300 border border-emerald-800 text-[11px] font-bold tracking-wide">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> READY
+            <div className="px-4 sm:px-8 py-3 bg-[var(--emos-bg-tertiary)] border-b border-[var(--emos-border-subtle)] shrink-0 transition-colors">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-4 text-xs">
+                {/* Recommended 6R */}
+                <div className="p-2 sm:p-0 rounded-lg sm:rounded-none bg-[var(--emos-surface)] sm:bg-transparent border sm:border-0 border-[var(--emos-border-subtle)] flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-[var(--emos-text-muted)] font-semibold">Recommended 6R:</span>
+                  <span className={`px-2.5 py-1 rounded-md border font-bold text-xs uppercase tracking-wider ${get6RBadgeStyle(metrics.disposition)}`}>
+                    {metrics.disposition}
                   </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#241C10] text-[#E5C492] border border-[#4A3B22] text-[11px] font-bold tracking-wide">
-                    <AlertCircle className="w-3.5 h-3.5 text-[#E5C492]" /> NEEDS EVIDENCE
+                </div>
+
+                <div className="h-4 w-[1px] bg-[var(--emos-border-subtle)] hidden sm:block" />
+
+                {/* Confidence Score */}
+                <div className="p-2 sm:p-0 rounded-lg sm:rounded-none bg-[var(--emos-surface)] sm:bg-transparent border sm:border-0 border-[var(--emos-border-subtle)] flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-[var(--emos-text-muted)] font-semibold">Confidence:</span>
+                  <span className="font-mono font-bold text-[var(--emos-text-primary)] bg-[var(--emos-surface)] px-2 py-0.5 rounded border border-[var(--emos-border-subtle)]">
+                    {metrics.confidence}%
                   </span>
-                )}
+                </div>
+
+                <div className="h-4 w-[1px] bg-[var(--emos-border-subtle)] hidden sm:block" />
+
+                {/* Evidence Completeness */}
+                <div className="p-2 sm:p-0 rounded-lg sm:rounded-none bg-[var(--emos-surface)] sm:bg-transparent border sm:border-0 border-[var(--emos-border-subtle)] flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-[var(--emos-text-muted)] font-semibold">Evidence:</span>
+                  <span className="font-mono font-bold text-[var(--emos-accent-text)] bg-[var(--emos-surface)] px-2 py-0.5 rounded border border-[var(--emos-border-subtle)]">
+                    {metrics.completeness}%
+                  </span>
+                </div>
+
+                <div className="h-4 w-[1px] bg-[var(--emos-border-subtle)] hidden sm:block" />
+
+                {/* Decision Readiness */}
+                <div className="p-2 sm:p-0 rounded-lg sm:rounded-none bg-[var(--emos-surface)] sm:bg-transparent border sm:border-0 border-[var(--emos-border-subtle)] flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 col-span-1">
+                  <span className="text-[10px] uppercase tracking-wider text-[var(--emos-text-muted)] font-semibold">Readiness:</span>
+                  {metrics.readiness === 'READY' ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[11px] font-bold tracking-wide">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> READY
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[11px] font-bold tracking-wide">
+                      <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> NEEDS EVIDENCE
+                    </span>
+                  )}
+                </div>
+
+                <div className="h-4 w-[1px] bg-[var(--emos-border-subtle)] hidden sm:block" />
+
+                {/* Guardrails Trust Indicator */}
+                <div className="p-2 sm:p-0 rounded-lg sm:rounded-none bg-[var(--emos-surface)] sm:bg-transparent border sm:border-0 border-[var(--emos-border-subtle)] flex items-center gap-1.5 col-span-2 sm:col-span-1">
+                  <span className="inline-flex items-center gap-1 text-[11px] text-[var(--emos-text-muted)] font-medium">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Guardrails Active</span>
+                  </span>
+                </div>
               </div>
+              {activeInteraction.trustIndicators?.wasRepaired && (
+                <div className="mt-2 text-[10px] text-[var(--emos-text-muted)] flex items-center gap-1.5">
+                  <AlertTriangle className="w-3 h-3 text-amber-500" />
+                  <span>Taxonomy Guardrail: Output repaired to adhere strictly to canonical 6R enterprise standard.</span>
+                </div>
+              )}
             </div>
           )}
 
           {/* Conversation & Assessment Stream */}
-          <div className="flex-1 overflow-y-auto p-6 sm:p-10 space-y-8 max-w-3xl mx-auto w-full">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-3xl mx-auto w-full">
             {/* User Modernization Scope / Evidence */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-[#666] font-semibold">
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--emos-text-muted)] font-semibold">
                   Modernization Scope & Evidence
                 </span>
-                <div className="h-[1px] flex-1 bg-[#222]" />
+                <div className="h-[1px] flex-1 bg-[var(--emos-border-subtle)]" />
                 <button
                   onClick={() => copyToClipboard(activeInteraction.content, 'user-initial')}
-                  className="text-[#555] hover:text-white p-1 transition-colors cursor-pointer"
+                  className="text-[var(--emos-text-muted)] hover:text-[var(--emos-text-primary)] p-1 transition-colors cursor-pointer"
                   title="Copy workload evidence"
                 >
-                  {copiedId === 'user-initial' ? <Check className="w-3.5 h-3.5 text-[#A88554]" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedId === 'user-initial' ? <Check className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
-              <div className="p-5 rounded-2xl bg-[#141414] border border-[#222]">
-                <p className="text-sm sm:text-base leading-relaxed text-[#CCC] whitespace-pre-wrap font-sans">
+              <div className="p-4 sm:p-5 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)]">
+                <p className="text-sm sm:text-base leading-relaxed text-[var(--emos-text-primary)] whitespace-pre-wrap font-sans">
                   {activeInteraction.content}
                 </p>
               </div>
             </div>
 
             {/* Initial Gemini Modernization Assessment */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-[#A88554] font-semibold">
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--emos-accent)] font-semibold">
                   EMOS Decision Intelligence
                 </span>
-                <div className="h-[1px] flex-1 bg-[#A88554]/20" />
+                <div className="h-[1px] flex-1 bg-[var(--emos-accent-border)]" />
                 <button
                   onClick={() => copyToClipboard(activeInteraction.geminiResponse, 'gemini-initial')}
-                  className="text-[#555] hover:text-[#A88554] p-1 transition-colors cursor-pointer"
+                  className="text-[var(--emos-text-muted)] hover:text-[var(--emos-accent)] p-1 transition-colors cursor-pointer"
                   title="Copy assessment"
                 >
-                  {copiedId === 'gemini-initial' ? <Check className="w-3.5 h-3.5 text-[#A88554]" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedId === 'gemini-initial' ? <Check className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
 
-              <div className="bg-[#0F0F0F] border border-[#222] p-6 sm:p-8 rounded-3xl shadow-2xl relative">
-                <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#222]">
+              <div className="bg-[var(--emos-surface-elevated)] border border-[var(--emos-border-subtle)] p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-md relative">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--emos-border-subtle)]">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-white">Gemini 3.6 Flash</span>
-                    <span className="text-[10px] bg-[#181818] text-[#A88554] px-2.5 py-0.5 rounded-full border border-[#333] font-medium uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-[var(--emos-text-primary)]">Gemini 3.6 Flash</span>
+                    <span className="text-[10px] bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] px-2.5 py-0.5 rounded-full border border-[var(--emos-accent-border)] font-medium uppercase tracking-wider">
                       {activeInteraction.mode === 'options' ? 'Options Comparison' : activeInteraction.mode === 'decision' ? 'Executive Decision' : '6R Assessment'}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#666]">Canonical 6R Taxonomy</span>
+                  <span className="text-[11px] text-[var(--emos-text-muted)]">Canonical 6R Taxonomy</span>
                 </div>
 
-                <div className="text-sm sm:text-base leading-relaxed text-[#D4D4D4] font-sans space-y-3 prose prose-invert max-w-none prose-headings:text-white prose-headings:font-serif prose-headings:tracking-tight prose-strong:text-white prose-a:text-[#A88554]">
+                <div className="text-sm sm:text-base leading-relaxed text-[var(--emos-text-primary)] font-sans space-y-3 prose dark:prose-invert max-w-none prose-headings:text-[var(--emos-text-primary)] prose-headings:font-serif prose-headings:tracking-tight prose-strong:text-[var(--emos-text-primary)] prose-a:text-[var(--emos-accent)] prose-p:text-[var(--emos-text-primary)] prose-li:text-[var(--emos-text-primary)]">
                   <ReactMarkdown>{activeInteraction.geminiResponse}</ReactMarkdown>
                 </div>
               </div>
@@ -418,20 +449,20 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
 
             {/* Subsequent Assessment Turns */}
             {activeInteraction.turns && activeInteraction.turns.length > 0 && (
-              <div className="space-y-6 pt-4 border-t border-[#1C1C1C]">
+              <div className="space-y-5 pt-4 border-t border-[var(--emos-border-subtle)]">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-[#666] font-semibold">
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--emos-text-muted)] font-semibold">
                     Assessment Dialogue & Evidence Updates
                   </span>
-                  <div className="h-[1px] flex-1 bg-[#222]" />
+                  <div className="h-[1px] flex-1 bg-[var(--emos-border-subtle)]" />
                 </div>
 
                 {activeInteraction.turns.map((turn, index) => {
                   const isUser = turn.role === 'user';
                   return (
-                    <div key={index} className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between text-[10px] text-[#555]">
-                        <span className="uppercase tracking-wider font-semibold text-[#888]">
+                    <div key={index} className="flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between text-[10px] text-[var(--emos-text-muted)]">
+                        <span className="uppercase tracking-wider font-semibold text-[var(--emos-text-secondary)]">
                           {isUser ? 'Architect / You' : 'EMOS Analysis'}
                         </span>
                         <span>
@@ -440,16 +471,16 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                       </div>
 
                       <div
-                        className={`p-5 rounded-2xl border text-sm leading-relaxed ${
+                        className={`p-4 sm:p-5 rounded-2xl border text-sm leading-relaxed ${
                           isUser
-                            ? 'bg-[#151515] border-[#222] text-[#CCC]'
-                            : 'bg-[#0F0F0F] border-[#222] text-[#D4D4D4] relative shadow-lg'
+                            ? 'bg-[var(--emos-surface)] border-[var(--emos-border-subtle)] text-[var(--emos-text-primary)]'
+                            : 'bg-[var(--emos-surface-elevated)] border-[var(--emos-border-subtle)] text-[var(--emos-text-primary)] relative shadow-sm'
                         }`}
                       >
                         {isUser ? (
                           <p className="whitespace-pre-wrap">{turn.content}</p>
                         ) : (
-                          <div className="space-y-2 prose prose-invert max-w-none prose-headings:text-white prose-headings:font-serif">
+                          <div className="space-y-2 prose dark:prose-invert max-w-none prose-headings:text-[var(--emos-text-primary)] prose-headings:font-serif prose-p:text-[var(--emos-text-primary)] prose-li:text-[var(--emos-text-primary)]">
                             <ReactMarkdown>{turn.content}</ReactMarkdown>
                           </div>
                         )}
@@ -462,9 +493,9 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
 
             {/* Active processing indicator */}
             {isProcessing && (
-              <div className="p-6 rounded-2xl bg-[#0F0F0F] border border-[#222] flex items-center gap-3 animate-pulse">
-                <div className="w-4 h-4 border-2 border-[#333] border-t-[#A88554] rounded-full animate-spin shrink-0" />
-                <span className="text-xs text-[#888]">
+              <div className="p-5 rounded-2xl bg-[var(--emos-surface-elevated)] border border-[var(--emos-border-subtle)] flex items-center gap-3 animate-pulse">
+                <div className="w-4 h-4 border-2 border-[var(--emos-border-subtle)] border-t-[var(--emos-accent)] rounded-full animate-spin shrink-0" />
+                <span className="text-xs text-[var(--emos-text-secondary)]">
                   EMOS is synthesizing workload evidence and evaluating 6R modernization dispositions...
                 </span>
               </div>
@@ -474,7 +505,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
           </div>
 
           {/* Follow-up Question Composer */}
-          <footer className="p-6 sm:p-8 border-t border-[#222] bg-[#0A0A0A] shrink-0">
+          <footer className="p-4 sm:p-6 border-t border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] shrink-0">
             <form onSubmit={handleFollowUpSubmit} className="max-w-3xl mx-auto w-full relative">
               <input
                 id="followup-input"
@@ -483,96 +514,96 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                 value={followUpInput}
                 onChange={(e) => setFollowUpInput(e.target.value)}
                 disabled={isProcessing}
-                className="w-full bg-[#111] border border-[#333] rounded-2xl py-3.5 sm:py-4 px-6 pr-16 text-sm focus:outline-hidden focus:border-[#A88554] focus:ring-1 focus:ring-[#A88554] transition-colors placeholder-[#555] text-[#D4D4D4]"
+                className="w-full bg-[var(--emos-input-bg)] border border-[var(--emos-border-subtle)] rounded-2xl py-3 sm:py-3.5 px-5 pr-14 text-sm focus:outline-hidden focus:border-[var(--emos-accent)] focus:ring-1 focus:ring-[var(--emos-accent)] transition-colors placeholder-[var(--emos-text-muted)] text-[var(--emos-text-primary)] min-h-[44px]"
               />
               <button
                 id="followup-submit-btn"
                 type="submit"
                 disabled={!followUpInput.trim() || isProcessing}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-[#A88554] text-black rounded-xl flex items-center justify-center hover:bg-[#E5C492] disabled:opacity-40 transition-colors cursor-pointer shadow-md"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-[#A88554] text-black rounded-xl flex items-center justify-center hover:bg-[#BCA075] dark:hover:bg-[#E5C492] disabled:opacity-40 transition-colors cursor-pointer shadow-sm min-w-[36px] min-h-[36px]"
                 title="Send Evidence Update"
               >
                 <Send className="w-4 h-4" />
               </button>
             </form>
-            <p className="text-center text-[10px] text-[#555] mt-3">
+            <p className="text-center text-[10px] text-[var(--emos-text-muted)] mt-2.5">
               Canonical 6R Taxonomy: Retain • Retire • Rehost • Replatform • Refactor • Repurchase
             </p>
           </footer>
         </div>
       ) : (
         /* New Assessment Composer View */
-        <div className="flex-1 overflow-y-auto p-6 sm:p-10 flex flex-col items-center">
-          <div className="w-full max-w-3xl space-y-8 my-auto py-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center">
+          <div className="w-full max-w-3xl space-y-6 sm:space-y-8 my-auto py-4 sm:py-6">
             {/* Header */}
             <div className="text-center space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#181818] border border-[#333] text-[11px] text-[#A88554] font-medium mb-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[11px] text-[var(--emos-accent)] font-medium mb-1">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>EMOS Decision Intelligence • Enterprise Modernization Operating System</span>
               </div>
-              <h2 className="text-2xl sm:text-4xl font-serif text-white tracking-tight">
+              <h2 className="text-2xl sm:text-4xl font-serif text-[var(--emos-text-primary)] tracking-tight">
                 What workload would you like to assess?
               </h2>
-              <p className="text-xs sm:text-sm text-[#888] max-w-xl mx-auto leading-relaxed">
+              <p className="text-xs sm:text-sm text-[var(--emos-text-secondary)] max-w-xl mx-auto leading-relaxed">
                 Turn fragmented enterprise modernization evidence into explainable, evidence-aware decisions. Assess workloads across canonical 6R dispositions grounded in deterministic Enterprise DNA evidence completeness.
               </p>
             </div>
 
             {/* Assessment Mode Selector */}
-            <div className="grid grid-cols-3 gap-2 p-1.5 bg-[#141414] border border-[#222] rounded-2xl max-w-lg mx-auto">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 p-1.5 bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] rounded-2xl max-w-lg mx-auto">
               <button
                 id="mode-assess-btn"
                 type="button"
                 onClick={() => setSelectedMode('assess')}
-                className={`py-2 px-3 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 px-2 sm:px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[38px] ${
                   selectedMode === 'assess'
-                    ? 'bg-[#222] text-[#E5C492] border border-[#333] shadow-sm'
-                    : 'text-[#666] hover:text-[#BBB]'
+                    ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+                    : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-[#A88554]" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
                 <span>Assess</span>
               </button>
               <button
                 id="mode-options-btn"
                 type="button"
                 onClick={() => setSelectedMode('options')}
-                className={`py-2 px-3 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 px-2 sm:px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[38px] ${
                   selectedMode === 'options'
-                    ? 'bg-[#222] text-[#E5C492] border border-[#333] shadow-sm'
-                    : 'text-[#666] hover:text-[#BBB]'
+                    ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+                    : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
                 }`}
               >
-                <GitCompare className="w-3.5 h-3.5 text-[#A88554]" />
-                <span>Explore Options</span>
+                <GitCompare className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
+                <span className="truncate">Options</span>
               </button>
               <button
                 id="mode-decision-btn"
                 type="button"
                 onClick={() => setSelectedMode('decision')}
-                className={`py-2 px-3 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 px-2 sm:px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[38px] ${
                   selectedMode === 'decision'
-                    ? 'bg-[#222] text-[#E5C492] border border-[#333] shadow-sm'
-                    : 'text-[#666] hover:text-[#BBB]'
+                    ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+                    : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
                 }`}
               >
-                <FileCheck2 className="w-3.5 h-3.5 text-[#A88554]" />
-                <span>Generate Decision</span>
+                <FileCheck2 className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
+                <span className="truncate">Decision</span>
               </button>
             </div>
 
             {/* Sample Portfolio Callout Banner */}
             {onOpenPortfolio && (
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#171410] to-[#121212] border border-[#33251A] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-[var(--emos-accent-subtle)] to-[var(--emos-surface-elevated)] border border-[var(--emos-accent-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-[#221A12] border border-[#443020] flex items-center justify-center shrink-0 mt-0.5">
-                    <Layers className="w-4 h-4 text-[#A88554]" />
+                  <div className="w-8 h-8 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-accent-border)] flex items-center justify-center shrink-0 mt-0.5">
+                    <Layers className="w-4 h-4 text-[var(--emos-accent)]" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-white">
+                    <h4 className="text-xs font-semibold text-[var(--emos-text-primary)]">
                       Start from Structured Enterprise DNA
                     </h4>
-                    <p className="text-[11px] text-[#888] mt-0.5 leading-relaxed">
+                    <p className="text-[11px] text-[var(--emos-text-secondary)] mt-0.5 leading-relaxed">
                       Explore 3 candidate workloads with deterministic evidence completeness profiles, missing evidence gap tracking, and 1-click assessment.
                     </p>
                   </div>
@@ -582,17 +613,17 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                   id="composer-portfolio-btn"
                   type="button"
                   onClick={onOpenPortfolio}
-                  className="px-3.5 py-2 rounded-xl bg-[#1F1810] hover:bg-[#2A2015] border border-[#A88554]/40 hover:border-[#A88554] text-[#E5C492] text-xs font-medium flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer shadow-xs"
+                  className="px-3.5 py-2 rounded-xl bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] border border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer shadow-xs min-h-[38px]"
                 >
                   <span>Sample Portfolio</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-[#A88554]" />
+                  <ArrowRight className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
                 </button>
               </div>
             )}
 
             {/* Canonical Prompt Starters */}
             <div className="space-y-2">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-[#555] font-semibold block">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--emos-text-muted)] font-semibold block">
                 Modernization Prompt Starters
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -605,13 +636,13 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                       setDraftContent(item.text);
                       textareaRef.current?.focus();
                     }}
-                    className="p-3.5 rounded-xl bg-[#121212] border border-[#222] hover:border-[#333] hover:bg-[#161616] text-left transition-all group cursor-pointer"
+                    className="p-3.5 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] hover:border-[var(--emos-accent-border)] hover:bg-[var(--emos-surface-hover)] text-left transition-all group cursor-pointer shadow-xs"
                   >
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#DDD] group-hover:text-white mb-1">
-                      <Sparkles className="w-3 h-3 text-[#A88554] group-hover:scale-110 transition-transform" />
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--emos-text-primary)] group-hover:text-[var(--emos-accent-text)] mb-1">
+                      <Sparkles className="w-3 h-3 text-[var(--emos-accent)] group-hover:scale-110 transition-transform" />
                       <span>{item.title}</span>
                     </div>
-                    <p className="text-[11px] text-[#777] line-clamp-2 leading-relaxed">{item.text}</p>
+                    <p className="text-[11px] text-[var(--emos-text-secondary)] line-clamp-2 leading-relaxed">{item.text}</p>
                   </button>
                 ))}
               </div>
@@ -619,7 +650,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
 
             {/* Main Draft Textarea */}
             <form onSubmit={handleDraftSubmit} className="space-y-4">
-              <div className="bg-[#0F0F0F] border border-[#262626] focus-within:border-[#A88554] rounded-2xl shadow-2xl overflow-hidden transition-all">
+              <div className="bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] focus-within:border-[var(--emos-accent)] rounded-2xl shadow-md overflow-hidden transition-all">
                 <textarea
                   id="assessment-entry-textarea"
                   ref={textareaRef}
@@ -628,18 +659,18 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                   onKeyDown={handleKeyDown}
                   disabled={isProcessing}
                   placeholder="Describe the application or data platform to modernize (e.g., current stack, hosting environment, business criticality, infrastructure/licensing costs, and scaling constraints)... Press Ctrl+Enter or Cmd+Enter to assess..."
-                  rows={8}
-                  className="w-full p-5 text-sm text-[#E5E5E5] placeholder-[#555] bg-transparent focus:outline-hidden resize-none leading-relaxed"
+                  rows={7}
+                  className="w-full p-4 sm:p-5 text-sm text-[var(--emos-text-primary)] placeholder-[var(--emos-text-muted)] bg-transparent focus:outline-hidden resize-none leading-relaxed"
                 />
 
-                <div className="px-5 py-3.5 bg-[#141414] border-t border-[#222] flex items-center justify-between text-xs text-[#666]">
-                  <div className="flex items-center gap-3">
-                    <span>
-                      {draftContent.length} characters • {draftContent.trim() ? draftContent.trim().split(/\s+/).length : 0} words
+                <div className="px-4 sm:px-5 py-3 bg-[var(--emos-bg-tertiary)] border-t border-[var(--emos-border-subtle)] flex items-center justify-between text-xs text-[var(--emos-text-muted)]">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <span className="truncate">
+                      {draftContent.length} chars • {draftContent.trim() ? draftContent.trim().split(/\s+/).length : 0} words
                     </span>
-                    <span className="hidden sm:inline text-[#333]">|</span>
-                    <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-[#555]">
-                      <CornerDownLeft className="w-3 h-3 text-[#777]" /> Press ⌘/Ctrl+Enter
+                    <span className="hidden sm:inline text-[var(--emos-border-subtle)]">|</span>
+                    <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-[var(--emos-text-muted)]">
+                      <CornerDownLeft className="w-3 h-3 text-[var(--emos-text-muted)]" /> ⌘/Ctrl+Enter
                     </span>
                   </div>
 
@@ -647,7 +678,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                     id="submit-assessment-btn"
                     type="submit"
                     disabled={!draftContent.trim() || isProcessing}
-                    className="px-5 py-2.5 rounded-xl bg-[#A88554] hover:bg-[#E5C492] text-black font-semibold text-xs sm:text-sm flex items-center gap-2 disabled:opacity-50 transition-all shadow-md active:scale-98 cursor-pointer"
+                    className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#A88554] hover:bg-[#BCA075] dark:hover:bg-[#E5C492] text-black font-semibold text-xs sm:text-sm flex items-center gap-2 disabled:opacity-50 transition-all shadow-sm active:scale-98 cursor-pointer min-h-[38px]"
                   >
                     {isProcessing ? (
                       <>
@@ -670,4 +701,3 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
     </div>
   );
 };
-
