@@ -125,10 +125,50 @@ describe('/api/chat release contract', () => {
     expect(result.body).toEqual({ title: 'Java 8 workload...', category: 'Legacy Application' });
   });
 
-  it('sets browser hardening headers', async () => {
+  it('enforces least-privilege Content Security Policy for Firebase Authentication and Google APIs', async () => {
     const result = await request(app).get('/api/health');
     expect(result.status).toBe(200);
-    expect(result.headers['content-security-policy']).toContain("object-src 'none'");
+    const csp = result.headers['content-security-policy'] as string;
+    expect(csp).toBeDefined();
+
+    const directives = Object.fromEntries(
+      csp
+        .split(';')
+        .map((d) => d.trim())
+        .filter(Boolean)
+        .map((d) => {
+          const [name, ...values] = d.split(/\s+/);
+          return [name, values.join(' ')];
+        })
+    );
+
+    // Required Google and Firebase origins are present
+    expect(directives['script-src']).toContain('https://apis.google.com');
+    expect(directives['frame-src']).toContain('https://codev-0326.firebaseapp.com');
+    expect(directives['frame-src']).toContain('https://accounts.google.com');
+    expect(directives['frame-src']).toContain("'self'");
+
+    // script-src and frame-src do not contain wildcard '*'
+    expect(directives['script-src']).not.toContain('*');
+    expect(directives['frame-src']).not.toContain('*');
+
+    // unsafe-eval is absent across the policy
+    expect(csp).not.toContain('unsafe-eval');
+
+    // Remaining CSP protections are preserved
+    expect(directives['default-src']).toBe("'self'");
+    expect(directives['object-src']).toBe("'none'");
+    expect(directives['base-uri']).toBe("'self'");
+    expect(directives['frame-ancestors']).toBe("'none'");
+    expect(directives['style-src']).toContain("'self'");
+    expect(directives['style-src']).toContain('https://fonts.googleapis.com');
+    expect(directives['font-src']).toContain('https://fonts.gstatic.com');
+    expect(directives['img-src']).toContain('https://lh3.googleusercontent.com');
+    expect(directives['connect-src']).toContain('https://*.googleapis.com');
+    expect(directives['connect-src']).toContain('https://*.firebaseio.com');
+
+    // Browser hardening headers preserved
     expect(result.headers['x-content-type-options']).toBe('nosniff');
+    expect(result.headers['referrer-policy']).toBe('no-referrer');
   });
 });
