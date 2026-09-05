@@ -618,7 +618,10 @@ npm run dev
 # 4. Compile and verify production build
 npm run build
 
-# 5. Start compiled production server
+# 5. Run the release gate (unit, API, rendering, and Firestore Emulator tests; Java 21+ required)
+npm test
+
+# 6. Start compiled production server
 npm start
 ```
 
@@ -640,10 +643,10 @@ The codebase includes verification across all critical paths (accessible interac
 - [x] **Bring Your Own Portfolio (CSV/JSON)**: Client-side schema validation, spreadsheet/formula injection protection, and graceful evidence gap extraction.
 - [x] **Downloadable Enterprise Benchmarks**: 4 industry portfolios (Diversified, Financial, Retail, Manufacturing) covering all 6 canonical 6R dispositions (Retain, Retire, Rehost, Replatform, Refactor, Repurchase).
 - [x] **Imported Workload DNA & Assessment**: Full integration of imported workloads into Enterprise DNA modeling, completeness calculation, and 6R Modernization Assessment.
-- [x] **Lightweight Guardrails Layer**: Zero-trust boundary fencing (`<untrusted_enterprise_evidence>`), adversarial injection detection, and input length limits.
+- [x] **Lightweight Guardrails Layer**: Structured JSON serialization of untrusted evidence, adversarial injection rejection, and input length limits.
 - [x] **Automated Secret & Token Redaction**: Outbound payload scanning to neutralize accidental API keys, tokens, or credential leakage in model outputs.
 - [x] **Canonical 6R Repair & Enforcement**: Mathematical validation guaranteeing output conforms strictly to canonical 6R taxonomy (Retain, Retire, Rehost, Replatform, Refactor, Repurchase) and auto-repairs legacy or non-canonical terms like "Rebuild".
-- [x] **Deterministic DNA Grounding**: Hard boundary preventing hallucinated evidence scores; Decision Readiness strictly enforced to `NEEDS EVIDENCE` whenever evidence completeness < 50% or critical dimensions are unmapped.
+- [x] **Deterministic DNA Grounding**: Server-side evidence scoring; Decision Readiness strictly enforced to `NEEDS EVIDENCE` whenever evidence completeness < 70% or critical dimensions are unmapped.
 - [x] **Formula Injection & Import Defense**: Neutralizes CSV formula triggers (`=`, `+`, `-`, `@`), enforces 5MB file boundaries, and limits record fields.
 - [x] **Responsive Theming (Light, Dark, System)**: WCAG AA contrast compliance, system preference detection, and zero-flash persistence across devices.
 - [x] **Cloud Firestore Persistence**: Transactional save of assessments, multi-turn follow-ups, and user-isolated history & imported workloads.

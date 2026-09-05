@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { SafeMarkdown } from './SafeMarkdown';
 import {
   Sparkles,
   Send,
@@ -20,7 +20,6 @@ import {
   List
 } from 'lucide-react';
 import type { Interaction, AssessmentMode, Disposition6R, DecisionReadiness } from '../types';
-import { extractAssessmentAttributes } from '../lib/gemini';
 
 interface ReflectionWorkspaceProps {
   activeInteraction: Interaction | null;
@@ -94,36 +93,22 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
     }
   }, [activeInteraction?.turns?.length, isProcessing]);
 
-  // Extract structured decision intelligence metrics dynamically (Single Source of Truth)
+  // Render only complete, persisted canonical metrics; never infer a second assessment.
   const metrics = useMemo(() => {
     if (!activeInteraction) return null;
+    if (
+      !activeInteraction.recommended6R ||
+      typeof activeInteraction.confidenceScore !== 'number' ||
+      typeof activeInteraction.evidenceCompleteness !== 'number' ||
+      !activeInteraction.decisionReadiness
+    ) return null;
 
-    // Determine target assessment text (checks if a follow-up turn refined the assessment, else initial response)
-    const turns = activeInteraction.turns || [];
-    const lastAssessmentTurn = [...turns].reverse().find(
-      (t) => t.role === 'model' && (t.content.includes('MODERNIZATION ASSESSMENT') || t.content.includes('Recommended 6R'))
-    );
-    const targetText = lastAssessmentTurn?.content || activeInteraction.geminiResponse || '';
+    const disposition = activeInteraction.recommended6R as Disposition6R;
+    const confidence = activeInteraction.confidenceScore;
+    const completeness = activeInteraction.evidenceCompleteness;
+    const readiness = activeInteraction.decisionReadiness as DecisionReadiness;
 
-    // Extract attributes directly from the detailed assessment text
-    const textAttrs = extractAssessmentAttributes(targetText);
-
-    // Strictly prioritize the values from the detailed assessment text to guarantee 100% mathematical and optical consistency
-    const disposition = textAttrs.recommended6R || (activeInteraction.recommended6R as Disposition6R) || 'Replatform';
-    const confidence = typeof textAttrs.confidenceScore === 'number'
-      ? textAttrs.confidenceScore
-      : (typeof activeInteraction.confidenceScore === 'number' ? activeInteraction.confidenceScore : undefined);
-    const completeness = typeof textAttrs.evidenceCompleteness === 'number'
-      ? textAttrs.evidenceCompleteness
-      : (typeof activeInteraction.evidenceCompleteness === 'number' ? activeInteraction.evidenceCompleteness : undefined);
-    const readiness = textAttrs.decisionReadiness || (activeInteraction.decisionReadiness as DecisionReadiness);
-
-    return {
-      disposition,
-      confidence: typeof confidence === 'number' ? confidence : (readiness === 'READY' ? 85 : 55),
-      completeness: typeof completeness === 'number' ? completeness : (readiness === 'READY' ? 80 : 35),
-      readiness: readiness || ((typeof confidence === 'number' && confidence >= 80) ? 'READY' : 'NEEDS EVIDENCE'),
-    };
+    return { disposition, confidence, completeness, readiness };
   }, [activeInteraction]);
 
   // Handle draft submission
@@ -442,7 +427,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                 </div>
 
                 <div className="text-sm sm:text-base leading-relaxed text-[var(--emos-text-primary)] font-sans space-y-3 prose dark:prose-invert max-w-none prose-headings:text-[var(--emos-text-primary)] prose-headings:font-serif prose-headings:tracking-tight prose-strong:text-[var(--emos-text-primary)] prose-a:text-[var(--emos-accent)] prose-p:text-[var(--emos-text-primary)] prose-li:text-[var(--emos-text-primary)]">
-                  <ReactMarkdown>{activeInteraction.geminiResponse}</ReactMarkdown>
+                  <SafeMarkdown>{activeInteraction.geminiResponse}</SafeMarkdown>
                 </div>
               </div>
             </div>
@@ -481,7 +466,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                           <p className="whitespace-pre-wrap">{turn.content}</p>
                         ) : (
                           <div className="space-y-2 prose dark:prose-invert max-w-none prose-headings:text-[var(--emos-text-primary)] prose-headings:font-serif prose-p:text-[var(--emos-text-primary)] prose-li:text-[var(--emos-text-primary)]">
-                            <ReactMarkdown>{turn.content}</ReactMarkdown>
+                            <SafeMarkdown>{turn.content}</SafeMarkdown>
                           </div>
                         )}
                       </div>
