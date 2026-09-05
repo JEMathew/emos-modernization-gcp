@@ -21,7 +21,7 @@ import {
   deleteImportedWorkload,
   clearAllImportedWorkloads,
 } from '../lib/firebase';
-import { chatWithGemini, generateAssessmentMeta, extractAssessmentAttributes } from '../lib/gemini';
+import { chatWithGemini, generateAssessmentMeta } from '../lib/gemini';
 
 interface DashboardProps {
   user: User;
@@ -43,7 +43,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   // Sync user profile and test connection on mount
   useEffect(() => {
-    testConnection();
+    testConnection(user.uid);
     syncUserProfile(user).catch((err) => {
       console.warn("Could not sync user profile:", err);
     });
@@ -117,12 +117,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         generateAssessmentMeta(content),
       ]);
 
-      // Extract canonical attributes directly from the generated assessment text (Single Source of Truth)
-      const attributes = chatRes.attributes || extractAssessmentAttributes(
-        chatRes.response,
-        matchedWorkload?.evidenceCompleteness,
-        matchedWorkload?.dna
-      );
+      // Consume the server-reconciled assessment and metadata as one canonical result.
+      const attributes = chatRes.attributes;
 
       const newId = `assessment_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       const now = new Date().toISOString();
@@ -133,16 +129,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         title: metaRes.title || attributes.workloadName || matchedWorkload?.name || 'Modernization Assessment',
         category: metaRes.category || (matchedWorkload ? `${matchedWorkload.type} Assessment` : 'Architecture Assessment'),
         mode,
-        content,
+        content: chatRes.sanitizedInput,
         geminiResponse: chatRes.response,
         turns: [],
         createdAt: now,
         updatedAt: now,
         workloadId: workloadId,
         workloadName: attributes.workloadName || metaRes.workloadName || matchedWorkload?.name,
-        recommended6R: attributes.recommended6R || 'Replatform',
+        recommended6R: attributes.recommended6R,
         confidenceScore: attributes.confidenceScore,
-        evidenceCompleteness: matchedWorkload ? matchedWorkload.evidenceCompleteness : (attributes.evidenceCompleteness ?? 35),
+        evidenceCompleteness: attributes.evidenceCompleteness,
         decisionReadiness: attributes.decisionReadiness,
         trustIndicators: attributes.trustIndicators || chatRes.trustIndicators || {
           inputValidated: true,
@@ -264,7 +260,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
       const updatedTurns: ChatMessage[] = [
         ...(current.turns || []),
-        { role: 'user', content: message, timestamp: now },
+        { role: 'user', content: response.sanitizedInput, timestamp: now },
         {
           role: 'model',
           content: response.response,
@@ -274,11 +270,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       ];
 
       // If follow-up refined the assessment, update canonical attributes consistently
-      const updatedAttrs = response.attributes || extractAssessmentAttributes(
-        response.response,
-        current.evidenceCompleteness ?? matchedWorkload?.evidenceCompleteness,
-        matchedWorkload?.dna
-      );
+      const updatedAttrs = response.attributes;
       const updatePayload: Partial<Interaction> = {
         turns: updatedTurns,
       };

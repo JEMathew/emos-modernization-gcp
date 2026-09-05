@@ -23,6 +23,7 @@ import {
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 import type { Interaction, UserProfile, EnterpriseWorkload } from '../types';
+import { redactSecrets } from './guardrails';
 
 // Initialize Firebase App
 const app = initializeApp(firebaseConfig);
@@ -49,33 +50,13 @@ export interface FirestoreErrorInfo {
   error: string;
   operationType: OperationType;
   path: string | null;
-  authInfo: {
-    userId?: string | null;
-    email?: string | null;
-    emailVerified?: boolean | null;
-    isAnonymous?: boolean | null;
-    tenantId?: string | null;
-    providerInfo?: {
-      providerId?: string | null;
-      email?: string | null;
-    }[];
-  };
+  authenticated: boolean;
 }
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
   const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData?.map(provider => ({
-        providerId: provider.providerId,
-        email: provider.email,
-      })) || []
-    },
+    error: redactSecrets(error instanceof Error ? error.message : String(error)),
+    authenticated: Boolean(auth.currentUser),
     operationType,
     path
   };
@@ -86,20 +67,23 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 // Strict undefined-stripping utility (Zero-Crash Payload Hygiene)
 export function sanitizeForFirestore<T>(data: T): T {
   return JSON.parse(
-    JSON.stringify(data, (_key, value) => (value === undefined ? null : value))
+    JSON.stringify(data, (_key, value) => {
+      if (value === undefined) return null;
+      return typeof value === 'string' ? redactSecrets(value) : value;
+    })
   );
 }
 
-// Initial connection test
-export async function testConnection(): Promise<boolean> {
+// Initial authenticated connection test against a path allowed by the rules.
+export async function testConnection(userId: string): Promise<boolean> {
   try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
+    await getDocFromServer(doc(db, 'users', userId));
     return true;
   } catch (error) {
     if (error instanceof Error && error.message.includes('the client is offline')) {
       console.warn("Firebase client reports offline. Check connectivity.");
     }
-    return true;
+    return false;
   }
 }
 
@@ -109,7 +93,7 @@ export async function signInWithGoogle(): Promise<User> {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error: any) {
-    console.error("Google Sign-In error:", error);
+    console.error("Google Sign-In error:", redactSecrets(error instanceof Error ? error.message : String(error)));
     throw error;
   }
 }
@@ -268,4 +252,3 @@ export function subscribeToUserImportedWorkloads(
     }
   );
 }
-

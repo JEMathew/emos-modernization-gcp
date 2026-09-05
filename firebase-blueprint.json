@@ -15,20 +15,26 @@
     },
     "Interaction": {
       "title": "Interaction",
-      "description": "User journal entry, reflection, or brainstorming session with Gemini AI multi-turn interactions",
+      "description": "User-owned EMOS modernization assessment with canonical decision metadata and multi-turn analysis",
       "type": "object",
       "properties": {
         "id": { "type": "string", "description": "Unique interaction document ID" },
         "userId": { "type": "string", "description": "Owner user ID" },
-        "title": { "type": "string", "description": "Title or summary topic of reflection" },
-        "category": { "type": "string", "description": "Type of reflection (e.g. Reflection, Brainstorm, Summary, Gratitude)" },
-        "content": { "type": "string", "description": "User's initial journal entry" },
-        "geminiResponse": { "type": "string", "description": "Gemini AI response, analysis, or reflection" },
+        "title": { "type": "string", "description": "Modernization assessment title" },
+        "category": { "type": "string", "description": "Workload or architecture assessment category" },
+        "mode": { "type": "string", "description": "Assessment workflow mode" },
+        "content": { "type": "string", "description": "Validated modernization scope and enterprise evidence" },
+        "geminiResponse": { "type": "string", "description": "Canonical reconciled EMOS assessment" },
         "turns": { "type": "array", "description": "Array of multi-turn conversational dialog items" },
+        "recommended6R": { "type": "string", "description": "Canonical 6R disposition" },
+        "confidenceScore": { "type": "number", "description": "Server-reconciled recommendation confidence" },
+        "evidenceCompleteness": { "type": "number", "description": "Server-computed percentage from validated Enterprise DNA" },
+        "decisionReadiness": { "type": "string", "description": "Deterministic READY or NEEDS EVIDENCE status" },
+        "trustIndicators": { "type": "object", "description": "Input, schema, grounding, and repair integrity indicators" },
         "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when entry was created" },
         "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp when entry was last updated" }
       },
-      "required": ["id", "userId", "content", "geminiResponse", "createdAt"]
+      "required": ["id", "userId", "mode", "content", "geminiResponse", "recommended6R", "confidenceScore", "evidenceCompleteness", "decisionReadiness", "trustIndicators", "createdAt", "updatedAt"]
     },
     "ImportedWorkload": {
       "title": "ImportedWorkload",
@@ -59,7 +65,7 @@
     },
     "/users/{userId}/interactions/{interactionId}": {
       "schema": "Interaction",
-      "description": "User-isolated journal entries and AI reflection chats"
+      "description": "User-isolated EMOS modernization assessments and follow-up analysis"
     },
     "/users/{userId}/importedWorkloads/{workloadId}": {
       "schema": "ImportedWorkload",

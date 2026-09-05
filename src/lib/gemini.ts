@@ -6,29 +6,27 @@ import type {
   TrustIndicators,
   EnterpriseDna,
 } from '../types';
-import {
-  validateAndReconcileAssessment,
-  validateOrRepair6RDisposition,
-  redactSecrets,
-} from './guardrails';
+import { redactSecrets } from './guardrails';
+import { chatResponseSchema, titleResponseSchema } from './schemas';
 
 export interface AssessmentAttributes {
-  recommended6R?: Disposition6R;
-  confidenceScore?: number;
-  evidenceCompleteness?: number;
-  decisionReadiness?: DecisionReadiness;
+  recommended6R: Disposition6R;
+  confidenceScore: number;
+  evidenceCompleteness: number;
+  decisionReadiness: DecisionReadiness;
   workloadName?: string;
-  isGrounded?: boolean;
-  wasRepaired?: boolean;
-  repairedReasons?: string[];
-  trustIndicators?: TrustIndicators;
+  isGrounded: boolean;
+  wasRepaired: boolean;
+  repairedReasons: string[];
+  trustIndicators: TrustIndicators;
 }
 
 export interface ChatResponse {
   response: string;
+  sanitizedInput: string;
   modelUsed: string;
-  attributes?: AssessmentAttributes;
-  trustIndicators?: TrustIndicators;
+  attributes: AssessmentAttributes;
+  trustIndicators: TrustIndicators;
 }
 
 export interface AssessmentMetaResponse {
@@ -42,93 +40,6 @@ export interface AssessmentMetaResponse {
 }
 
 export type TitleResponse = AssessmentMetaResponse;
-
-// Canonical Assessment Attributes Extractor (Single Source of Truth & Guardrail Enforced)
-export function extractAssessmentAttributes(
-  text: string,
-  deterministicCompleteness?: number,
-  workloadDna?: EnterpriseDna
-): AssessmentAttributes {
-  if (!text) return {};
-
-  // 1. Recommended 6R Disposition (Raw match)
-  const r6Match = text.match(/(?:Recommended\s+6R\s+Disposition|6R\s+Disposition|Recommended\s+Disposition)\s*:\*{0,2}\s*(?:\*\*)?\s*([A-Za-z]+)/i);
-  const rawCandidate = r6Match ? r6Match[1].trim() : undefined;
-  const { disposition, wasRepaired: was6RRepaired, reason: r6Reason } = validateOrRepair6RDisposition(rawCandidate, text);
-
-  // 2. Confidence Score
-  const confMatch = text.match(/(?:Confidence\s+Score|Confidence)\s*:\*{0,2}\s*(?:\*\*)?\s*(\d{1,3})%?/i);
-  let confidenceScore: number | undefined;
-  if (confMatch) {
-    const val = parseInt(confMatch[1], 10);
-    if (!isNaN(val) && val >= 0 && val <= 100) {
-      confidenceScore = val;
-    }
-  }
-
-  // 3. Evidence Completeness
-  const compMatch = text.match(/(?:Evidence\s+Completeness|Completeness)\s*:\*{0,2}\s*(?:\*\*)?\s*(\d{1,3})%?/i);
-  let evidenceCompleteness: number | undefined;
-  if (compMatch) {
-    const val = parseInt(compMatch[1], 10);
-    if (!isNaN(val) && val >= 0 && val <= 100) {
-      evidenceCompleteness = val;
-    }
-  }
-
-  // 4. Decision Readiness
-  const readyMatch = text.match(/Decision\s+Readiness\s*:\*{0,2}\s*(?:\*\*)?\s*(READY|NEEDS\s+EVIDENCE)/i);
-  let decisionReadiness: DecisionReadiness | undefined;
-  if (readyMatch) {
-    decisionReadiness = readyMatch[1].toUpperCase().includes('NEEDS') ? 'NEEDS EVIDENCE' : 'READY';
-  }
-
-  // 5. Workload / Application Name
-  const workMatch = text.match(/(?:Workload\s*\/\s*Application|Application|Workload)\s*:\*{0,2}\s*(?:\*\*)?\s*([^\n\r*]+)/i);
-  let workloadName: string | undefined;
-  if (workMatch) {
-    const raw = workMatch[1].trim().replace(/^\[|\]$/g, '').replace(/^\*+|\*+$/g, '').trim();
-    if (raw && !raw.toLowerCase().includes('identified or inferred')) {
-      workloadName = raw;
-    }
-  }
-
-  // Run comprehensive guardrail reconciliation
-  const reconciled = validateAndReconcileAssessment({
-    rawText: text,
-    rawAttributes: {
-      recommended6R: disposition,
-      confidenceScore,
-      evidenceCompleteness,
-      decisionReadiness,
-      workloadName,
-    },
-    deterministicCompleteness,
-    workloadDna,
-  });
-
-  const repairedReasons = [...reconciled.repairedReasons];
-  if (was6RRepaired && r6Reason && !repairedReasons.includes(r6Reason)) {
-    repairedReasons.push(r6Reason);
-  }
-
-  return {
-    recommended6R: reconciled.recommended6R,
-    confidenceScore: reconciled.confidenceScore,
-    evidenceCompleteness: reconciled.evidenceCompleteness,
-    decisionReadiness: reconciled.decisionReadiness,
-    workloadName: reconciled.workloadName,
-    isGrounded: reconciled.isGrounded,
-    wasRepaired: reconciled.wasRepaired || was6RRepaired,
-    repairedReasons,
-    trustIndicators: {
-      inputValidated: true,
-      evidenceGrounded: reconciled.isGrounded,
-      schemaValidated: true,
-      wasRepaired: reconciled.wasRepaired || was6RRepaired,
-    },
-  };
-}
 
 export async function chatWithGemini(params: {
   message: string;
@@ -162,7 +73,7 @@ export async function chatWithGemini(params: {
     json.response = redactSecrets(json.response);
   }
 
-  return json;
+  return chatResponseSchema.parse(json) as ChatResponse;
 }
 
 export async function generateAssessmentMeta(content: string): Promise<AssessmentMetaResponse> {
@@ -182,7 +93,7 @@ export async function generateAssessmentMeta(content: string): Promise<Assessmen
       };
     }
 
-    return res.json();
+    return titleResponseSchema.parse(await res.json()) as AssessmentMetaResponse;
   } catch (err) {
     console.warn('Could not generate automatic assessment metadata:', err);
     return {
@@ -194,4 +105,3 @@ export async function generateAssessmentMeta(content: string): Promise<Assessmen
 
 // Backward compatibility export
 export const generateReflectionMeta = generateAssessmentMeta;
-

@@ -1,24 +1,127 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Zero insecure defaults: deny all unmatched reads and writes
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function optionalString(data, field, maxSize) {
+      return !(field in data) || data[field] == null ||
+        (data[field] is string && data[field].size() <= maxSize);
+    }
+
+    function validUserProfile(userId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'userId', 'displayName', 'email', 'photoURL', 'createdAt', 'lastActiveAt'
+        ]) &&
+        data.keys().hasAll(['userId', 'createdAt', 'lastActiveAt']) &&
+        data.userId == userId &&
+        data.createdAt is string && data.createdAt.size() <= 100 &&
+        data.lastActiveAt is string && data.lastActiveAt.size() <= 100 &&
+        optionalString(data, 'displayName', 250) &&
+        optionalString(data, 'email', 320) &&
+        optionalString(data, 'photoURL', 2000);
+    }
+
+    function validInteraction(userId, interactionId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'id', 'userId', 'title', 'category', 'mode', 'content', 'geminiResponse',
+          'turns', 'createdAt', 'updatedAt', 'isFavorite', 'workloadName', 'workloadId',
+          'recommended6R', 'confidenceScore', 'evidenceCompleteness',
+          'decisionReadiness', 'trustIndicators'
+        ]) &&
+        data.keys().hasAll([
+          'id', 'userId', 'title', 'category', 'mode', 'content', 'geminiResponse',
+          'turns', 'createdAt', 'updatedAt', 'recommended6R', 'confidenceScore',
+          'evidenceCompleteness', 'decisionReadiness', 'trustIndicators'
+        ]) &&
+        data.userId == userId && data.id == interactionId &&
+        data.title is string && data.title.size() <= 250 &&
+        data.category is string && data.category.size() <= 100 &&
+        data.mode in ['assess', 'options', 'decision', 'reflection', 'brainstorm', 'summary'] &&
+        data.content is string && data.content.size() <= 12100 &&
+        data.geminiResponse is string && data.geminiResponse.size() <= 50000 &&
+        data.turns is list && data.turns.size() <= 40 &&
+        data.createdAt is string && data.updatedAt is string &&
+        data.recommended6R in ['Retain', 'Retire', 'Rehost', 'Replatform', 'Refactor', 'Repurchase'] &&
+        data.confidenceScore is number && data.confidenceScore >= 0 && data.confidenceScore <= 100 &&
+        data.evidenceCompleteness is number && data.evidenceCompleteness >= 0 && data.evidenceCompleteness <= 100 &&
+        data.decisionReadiness in ['READY', 'NEEDS EVIDENCE'] &&
+        data.trustIndicators is map &&
+        data.trustIndicators.keys().hasOnly([
+          'inputValidated', 'evidenceGrounded', 'schemaValidated', 'wasRepaired'
+        ]) &&
+        data.trustIndicators.keys().hasAll([
+          'inputValidated', 'evidenceGrounded', 'schemaValidated', 'wasRepaired'
+        ]) &&
+        data.trustIndicators.inputValidated == true &&
+        data.trustIndicators.schemaValidated == true &&
+        data.trustIndicators.evidenceGrounded is bool &&
+        data.trustIndicators.wasRepaired is bool &&
+        optionalString(data, 'workloadName', 250) &&
+        optionalString(data, 'workloadId', 100);
+    }
+
+    function validImportedWorkload(userId, workloadId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'id', 'name', 'type', 'businessCapability', 'businessCriticality',
+          'currentStack', 'hosting', 'knownDependencies', 'modernizationSignals',
+          'evidenceCompleteness', 'dna', 'userId', 'importedAt', 'source', 'evaluationMeta'
+        ]) &&
+        data.keys().hasAll([
+          'id', 'name', 'type', 'businessCapability', 'businessCriticality',
+          'currentStack', 'hosting', 'knownDependencies', 'modernizationSignals',
+          'evidenceCompleteness', 'dna', 'userId', 'importedAt', 'source'
+        ]) &&
+        data.userId == userId && data.id == workloadId &&
+        data.name is string && data.name.size() <= 250 &&
+        data.type in ['Application', 'Data Platform'] &&
+        data.businessCriticality in ['High', 'Medium', 'Low'] &&
+        data.businessCapability is string && data.businessCapability.size() <= 2000 &&
+        data.currentStack is string && data.currentStack.size() <= 4000 &&
+        data.hosting is string && data.hosting.size() <= 2000 &&
+        data.knownDependencies is string && data.knownDependencies.size() <= 2000 &&
+        data.modernizationSignals is list && data.modernizationSignals.size() <= 100 &&
+        data.evidenceCompleteness is number && data.evidenceCompleteness >= 0 && data.evidenceCompleteness <= 100 &&
+        validDna(data.dna) && data.importedAt is string && data.source == 'imported';
+    }
+
+    function validDna(dna) {
+      return dna is map &&
+        dna.keys().hasOnly([
+          'business', 'technology', 'dependency', 'economics', 'dataAndRisk', 'targetState'
+        ]) &&
+        dna.keys().hasAll([
+          'business', 'technology', 'dependency', 'economics', 'dataAndRisk', 'targetState'
+        ]) &&
+        dna.business is list && dna.business.size() == 3 &&
+        dna.technology is list && dna.technology.size() == 4 &&
+        dna.dependency is list && dna.dependency.size() == 2 &&
+        dna.economics is list && dna.economics.size() == 3 &&
+        dna.dataAndRisk is list && dna.dataAndRisk.size() == 3 &&
+        dna.targetState is list && dna.targetState.size() == 3;
+    }
+
+    match /users/{userId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && validUserProfile(userId);
+    }
+
+    match /users/{userId}/interactions/{interactionId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && validInteraction(userId, interactionId);
+    }
+
+    match /users/{userId}/importedWorkloads/{workloadId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && validImportedWorkload(userId, workloadId);
+    }
+
     match /{document=**} {
       allow read, write: if false;
-    }
-
-    // User profile document isolated to authenticated user
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // User interaction/journal entries isolated strictly to owning user
-    match /users/{userId}/interactions/{interactionId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // User imported enterprise workloads isolated strictly to owning user
-    match /users/{userId}/importedWorkloads/{workloadId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
