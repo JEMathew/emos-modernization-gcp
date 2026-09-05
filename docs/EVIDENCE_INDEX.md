@@ -5,7 +5,8 @@ This index maps current product claims to implementation and verification eviden
 | Claim | Status | Implementation | Verification |
 | --- | --- | --- | --- |
 | AI endpoints require authenticated users | Enforced | `server.ts` verifies signed Firebase ID tokens against Google's JWKS, project audience, and issuer; `src/lib/gemini.ts` sends the current user's token | `tests/api.chat.contract.test.ts` covers missing and expired tokens |
-| Portfolio limits are consistent | Enforced | `src/utils/portfolioImporter.ts` exports canonical 5MB / 200-workload limits used by the modal | `tests/portfolioImporter.limits.test.ts` |
+| Portfolio limits are consistent | Enforced | Shared 5MB / 200-workload limits are shown in the modal; both CSV and JSON reject oversized portfolios before import, with no partial ingestion | `src/utils/portfolioImporter.ts`, `src/components/ImportPortfolioModal.tsx`, `tests/portfolioImporter.limits.test.ts` |
+| Test listener isolation | Enforced | The HTTP listener is skipped whenever `NODE_ENV=test` or `VITEST` is present, while the exported Express app remains directly testable | `server.ts`, `tests/api.chat.contract.test.ts` |
 | Portfolio evidence produces deterministic waves | Implemented | `src/lib/wavePlanner.ts` uses 6R, criticality, dependencies, evidence, and readiness | `tests/wavePlanner.test.ts` |
 | Missing evidence remains visible | Enforced | Wave workloads retain blockers and conditional/assessment-required state | Wave-planner and UI rendering tests |
 | Program alignment is owner isolated | Enforced | `programContext/alignment` Firestore document | `firestore.rules`; `tests/firestore.rules.test.ts` |
@@ -16,7 +17,7 @@ This index maps current product claims to implementation and verification eviden
 ## Verification snapshot
 
 - TypeScript: `npm run lint`
-- Unit/API/security/UI tests: 36 passing locally
+- Unit/API/security/UI tests: 42 passing locally
 - Production bundle: `npm run build`
 - Production dependency audit: `npm audit --omit=dev --audit-level=moderate` reports 0 vulnerabilities
 - Firestore rules: included in CI; local emulator requires Java 21

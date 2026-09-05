@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { app, setAuthTokenVerifierForTests, setContentGeneratorForTests } from '../server';
+import { app, setAuthTokenVerifierForTests, setContentGeneratorForTests, shouldStartServer } from '../server';
 import { SAMPLE_PORTFOLIO } from '../src/data/samplePortfolio';
 
 const hostileAssessment = [
@@ -19,6 +19,21 @@ beforeEach(() => setAuthTokenVerifierForTests(async () => ({ uid: 'test-user' })
 afterEach(() => {
   setContentGeneratorForTests(undefined);
   setAuthTokenVerifierForTests(undefined);
+});
+
+describe('server startup isolation', () => {
+  it('does not start a listener in NODE_ENV=test', () => {
+    expect(shouldStartServer({ NODE_ENV: 'test' })).toBe(false);
+  });
+
+  it('does not start a listener whenever VITEST is present', () => {
+    expect(shouldStartServer({ NODE_ENV: 'production', VITEST: 'true' })).toBe(false);
+    expect(shouldStartServer({ NODE_ENV: 'production', VITEST: '' })).toBe(false);
+  });
+
+  it('starts normally outside test runners', () => {
+    expect(shouldStartServer({ NODE_ENV: 'production' })).toBe(true);
+  });
 });
 
 describe('/api/chat release contract', () => {

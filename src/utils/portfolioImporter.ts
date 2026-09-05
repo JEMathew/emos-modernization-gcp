@@ -18,6 +18,12 @@ export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 export const MAX_IMPORT_WORKLOADS = 200;
 export const MAX_FILE_SIZE_LABEL = '5MB';
 
+function workloadLimitError(count: number): Error {
+  return new Error(
+    `Portfolio contains ${count} workloads. The maximum supported per file is ${MAX_IMPORT_WORKLOADS}. Split the portfolio into smaller files and try again.`
+  );
+}
+
 /**
  * Defends against CSV / Spreadsheet formula injection and limits text lengths.
  */
@@ -359,12 +365,10 @@ export function parseCsvPortfolio(
 
   const dataRows = rawRows.slice(1);
   if (dataRows.length > MAX_IMPORT_WORKLOADS) {
-    warnings.push(
-      `Portfolio contains ${dataRows.length} rows; only the first ${MAX_IMPORT_WORKLOADS} workloads will be imported.`
-    );
+    throw workloadLimitError(dataRows.length);
   }
 
-  const rowsToProcess = dataRows.slice(0, MAX_IMPORT_WORKLOADS);
+  const rowsToProcess = dataRows;
 
   rowsToProcess.forEach((row, idx) => {
     const rowNumber = idx + 2; // 1-indexed including header
@@ -477,12 +481,10 @@ export function parseJsonPortfolio(
   let totalEvidenceGaps = 0;
 
   if (rawList.length > MAX_IMPORT_WORKLOADS) {
-    warnings.push(
-      `Portfolio contains ${rawList.length} items; only the first ${MAX_IMPORT_WORKLOADS} workloads will be imported.`
-    );
+    throw workloadLimitError(rawList.length);
   }
 
-  const itemsToProcess = rawList.slice(0, MAX_IMPORT_WORKLOADS);
+  const itemsToProcess = rawList;
 
   itemsToProcess.forEach((item, idx) => {
     const rowNumber = idx + 1;

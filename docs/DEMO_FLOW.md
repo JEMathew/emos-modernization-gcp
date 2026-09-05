@@ -3,7 +3,7 @@
 Target length: 3–4 minutes.
 
 1. **Align (30 seconds)** — Open **Plan**, record the program name, executive sponsor, security approver, delivery owner, business outcomes, platform strategy, risk posture, time horizon, and success measures. Save the owner-isolated context.
-2. **Discover (25 seconds)** — Return to **Portfolio**, import a CSV/JSON estate, and show the 5MB / 200-workload limit, validation summary, and formula-injection defense.
+2. **Discover (25 seconds)** — Return to **Portfolio**, import a CSV/JSON estate, and show the 5MB / 200-workload rejection contract, validation summary, and formula-injection defense. Explain that oversized portfolios fail as a whole rather than being silently truncated.
 3. **Understand (30 seconds)** — Open one workload's **Enterprise DNA** and point out known, incomplete, and missing evidence plus the deterministic completeness score.
 4. **Decide (45 seconds)** — Generate a governed 6R assessment. Highlight canonical disposition, confidence, readiness, rationale, alternatives, risks, and missing evidence.
 5. **Plan (45 seconds)** — Open **Plan → Wave Plan**. Show deterministic sequencing and explain why assessment/evidence gates remain visible.

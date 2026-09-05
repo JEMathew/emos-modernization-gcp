@@ -203,7 +203,7 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
                   </h3>
                   <p className="text-xs text-[var(--emos-text-secondary)] mb-4">
                     Supports <span className="text-[var(--emos-accent-text)] font-medium">.csv</span> and{' '}
-                    <span className="text-[var(--emos-accent-text)] font-medium">.json</span> files up to {MAX_FILE_SIZE_LABEL} (max {MAX_IMPORT_WORKLOADS} workloads)
+                    <span className="text-[var(--emos-accent-text)] font-medium">.json</span> files up to {MAX_FILE_SIZE_LABEL} and {MAX_IMPORT_WORKLOADS} workloads. Files exceeding either limit are rejected.
                   </p>
                   <div className="inline-flex items-center gap-2 text-[11px] text-[var(--emos-text-muted)] bg-[var(--emos-bg-tertiary)] px-3 py-1.5 rounded-full border border-[var(--emos-border-subtle)]">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />

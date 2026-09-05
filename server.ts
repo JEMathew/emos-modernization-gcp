@@ -526,6 +526,10 @@ async function startServer() {
   });
 }
 
-if (process.env.NODE_ENV !== "test") {
+export function shouldStartServer(environment: NodeJS.ProcessEnv = process.env): boolean {
+  return environment.NODE_ENV !== "test" && environment.VITEST === undefined;
+}
+
+if (shouldStartServer()) {
   startServer();
 }

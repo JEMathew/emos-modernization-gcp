@@ -373,7 +373,7 @@ In enterprise modernization, inventory data is almost never complete. Unlike rig
 Uploaded CSV and JSON files represent untrusted external input and are defended with strict security controls:
 1. **Zero Execution & Safe Parsing**: Files are parsed in memory using regex-based CSV scanning and guarded JSON deserialization. No dynamic scripts, macros, or `eval()` constructs are ever executed.
 2. **Spreadsheet & Formula Injection Protection**: Any value starting with formula trigger characters (`=`, `+`, `-`, `@`, `\t`, `\r`) is automatically sanitized by prepending a safe apostrophe (`'`), preventing formula execution if exported into spreadsheet viewers.
-3. **Payload Thresholds**: File uploads are capped at a maximum of 5MB and a maximum of 200 workload records per file to reduce memory-exhaustion and denial-of-service risk. The UI, parser, tests, and documentation use these same canonical limits.
+3. **Payload Thresholds**: Files above 5MB and CSV/JSON portfolios above 200 workload records are rejected before import to reduce memory-exhaustion and denial-of-service risk. Oversized portfolios are never partially imported, and the UI, parsers, tests, and documentation use the same canonical limits.
 4. **Owner-Bound Subcollection**: Successfully imported workloads are sanitized of `undefined` fields and stored under the authenticated user's private path `/users/{userId}/importedWorkloads/{workloadId}` governed by Firestore security rules.
 
 AI requests use the same authenticated boundary: `/api/chat` and `/api/summarize-title` reject anonymous or expired sessions, and the server verifies the Firebase ID token signature, project audience, issuer, and subject before invoking Gemini. The browser never sends the Gemini API key.
@@ -655,7 +655,7 @@ The codebase includes verification across all critical paths (accessible interac
 - [x] **Automated Secret & Token Redaction**: Outbound payload scanning to neutralize accidental API keys, tokens, or credential leakage in model outputs.
 - [x] **Canonical 6R Repair & Enforcement**: Mathematical validation guaranteeing output conforms strictly to canonical 6R taxonomy (Retain, Retire, Rehost, Replatform, Refactor, Repurchase) and auto-repairs legacy or non-canonical terms like "Rebuild".
 - [x] **Deterministic DNA Grounding**: Server-side evidence scoring; Decision Readiness strictly enforced to `NEEDS EVIDENCE` whenever evidence completeness < 70% or critical dimensions are unmapped.
-- [x] **Formula Injection & Import Defense**: Neutralizes CSV formula triggers (`=`, `+`, `-`, `@`), enforces 5MB file boundaries, and limits record fields.
+- [x] **Formula Injection & Import Defense**: Neutralizes CSV formula triggers (`=`, `+`, `-`, `@`), enforces the 5MB file boundary, and rejects CSV/JSON portfolios above 200 workloads without partial ingestion.
 - [x] **Responsive Theming (Light, Dark, System)**: WCAG AA contrast compliance, system preference detection, and zero-flash persistence across devices.
 - [x] **Cloud Firestore Persistence**: Transactional save of assessments, multi-turn follow-ups, and user-isolated history & imported workloads.
 - [x] **Production Compilation**: Clean Vite build and esbuild backend bundle passing all strict TypeScript validations.
