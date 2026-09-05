@@ -3,6 +3,7 @@ import path from "path";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import {
   GuardrailValidationError,
   hasExplicitTargetPlatformEvidence,
@@ -19,6 +20,7 @@ import {
   titleRequestSchema,
   titleResponseSchema,
 } from "./src/lib/schemas";
+import firebaseConfig from "./firebase-applet-config.json";
 
 dotenv.config();
 
@@ -35,6 +37,30 @@ export function setContentGeneratorForTests(generator?: ContentGenerator) {
   contentGeneratorOverride = generator;
 }
 
+export type AuthTokenVerifier = (token: string) => Promise<{ uid: string }>;
+let authTokenVerifierOverride: AuthTokenVerifier | undefined;
+export function setAuthTokenVerifierForTests(verifier?: AuthTokenVerifier) {
+  authTokenVerifierOverride = verifier;
+}
+
+const firebaseSigningKeys = createRemoteJWKSet(
+  new URL("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"),
+);
+
+function getAuthTokenVerifier(): AuthTokenVerifier {
+  if (authTokenVerifierOverride) return authTokenVerifierOverride;
+  return async (token: string) => {
+    const projectId = process.env.GOOGLE_CLOUD_PROJECT || firebaseConfig.projectId;
+    const { payload } = await jwtVerify(token, firebaseSigningKeys, {
+      algorithms: ["RS256"],
+      audience: projectId,
+      issuer: `https://securetoken.google.com/${projectId}`,
+    });
+    if (!payload.sub || payload.sub.length > 128) throw new Error("Firebase token subject is invalid.");
+    return { uid: payload.sub };
+  };
+}
+
 // Standard Top-Level Request Deserialization (Ordering Guarantee)
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -47,6 +73,23 @@ app.use((_req, res, next) => {
   res.setHeader("Referrer-Policy", "no-referrer");
   next();
 });
+
+async function requireAuthenticatedUser(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const authorization = req.header("authorization") || "";
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  if (!match) {
+    return res.status(401).json({ error: "Authentication is required." });
+  }
+
+  try {
+    const decoded = await getAuthTokenVerifier()(match[1]);
+    res.locals.authenticatedUserId = decoded.uid;
+    return next();
+  } catch (error) {
+    console.warn("Rejected invalid Firebase ID token:", redactSecrets(error instanceof Error ? error.message : String(error)));
+    return res.status(401).json({ error: "Authentication token is invalid or expired." });
+  }
+}
 
 // Lazy GoogleGenAI client initialization
 let aiClient: GoogleGenAI | null = null;
@@ -217,7 +260,7 @@ function extractAssessmentAttributes(
 }
 
 // AI Chat & Modernization Assessment endpoint
-app.post("/api/chat", async (req, res) => {
+app.post("/api/chat", requireAuthenticatedUser, async (req, res) => {
   try {
     const requestResult = chatRequestSchema.safeParse(req.body);
     if (!requestResult.success) {
@@ -408,7 +451,7 @@ ${systemInstruction}`;
 });
 
 // Title & Category generation endpoint (Scores are NEVER independently generated here)
-app.post("/api/summarize-title", async (req, res) => {
+app.post("/api/summarize-title", requireAuthenticatedUser, async (req, res) => {
   try {
     const requestResult = titleRequestSchema.safeParse(req.body);
     if (!requestResult.success) {

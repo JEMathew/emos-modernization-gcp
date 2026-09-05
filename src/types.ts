@@ -92,6 +92,50 @@ export interface EnterpriseWorkload {
   };
 }
 
+export type RiskTolerance = 'Conservative' | 'Balanced' | 'Accelerated';
+
+export interface ProgramAlignment {
+  userId: string;
+  programName: string;
+  executiveSponsor: string;
+  securityApprover: string;
+  deliveryOwner: string;
+  businessOutcomes: string;
+  targetPlatform: string;
+  riskTolerance: RiskTolerance;
+  timeHorizonMonths: number;
+  successMeasures: string;
+  updatedAt: string;
+}
+
+export type WaveReadiness = 'READY' | 'CONDITIONAL' | 'ASSESSMENT REQUIRED';
+
+export interface WaveWorkload {
+  workloadId: string;
+  workloadName: string;
+  disposition: Disposition6R | 'Assessment required';
+  readiness: WaveReadiness;
+  evidenceCompleteness: number;
+  rationale: string;
+  blockers: string[];
+}
+
+export interface ModernizationWave {
+  id: string;
+  order: number;
+  name: string;
+  objective: string;
+  workloads: WaveWorkload[];
+}
+
+export interface MobilizationItem {
+  id: string;
+  category: 'Governance' | 'People' | 'Platform' | 'Security' | 'Delivery';
+  label: string;
+  status: 'READY' | 'ACTION REQUIRED';
+  evidence: string;
+}
+
 export interface RawImportRecord {
   workload_id?: string;
   workload_name?: string;
@@ -148,4 +192,3 @@ export interface ModernizationStarter {
   text: string;
   mode: AssessmentMode;
 }
-

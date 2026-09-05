@@ -12,6 +12,7 @@ import {
   FolderOpen,
   Search,
   FileSpreadsheet,
+  Route,
 } from 'lucide-react';
 import type { EnterpriseWorkload } from '../types';
 import { SAMPLE_PORTFOLIO } from '../data/samplePortfolio';
@@ -24,6 +25,7 @@ interface SamplePortfolioViewProps {
   onDeleteImportedWorkload?: (workloadId: string) => Promise<void>;
   onClearImportedPortfolio?: () => Promise<void>;
   isProcessing?: boolean;
+  onOpenPlan: () => void;
 }
 
 export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
@@ -34,6 +36,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
   onDeleteImportedWorkload,
   onClearImportedPortfolio,
   isProcessing = false,
+  onOpenPlan,
 }) => {
   const [activeTab, setActiveTab] = useState<'sample' | 'imported'>('sample');
   const [searchQuery, setSearchQuery] = useState('');
@@ -114,14 +117,19 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
             </p>
           </div>
 
-          <button
-            id="import-portfolio-header-btn"
-            onClick={onOpenImportModal}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#A88554] hover:bg-[#BCA075] dark:hover:bg-[#E5C492] text-black text-xs font-semibold shadow-sm transition-all cursor-pointer self-start sm:self-auto min-h-[38px]"
-          >
-            <UploadCloud className="w-4 h-4" />
-            <span>Import CSV / JSON</span>
-          </button>
+          <div className="flex flex-wrap gap-2 self-start sm:self-auto">
+            <button onClick={onOpenPlan} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] text-xs font-semibold shadow-sm transition-all cursor-pointer min-h-[38px]">
+              <Route className="w-4 h-4" /><span>Plan & Mobilize</span>
+            </button>
+            <button
+              id="import-portfolio-header-btn"
+              onClick={onOpenImportModal}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#A88554] hover:bg-[#BCA075] dark:hover:bg-[#E5C492] text-black text-xs font-semibold shadow-sm transition-all cursor-pointer min-h-[38px]"
+            >
+              <UploadCloud className="w-4 h-4" />
+              <span>Import CSV / JSON</span>
+            </button>
+          </div>
         </div>
 
         {/* Two Prominent Entry Paths: A. Explore Sample Portfolio | B. Bring Your Own Portfolio */}

@@ -16,6 +16,7 @@ import {
 
 export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 export const MAX_IMPORT_WORKLOADS = 200;
+export const MAX_FILE_SIZE_LABEL = '5MB';
 
 /**
  * Defends against CSV / Spreadsheet formula injection and limits text lengths.
@@ -309,7 +310,7 @@ export async function parseAndValidatePortfolioFile(
 
   if (file.size > MAX_FILE_SIZE_BYTES) {
     throw new Error(
-      `File size exceeds 2MB limit (${(file.size / (1024 * 1024)).toFixed(2)} MB). Please upload a smaller file.`
+      `File size exceeds ${MAX_FILE_SIZE_LABEL} limit (${(file.size / (1024 * 1024)).toFixed(2)} MB). Please upload a smaller file.`
     );
   }
 

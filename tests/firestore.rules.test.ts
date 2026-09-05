@@ -57,6 +57,20 @@ const validImportedWorkload = (userId: string, id = 'workload-1') => ({
   source: 'imported',
 });
 
+const validProgramAlignment = (userId: string) => ({
+  userId,
+  programName: 'Core modernization',
+  executiveSponsor: 'CTO',
+  securityApprover: 'CISO delegate',
+  deliveryOwner: 'Program director',
+  businessOutcomes: 'Reduce operational risk',
+  targetPlatform: 'Vendor neutral',
+  riskTolerance: 'Balanced',
+  timeHorizonMonths: 18,
+  successMeasures: 'Reduce run cost by 20%',
+  updatedAt: new Date(0).toISOString(),
+});
+
 beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
     projectId: 'demo-emos-guardrails',
@@ -118,6 +132,13 @@ describe('Firestore owner isolation and integrity', () => {
       validImportedWorkload('bob', 'spoofed'),
     ));
     await assertFails(getDoc(doc(alice, 'users/bob/importedWorkloads/workload-1')));
+  });
+
+  it('isolates and validates the modernization program alignment', async () => {
+    const alice = testEnv.authenticatedContext('alice').firestore();
+    await assertSucceeds(setDoc(doc(alice, 'users/alice/programContext/alignment'), validProgramAlignment('alice')));
+    await assertFails(setDoc(doc(alice, 'users/alice/programContext/alignment'), validProgramAlignment('bob')));
+    await assertFails(getDoc(doc(alice, 'users/bob/programContext/alignment')));
   });
 
   it('denies unmatched paths', async () => {
