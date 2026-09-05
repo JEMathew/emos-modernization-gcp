@@ -14,9 +14,10 @@ import { ThemeSelector } from './ThemeSelector';
 
 interface LandingPageProps {
   onOpenWalkthrough: () => void;
+  onNavigate?: (path: string) => void;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onNavigate }) => {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -209,8 +210,43 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough }) =
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--emos-border-subtle)] py-6 text-center text-xs text-[var(--emos-text-muted)] bg-[var(--emos-bg-secondary)]">
-        EMOS — Enterprise Modernization Operating System • Ideathon Release: Decision Intelligence
+      <footer className="border-t border-[var(--emos-border-subtle)] py-8 px-4 sm:px-6 bg-[var(--emos-bg-secondary)] text-xs text-[var(--emos-text-muted)] transition-colors">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-center sm:text-left">
+            <span className="font-serif font-semibold text-[var(--emos-text-primary)]">EMOS</span>
+            <span>—</span>
+            <span>Enterprise Modernization Operating System</span>
+            <span className="hidden md:inline">• Ideathon Demonstration</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <a
+              id="footer-privacy-link"
+              href="/privacy"
+              onClick={(e) => {
+                if (onNavigate) {
+                  e.preventDefault();
+                  onNavigate('/privacy');
+                }
+              }}
+              className="text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:underline underline-offset-4 transition-colors font-medium"
+            >
+              Privacy Policy
+            </a>
+            <a
+              id="footer-terms-link"
+              href="/terms"
+              onClick={(e) => {
+                if (onNavigate) {
+                  e.preventDefault();
+                  onNavigate('/terms');
+                }
+              }}
+              className="text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:underline underline-offset-4 transition-colors font-medium"
+            >
+              Terms of Service
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );
