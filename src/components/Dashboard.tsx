@@ -7,7 +7,8 @@ import { SamplePortfolioView } from './SamplePortfolioView';
 import { EnterpriseDnaView } from './EnterpriseDnaView';
 import { ImportPortfolioModal } from './ImportPortfolioModal';
 import { TestWalkthroughModal } from './TestWalkthroughModal';
-import type { Interaction, AssessmentMode, ChatMessage, EnterpriseWorkload } from '../types';
+import { PortfolioPlanView } from './PortfolioPlanView';
+import type { Interaction, AssessmentMode, ChatMessage, EnterpriseWorkload, ProgramAlignment } from '../types';
 import { SAMPLE_PORTFOLIO, formatWorkloadDnaForAssessment } from '../data/samplePortfolio';
 import {
   subscribeToUserInteractions,
@@ -20,6 +21,8 @@ import {
   saveImportedWorkloads,
   deleteImportedWorkload,
   clearAllImportedWorkloads,
+  saveProgramAlignment,
+  subscribeToProgramAlignment,
 } from '../lib/firebase';
 import { chatWithGemini, generateAssessmentMeta } from '../lib/gemini';
 
@@ -28,10 +31,24 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
+  const defaultAlignment: ProgramAlignment = {
+    userId: user.uid,
+    programName: 'Enterprise Modernization Program',
+    executiveSponsor: '',
+    securityApprover: '',
+    deliveryOwner: '',
+    businessOutcomes: '',
+    targetPlatform: '',
+    riskTolerance: 'Balanced',
+    timeHorizonMonths: 18,
+    successMeasures: '',
+    updatedAt: new Date(0).toISOString(),
+  };
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [importedWorkloads, setImportedWorkloads] = useState<EnterpriseWorkload[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'portfolio' | 'dna' | 'workspace'>('portfolio');
+  const [currentView, setCurrentView] = useState<'portfolio' | 'dna' | 'workspace' | 'plan'>('portfolio');
+  const [programAlignment, setProgramAlignment] = useState<ProgramAlignment>(defaultAlignment);
   const [selectedWorkload, setSelectedWorkload] = useState<EnterpriseWorkload | null>(SAMPLE_PORTFOLIO[0]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -68,6 +85,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
     return () => unsubscribe();
   }, [user.uid]);
+
+  useEffect(() => subscribeToProgramAlignment(
+    user.uid,
+    (alignment) => setProgramAlignment(alignment ? { ...defaultAlignment, ...alignment, userId: user.uid } : { ...defaultAlignment, userId: user.uid }),
+    (error) => console.warn('Could not load program alignment:', error),
+  ), [user.uid]);
 
   // Subscribe to real-time imported workloads for this user
   useEffect(() => {
@@ -357,6 +380,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               }
             }
             setCurrentView('workspace');
+          } else if (view === 'plan') {
+            setCurrentView('plan');
+            setIsMobileHistoryOpen(false);
           }
         }}
         onNewAssessment={() => {
@@ -433,6 +459,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             onDeleteImportedWorkload={handleDeleteImportedWorkload}
             onClearImportedPortfolio={handleClearImportedPortfolio}
             isProcessing={isProcessing}
+            onOpenPlan={() => setCurrentView('plan')}
           />
         )}
 
@@ -457,6 +484,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             isProcessing={isProcessing}
             saveStatus={saveStatus}
             errorMessage={errorMessage}
+          />
+        )}
+
+        {currentView === 'plan' && (
+          <PortfolioPlanView
+            workloads={[...SAMPLE_PORTFOLIO, ...importedWorkloads]}
+            interactions={interactions}
+            alignment={programAlignment}
+            onSaveAlignment={async (alignment) => {
+              await saveProgramAlignment(user.uid, alignment);
+              setProgramAlignment({ ...alignment, userId: user.uid, updatedAt: new Date().toISOString() });
+            }}
+            onBack={() => setCurrentView('portfolio')}
           />
         )}
       </div>

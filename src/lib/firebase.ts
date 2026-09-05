@@ -22,7 +22,7 @@ import {
   type Unsubscribe
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
-import type { Interaction, UserProfile, EnterpriseWorkload } from '../types';
+import type { Interaction, UserProfile, EnterpriseWorkload, ProgramAlignment } from '../types';
 import { redactSecrets } from './guardrails';
 
 // Initialize Firebase App
@@ -251,4 +251,28 @@ export function subscribeToUserImportedWorkloads(
       onError(error);
     }
   );
+}
+
+export async function saveProgramAlignment(userId: string, alignment: ProgramAlignment): Promise<void> {
+  const path = `users/${userId}/programContext/alignment`;
+  try {
+    await setDoc(doc(db, path), sanitizeForFirestore({
+      ...alignment,
+      userId,
+      updatedAt: new Date().toISOString(),
+    }));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
+}
+
+export function subscribeToProgramAlignment(
+  userId: string,
+  onData: (alignment: ProgramAlignment | null) => void,
+  onError: (error: unknown) => void,
+): Unsubscribe {
+  const path = `users/${userId}/programContext/alignment`;
+  return onSnapshot(doc(db, path), (snapshot) => {
+    onData(snapshot.exists() ? snapshot.data() as ProgramAlignment : null);
+  }, onError);
 }

@@ -1,15 +1,15 @@
 import React from 'react';
-import { Sparkles, LogOut, Plus, ShieldCheck, Database, User as UserIcon, Layers, FileText } from 'lucide-react';
+import { Sparkles, LogOut, Plus, ShieldCheck, Database, User as UserIcon, Layers, FileText, Route } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { signOut } from '../lib/firebase';
 import { ThemeSelector } from './ThemeSelector';
 
 interface NavbarProps {
   user: User | null;
-  currentView: 'portfolio' | 'dna' | 'workspace';
+  currentView: 'portfolio' | 'dna' | 'workspace' | 'plan';
   selectedId?: string | null;
   assessmentCount?: number;
-  onNavigate: (view: 'portfolio' | 'decision-intelligence' | 'assessments') => void;
+  onNavigate: (view: 'portfolio' | 'decision-intelligence' | 'assessments' | 'plan') => void;
   onNewAssessment: () => void;
   onOpenWalkthrough: () => void;
 }
@@ -71,6 +71,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <Layers className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
             <span>Portfolio</span>
+          </button>
+
+          <button
+            id="nav-tab-plan"
+            onClick={() => onNavigate('plan')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              currentView === 'plan'
+                ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+                : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+            }`}
+          >
+            <Route className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
+            <span>Plan</span>
           </button>
 
           <button
@@ -178,6 +191,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <Layers className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
           <span>Portfolio</span>
+        </button>
+
+        <button
+          id="mobile-nav-plan"
+          onClick={() => onNavigate('plan')}
+          className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+            currentView === 'plan'
+              ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
+              : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+          }`}
+        >
+          <Route className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
+          <span>Plan</span>
         </button>
 
         <button

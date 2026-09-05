@@ -4,7 +4,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { SafeMarkdown } from '../src/components/SafeMarkdown';
 import { ReflectionWorkspace } from '../src/components/ReflectionWorkspace';
-import type { Interaction } from '../src/types';
+import { PortfolioPlanView } from '../src/components/PortfolioPlanView';
+import { SAMPLE_PORTFOLIO } from '../src/data/samplePortfolio';
+import type { Interaction, ProgramAlignment } from '../src/types';
 
 describe('safe assessment rendering', () => {
   const writeText = vi.fn();
@@ -78,5 +80,26 @@ describe('safe assessment rendering', () => {
     fireEvent.click(container.querySelector('#copy-assessment-btn')!);
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining('**Evidence Completeness:** 20%'));
     expect(writeText).not.toHaveBeenCalledWith(expect.stringMatching(/Rebuild|99%|Decision Readiness:\*\* READY/));
+  });
+
+  it('renders alignment, deterministic waves, and mobilization readiness', () => {
+    const alignment: ProgramAlignment = {
+      userId: 'owner-1', programName: 'Core modernization', executiveSponsor: 'CTO', securityApprover: 'CISO delegate', deliveryOwner: 'Program director',
+      businessOutcomes: 'Reduce risk', targetPlatform: 'Vendor neutral', riskTolerance: 'Balanced',
+      timeHorizonMonths: 18, successMeasures: 'Retire unsupported runtimes', updatedAt: new Date(0).toISOString(),
+    };
+    render(<PortfolioPlanView
+      workloads={SAMPLE_PORTFOLIO}
+      interactions={[]}
+      alignment={alignment}
+      onSaveAlignment={async () => undefined}
+      onBack={() => undefined}
+    />);
+    expect(screen.getByText('Modernization Decision Cockpit')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('2. Wave Plan'));
+    expect(screen.getByText('Deterministic sequencing:')).toBeInTheDocument();
+    expect(screen.getAllByText('ASSESSMENT REQUIRED')).toHaveLength(SAMPLE_PORTFOLIO.length);
+    fireEvent.click(screen.getByText('3. Mobilize'));
+    expect(screen.getByText('Wave delivery accountability')).toBeInTheDocument();
   });
 });

@@ -105,6 +105,29 @@ service cloud.firestore {
         dna.targetState is list && dna.targetState.size() == 3;
     }
 
+    function validProgramAlignment(userId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'userId', 'programName', 'executiveSponsor', 'securityApprover', 'deliveryOwner', 'businessOutcomes',
+          'targetPlatform', 'riskTolerance', 'timeHorizonMonths', 'successMeasures', 'updatedAt'
+        ]) &&
+        data.keys().hasAll([
+          'userId', 'programName', 'executiveSponsor', 'securityApprover', 'deliveryOwner', 'businessOutcomes',
+          'targetPlatform', 'riskTolerance', 'timeHorizonMonths', 'successMeasures', 'updatedAt'
+        ]) &&
+        data.userId == userId &&
+        data.programName is string && data.programName.size() <= 250 &&
+        data.executiveSponsor is string && data.executiveSponsor.size() <= 250 &&
+        data.securityApprover is string && data.securityApprover.size() <= 250 &&
+        data.deliveryOwner is string && data.deliveryOwner.size() <= 250 &&
+        data.businessOutcomes is string && data.businessOutcomes.size() <= 4000 &&
+        data.targetPlatform is string && data.targetPlatform.size() <= 500 &&
+        data.riskTolerance in ['Conservative', 'Balanced', 'Accelerated'] &&
+        data.timeHorizonMonths is number && data.timeHorizonMonths >= 1 && data.timeHorizonMonths <= 120 &&
+        data.successMeasures is string && data.successMeasures.size() <= 4000 &&
+        data.updatedAt is string && data.updatedAt.size() <= 100;
+    }
+
     match /users/{userId} {
       allow read, delete: if isOwner(userId);
       allow create, update: if isOwner(userId) && validUserProfile(userId);
@@ -118,6 +141,12 @@ service cloud.firestore {
     match /users/{userId}/importedWorkloads/{workloadId} {
       allow read, delete: if isOwner(userId);
       allow create, update: if isOwner(userId) && validImportedWorkload(userId, workloadId);
+    }
+
+    match /users/{userId}/programContext/{contextId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && contextId == 'alignment' && validProgramAlignment(userId);
+      allow delete: if false;
     }
 
     match /{document=**} {

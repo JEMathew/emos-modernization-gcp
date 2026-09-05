@@ -8,6 +8,16 @@ import type {
 } from '../types';
 import { redactSecrets } from './guardrails';
 import { chatResponseSchema, titleResponseSchema } from './schemas';
+import { auth } from './firebase';
+
+async function authenticatedHeaders(): Promise<HeadersInit> {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Your session has expired. Please sign in again.');
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${await user.getIdToken()}`,
+  };
+}
 
 export interface AssessmentAttributes {
   recommended6R: Disposition6R;
@@ -50,9 +60,7 @@ export async function chatWithGemini(params: {
 }): Promise<ChatResponse> {
   const res = await fetch('/api/chat', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: await authenticatedHeaders(),
     body: JSON.stringify({
       message: params.message,
       history: params.history || [],
@@ -80,9 +88,7 @@ export async function generateAssessmentMeta(content: string): Promise<Assessmen
   try {
     const res = await fetch('/api/summarize-title', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: await authenticatedHeaders(),
       body: JSON.stringify({ content }),
     });
 

@@ -80,7 +80,10 @@ EMOS (Enterprise Modernization Operating System)
 │   [Future Scope: Portfolio-wide Value vs. Complexity Prioritization]
 │
 ├── Plan
-│   [Future Scope: Automated Dependency-Aware Migration Wave Planning]
+│   Deterministic, Evidence-Gated Modernization Wave Planning
+│
+├── Mobilize
+│   Program Alignment, Readiness Controls & Executive Decision Export
 │
 ├── Define Target State
 │   [Future Scope: Target Architecture Decomposition & Blueprinting]
@@ -113,7 +116,10 @@ EMOS (Enterprise Modernization Operating System)
 | **Risk Identification** | Basic implemented capability (DNA risk factors) | Autonomous Risk & Governance Agent |
 | **Governance / Approval** | Future | HITL governed workflow & ARB approval gates |
 | **Portfolio Prioritization** | Future | Autonomous Portfolio Intelligence |
-| **Wave Planning** | Future | Automated migration wave planning |
+| **Program Alignment** | Implemented (owner-isolated program context) | Policy hierarchy and multi-stakeholder approvals |
+| **Wave Planning** | Implemented (deterministic preliminary sequencing) | Live dependency graph and capacity-aware optimization |
+| **Mobilization Readiness** | Implemented (governance, people, platform, security, delivery gates) | Workflow automation across delivery organizations |
+| **Executive Decision Export** | Implemented (portable HTML decision pack) | Signed PDF, evidence lineage, and portfolio BI feeds |
 | **Target-State Architecture** | Future | Autonomous Enterprise Architect Agent |
 | **Execution** | Future | Disposition-specific governed agents & workflows |
 | **Validation** | Future | Autonomous Validation Agents & parity verification |
@@ -165,10 +171,10 @@ In the EMOS operating philosophy, the modernization disposition is a **routing d
 
 ## The Implemented Capability: EMOS Decision Intelligence
 
-The current Ideathon release proves a production-deployed vertical slice of EMOS focused on **modernization Decision Intelligence**:
+The current release proves a production-minded vertical slice of EMOS spanning **modernization Decision Intelligence through mobilization readiness**:
 
 ```
-Discover  ➔  Understand  ➔  Assess  ➔  Decide  ➔  Explain  ➔  Establish Trust  ➔  Identify Risk
+Align  ➔  Discover  ➔  Understand  ➔  Assess  ➔  Decide  ➔  Plan  ➔  Mobilize
 ```
 
 More specifically:
@@ -367,8 +373,10 @@ In enterprise modernization, inventory data is almost never complete. Unlike rig
 Uploaded CSV and JSON files represent untrusted external input and are defended with strict security controls:
 1. **Zero Execution & Safe Parsing**: Files are parsed in memory using regex-based CSV scanning and guarded JSON deserialization. No dynamic scripts, macros, or `eval()` constructs are ever executed.
 2. **Spreadsheet & Formula Injection Protection**: Any value starting with formula trigger characters (`=`, `+`, `-`, `@`, `\t`, `\r`) is automatically sanitized by prepending a safe apostrophe (`'`), preventing formula execution if exported into spreadsheet viewers.
-3. **Payload Thresholds**: File uploads are capped at a maximum of 5MB and a maximum of 500 records per file to eliminate memory exhaustion or denial-of-service risks.
+3. **Payload Thresholds**: Files above 5MB and CSV/JSON portfolios above 200 workload records are rejected before import to reduce memory-exhaustion and denial-of-service risk. Oversized portfolios are never partially imported, and the UI, parsers, tests, and documentation use the same canonical limits.
 4. **Owner-Bound Subcollection**: Successfully imported workloads are sanitized of `undefined` fields and stored under the authenticated user's private path `/users/{userId}/importedWorkloads/{workloadId}` governed by Firestore security rules.
+
+AI requests use the same authenticated boundary: `/api/chat` and `/api/summarize-title` reject anonymous or expired sessions, and the server verifies the Firebase ID token signature, project audience, issuer, and subject before invoking Gemini. The browser never sends the Gemini API key.
 
 ### 4. Downloadable Enterprise Benchmark Datasets (Canonical 6R Coverage)
 
@@ -647,7 +655,7 @@ The codebase includes verification across all critical paths (accessible interac
 - [x] **Automated Secret & Token Redaction**: Outbound payload scanning to neutralize accidental API keys, tokens, or credential leakage in model outputs.
 - [x] **Canonical 6R Repair & Enforcement**: Mathematical validation guaranteeing output conforms strictly to canonical 6R taxonomy (Retain, Retire, Rehost, Replatform, Refactor, Repurchase) and auto-repairs legacy or non-canonical terms like "Rebuild".
 - [x] **Deterministic DNA Grounding**: Server-side evidence scoring; Decision Readiness strictly enforced to `NEEDS EVIDENCE` whenever evidence completeness < 70% or critical dimensions are unmapped.
-- [x] **Formula Injection & Import Defense**: Neutralizes CSV formula triggers (`=`, `+`, `-`, `@`), enforces 5MB file boundaries, and limits record fields.
+- [x] **Formula Injection & Import Defense**: Neutralizes CSV formula triggers (`=`, `+`, `-`, `@`), enforces the 5MB file boundary, and rejects CSV/JSON portfolios above 200 workloads without partial ingestion.
 - [x] **Responsive Theming (Light, Dark, System)**: WCAG AA contrast compliance, system preference detection, and zero-flash persistence across devices.
 - [x] **Cloud Firestore Persistence**: Transactional save of assessments, multi-turn follow-ups, and user-isolated history & imported workloads.
 - [x] **Production Compilation**: Clean Vite build and esbuild backend bundle passing all strict TypeScript validations.
