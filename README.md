@@ -24,7 +24,7 @@ The current Decision Intelligence capability determines *what* should happen bas
 ## Live Demo
 
 - **Application**: [https://emos-modernization.ai.studio](https://emos-modernization.ai.studio)
-- **Narrated Demo Video**: [Watch the 4-minute EMOS Beta introduction](docs/demo/EMOS-Beta-Introduction.mp4)
+- **Demo Videos**: [Complete library on Google Drive](https://drive.google.com/drive/folders/1ONwIDuVpKqu3DJzmHgzrtYTeJaOUXqQ1?usp=drive_link) · [Narrated EMOS Beta introduction](docs/demo/EMOS-Beta-Introduction.mp4)
 - **Subtitles**: [WebVTT](docs/demo/EMOS-Beta-Introduction.vtt) · [SRT](docs/demo/EMOS-Beta-Introduction.srt)
 - **Repository**: [github.com/JEMathew/emos-modernization-gcp](https://github.com/JEMathew/emos-modernization-gcp)
 
