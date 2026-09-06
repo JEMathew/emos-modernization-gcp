@@ -28,7 +28,7 @@ The current Decision Intelligence capability determines *what* should happen bas
 - **Subtitles**: [WebVTT](docs/demo/EMOS-Beta-Introduction.vtt) · [SRT](docs/demo/EMOS-Beta-Introduction.srt)
 - **Repository**: [github.com/JEMathew/emos-modernization-gcp](https://github.com/JEMathew/emos-modernization-gcp)
 
-*The application is deployed on Google Cloud Run through Google AI Studio.*
+**Beta implementation:** EMOS is deployed on Google Cloud Run and built using Google AI Studio. It uses deterministic Enterprise DNA extraction, Gemini-powered explainable 6R decisions, evidence-gap analysis, modernization wave planning, server-side API protection, owner-isolated Cloud Firestore persistence, and Firebase Emulator-tested security controls.
 
 ---
 
@@ -421,6 +421,7 @@ Cloud Run / Express Backend
 - **Gemini**: Evidence-aware modernization reasoning, 6R disposition analysis, and confidence scoring.
 - **Google Cloud Run**: Managed container execution running the unified full-stack application.
 - **Secret Manager**: Production-grade isolation of `GEMINI_API_KEY` on the server runtime.
+- **Google AI Studio**: Agentic development environment used to build, iterate, test, and publish the EMOS beta.
 
 ---
 
@@ -498,13 +499,16 @@ The following capabilities represent the broader EMOS vision and are **strictly 
 
 ## Technology Stack
 
-- **Frontend**: React 18, TypeScript, Tailwind CSS, Lucide Icons, Vite
-- **Backend**: Node.js, Express, `@google/genai` TypeScript SDK
-- **AI Models**: Google Gemini (`gemini-3.6-flash` primary with multi-model fallback)
-- **Identity & Auth**: Firebase Authentication (Google Identity Services / Federated Google Sign-In)
-- **Database**: Cloud Firestore (NoSQL, real-time listeners, owner-bound security)
-- **Runtime**: Google Cloud Run (Containerized managed compute)
-- **Secrets**: Google Cloud Secret Manager
+- **AI-assisted development**: Google AI Studio for agentic application design, implementation, iteration, testing, and publishing
+- **Frontend**: React 18, TypeScript, Tailwind CSS, Lucide Icons, and Vite
+- **Backend and API security**: Node.js and Express with Firebase ID-token verification, request validation, response schemas, prompt-injection guardrails, and secret redaction
+- **AI and decision intelligence**: `@google/genai` with Google Gemini (`gemini-3.6-flash` primary and a resilient fallback ladder), deterministic Enterprise DNA completeness scoring, explainable canonical 6R assessment, and evidence-gap detection
+- **Identity and authentication**: Firebase Authentication with federated Google Sign-In, desktop popup handling, and same-origin mobile redirect support
+- **Data and multi-turn persistence**: Cloud Firestore with real-time listeners, owner-bound document paths, multi-turn history, imported workloads, and modernization-program context
+- **Planning and mobilization**: Deterministic modernization wave planning, readiness controls, and executive decision export
+- **Runtime**: Google Cloud Run managed container execution for the unified frontend and Express backend
+- **Secret integration**: Google Cloud Secret Manager-compatible Cloud Run injection for the server-only `GEMINI_API_KEY`; the key is never returned to the browser
+- **Testing and release controls**: Vitest, Supertest, Firebase Emulator Suite, Firestore owner-isolation tests, and a required GitHub Actions release gate
 
 ---
 

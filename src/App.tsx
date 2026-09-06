@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth } from './lib/firebase';
+import { auth, processRedirectResult, getFriendlyAuthErrorMessage } from './lib/firebase';
 import { LandingPage } from './components/LandingPage';
 import { Dashboard } from './components/Dashboard';
 import { TestWalkthroughModal } from './components/TestWalkthroughModal';
@@ -17,6 +17,7 @@ import { Sparkles } from 'lucide-react';
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
   const [currentPath, setCurrentPath] = useState<string>(() => {
     if (typeof window !== 'undefined') {
@@ -26,12 +27,29 @@ export default function App() {
   });
 
   useEffect(() => {
+    let isMounted = true;
+
+    // Process redirect result if arriving back from a mobile sign-in redirect
+    processRedirectResult()
+      .catch((error) => {
+        console.error("Auth redirect processing failed:", error);
+        if (isMounted) {
+          setAuthError(getFriendlyAuthErrorMessage(error));
+        }
+      });
+
+    // onAuthStateChanged is the authoritative and exclusive source for currentUser updates
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setIsAuthChecking(false);
+      if (isMounted) {
+        setCurrentUser(user);
+        setIsAuthChecking(false);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -104,6 +122,7 @@ export default function App() {
       <LandingPage
         onOpenWalkthrough={() => setIsWalkthroughOpen(true)}
         onNavigate={navigateTo}
+        initialAuthError={authError}
       />
     );
   };
