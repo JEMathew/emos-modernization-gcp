@@ -24,9 +24,12 @@ The current Decision Intelligence capability determines *what* should happen bas
 ## Live Demo
 
 - **Application**: [https://emos-modernization.ai.studio](https://emos-modernization.ai.studio)
+- **Learn EMOS**: [Public Beta v1.0 Learning Center](docs/LEARN.md) — product introduction and 19 task-based walkthroughs; no EMOS sign-in required
 - **Demo Videos**: [Complete library on Google Drive](https://drive.google.com/drive/folders/1ONwIDuVpKqu3DJzmHgzrtYTeJaOUXqQ1?usp=drive_link) · [Narrated EMOS Beta introduction](docs/demo/EMOS-Beta-Introduction.mp4)
 - **Subtitles**: [WebVTT](docs/demo/EMOS-Beta-Introduction.vtt) · [SRT](docs/demo/EMOS-Beta-Introduction.srt)
 - **Repository**: [github.com/JEMathew/emos-modernization-gcp](https://github.com/JEMathew/emos-modernization-gcp)
+
+[<img src="docs/learning/emos-learning-background.png" alt="Open the public EMOS Beta v1.0 Learning Center" width="760">](docs/LEARN.md)
 
 **Beta implementation:** EMOS is deployed on Google Cloud Run and built using Google AI Studio. It uses deterministic Enterprise DNA extraction, Gemini-powered explainable 6R decisions, evidence-gap analysis, modernization wave planning, server-side API protection, owner-isolated Cloud Firestore persistence, and Firebase Emulator-tested security controls.
 
