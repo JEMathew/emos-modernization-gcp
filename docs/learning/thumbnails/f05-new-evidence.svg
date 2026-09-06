@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">EMOS F05: Refine an Assessment with New Evidence</title>
+  <desc id="desc">EMOS Beta v1.0 learning video thumbnail in the DECISION INTELLIGENCE category.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06111f"/>
+      <stop offset="1" stop-color="#10234a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#a78bfa" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#93c5fd" stroke-opacity="0.08"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="720" rx="30" fill="url(#background)"/>
+  <rect width="1280" height="720" rx="30" fill="url(#grid)"/>
+  <circle cx="1050" cy="360" r="315" fill="url(#glow)"/>
+  <g fill="none" stroke="#a78bfa" stroke-linecap="round">
+    <path d="M874 132C1060 203 934 318 1118 390C1218 430 1192 536 1052 592" stroke-width="4" stroke-opacity="0.75"/>
+    <path d="M1010 104C1164 208 1008 302 1172 372" stroke-width="2" stroke-opacity="0.42"/>
+    <path d="M850 570C944 512 1021 527 1156 618" stroke-width="2" stroke-opacity="0.38"/>
+  </g>
+  <g fill="#a78bfa">
+    <circle cx="878" cy="132" r="9"/><circle cx="1118" cy="390" r="12"/>
+    <circle cx="1052" cy="592" r="8"/><circle cx="1172" cy="372" r="7"/>
+  </g>
+  <text x="78" y="92" fill="#a78bfa" font-family="Inter,Arial,sans-serif" font-size="27" font-weight="700" letter-spacing="3">EMOS • LEARNING CENTER</text>
+  <text x="78" y="202" fill="#a78bfa" font-family="Inter,Arial,sans-serif" font-size="44" font-weight="700">F05</text>
+  <text x="78" y="280" fill="#f8fafc" font-family="Inter,Arial,sans-serif" font-size="48" font-weight="700">Refine an Assessment</text>
+  <text x="78" y="342" fill="#f8fafc" font-family="Inter,Arial,sans-serif" font-size="48" font-weight="700">with New Evidence</text>
+  <rect x="78" y="586" width="390" height="52" rx="26" fill="#a78bfa" fill-opacity="0.14" stroke="#a78bfa" stroke-opacity="0.52"/>
+  <text x="104" y="620" fill="#a78bfa" font-family="Inter,Arial,sans-serif" font-size="20" font-weight="700" letter-spacing="1.5">DECISION INTELLIGENCE</text>
+  <text x="1092" y="650" fill="#cbd5e1" font-family="Inter,Arial,sans-serif" font-size="20" font-weight="600">BETA v1.0</text>
+</svg>
