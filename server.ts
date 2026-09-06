@@ -61,13 +61,108 @@ function getAuthTokenVerifier(): AuthTokenVerifier {
   };
 }
 
+export function getPublicFirebaseConfig(hostname?: string) {
+  const host = hostname?.toLowerCase().split(":")[0] || "";
+  let resolvedAuthDomain = firebaseConfig.authDomain;
+
+  if (
+    host === "emos-modernization.ai.studio" ||
+    (process.env.NODE_ENV === "production" && (!host || host.includes("emos-modernization.ai.studio")))
+  ) {
+    resolvedAuthDomain = "emos-modernization.ai.studio";
+  } else if (host === "localhost" || host === "127.0.0.1") {
+    resolvedAuthDomain = firebaseConfig.authDomain;
+  }
+
+  return {
+    apiKey: firebaseConfig.apiKey,
+    appId: firebaseConfig.appId,
+    authDomain: resolvedAuthDomain,
+    messagingSenderId: firebaseConfig.messagingSenderId,
+    projectId: firebaseConfig.projectId,
+    storageBucket: firebaseConfig.storageBucket,
+    firestoreDatabaseId: firebaseConfig.firestoreDatabaseId,
+    measurementId: firebaseConfig.measurementId || "",
+  };
+}
+
+// 1. Same-origin Firebase Auth Helper reverse proxy (registered BEFORE body parsers & catch-all)
+const FIREBASE_AUTH_UPSTREAM = "https://codev-0326.firebaseapp.com";
+
+app.use("/__/auth", async (req, res) => {
+  try {
+    const targetUrl = new URL(`/__/auth${req.url}`, FIREBASE_AUTH_UPSTREAM).toString();
+    const forwardedHeaders: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (!value) continue;
+      const lower = key.toLowerCase();
+      // Filter hop-by-hop headers
+      if (lower === "host" || lower === "connection" || lower === "content-length") continue;
+      forwardedHeaders[key] = Array.isArray(value) ? value.join(", ") : value;
+    }
+
+    forwardedHeaders["host"] = "codev-0326.firebaseapp.com";
+
+    const fetchOptions: RequestInit = {
+      method: req.method,
+      headers: forwardedHeaders,
+      redirect: "manual",
+    };
+
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      const chunks: Buffer[] = [];
+      for await (const chunk of req) {
+        chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+      }
+      if (chunks.length > 0) {
+        fetchOptions.body = Buffer.concat(chunks);
+      }
+    }
+
+    const upstreamResponse = await fetch(targetUrl, fetchOptions);
+
+    res.status(upstreamResponse.status);
+    upstreamResponse.headers.forEach((val, key) => {
+      const lower = key.toLowerCase();
+      // Remove hop-by-hop and decompression-invalidated headers from decompressed upstream response
+      if (
+        lower === "transfer-encoding" ||
+        lower === "content-encoding" ||
+        lower === "content-length" ||
+        lower === "connection"
+      ) {
+        return;
+      }
+      // Preserve content-type, location, cache-control, set-cookie, and required auth headers
+      res.setHeader(key, val);
+    });
+
+    const bodyBuffer = Buffer.from(await upstreamResponse.arrayBuffer());
+    // Recalculate accurate content-length for the decompressed response body
+    res.setHeader("Content-Length", bodyBuffer.length);
+    return res.send(bodyBuffer);
+  } catch (error: any) {
+    console.error("Firebase auth proxy error:", redactSecrets(error?.message || String(error)));
+    return res.status(502).json({ error: "Failed to connect to Firebase authentication helper." });
+  }
+});
+
+// 2. Public Firebase client configuration initialization endpoint (NO SECRETS)
+app.get("/__/firebase/init.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  const host = req.hostname || (req.headers.host ? req.headers.host.split(":")[0] : undefined);
+  return res.json(getPublicFirebaseConfig(host));
+});
+
 // Standard Top-Level Request Deserialization (Ordering Guarantee)
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use((_req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com; frame-src 'self' https://codev-0326.firebaseapp.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://lh3.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com; frame-src 'self' https://emos-modernization.ai.studio https://codev-0326.firebaseapp.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://lh3.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://codev-0326.firebaseapp.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
   );
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer");

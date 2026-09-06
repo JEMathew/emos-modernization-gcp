@@ -9,17 +9,22 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
-import { signInWithGoogle } from '../lib/firebase';
+import { signInWithGoogle, getFriendlyAuthErrorMessage } from '../lib/firebase';
 import { ThemeSelector } from './ThemeSelector';
 
 interface LandingPageProps {
   onOpenWalkthrough: () => void;
   onNavigate?: (path: string) => void;
+  initialAuthError?: string | null;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onNavigate }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({
+  onOpenWalkthrough,
+  onNavigate,
+  initialAuthError,
+}) => {
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(initialAuthError ?? null);
 
   const handleSignIn = async () => {
     try {
@@ -30,7 +35,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
       console.error("Sign in failed:", err);
       // Popup closed by user or standard web auth prompt
       if (err?.code !== 'auth/popup-closed-by-user') {
-        setAuthError(err?.message || "Failed to complete Google Sign-In. Please ensure popups are enabled and retry.");
+        setAuthError(getFriendlyAuthErrorMessage(err));
       }
     } finally {
       setIsSigningIn(false);
