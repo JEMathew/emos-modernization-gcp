@@ -1,0 +1,176 @@
+1
+00:00:00,550 --> 00:00:06,628
+Today, September sixth, twenty twenty-six, we are introducing the beta of EMOS:
+the Enterprise Modernization Operating System.
+
+2
+00:00:06,928 --> 00:00:11,237
+This release establishes a decision-intelligence foundation for continuous
+enterprise modernization.
+
+3
+00:00:12,758 --> 00:00:18,678
+Imagine a global aerospace and manufacturing enterprise, comparable in scale and
+complexity to industry leaders such as Boeing.
+
+4
+00:00:18,978 --> 00:00:28,518
+This is an illustrative scenario, not a claim about Boeing: more than five
+thousand internal and external digital products support engineering, factories,
+supply chains, employees, partners, and customers.
+
+5
+00:00:30,050 --> 00:00:35,797
+Over decades, critical products accumulate aging runtimes, databases,
+infrastructure, and undocumented dependencies.
+
+6
+00:00:36,097 --> 00:00:44,234
+Licensing and operating costs rise. Teams spend more time sustaining the estate,
+while new business initiatives wait for products that can no longer change safely
+or quickly.
+
+7
+00:00:45,758 --> 00:00:47,912
+The question is no longer whether to modernize.
+
+8
+00:00:48,212 --> 00:00:54,019
+When thousands of products need attention, how do you decide what to modernize,
+what to preserve, what to replace, and where to begin?
+
+9
+00:00:55,550 --> 00:01:04,699
+The complete journey begins with business intent, then discovers the estate,
+understands evidence, assesses options, makes governed decisions, plans investment
+and delivery waves, and mobilizes teams.
+
+10
+00:01:04,999 --> 00:01:14,391
+Execution, validation, benefit measurement, learning, and continuous reassessment
+complete the loop. Business, architecture, security, finance, and delivery each
+contribute evidence and decisions.
+
+11
+00:01:15,925 --> 00:01:21,898
+EMOS envisions one operating system connecting enterprise evidence, explainable
+modernization decisions, and program planning.
+
+12
+00:01:22,198 --> 00:01:28,252
+The aim is a shared, continuously improving view of every workload, the evidence
+behind each choice, and the governed journey that follows.
+
+13
+00:01:29,758 --> 00:01:38,888
+The beta implements a focused vertical slice from program alignment and portfolio
+discovery through Enterprise DNA, six-R assessment, explainable decisions, wave
+planning, and mobilization readiness.
+
+14
+00:01:39,188 --> 00:01:45,663
+It does not execute migrations, provision landing zones, staff delivery teams, or
+claim live CMDB and cloud-agent discovery.
+
+15
+00:01:47,175 --> 00:01:51,900
+Users can explore representative workloads or bring their own portfolio through
+CSV or JSON.
+
+16
+00:01:52,200 --> 00:02:00,103
+EMOS validates the inventory, protects against formula injection, shows valid and
+invalid rows, and converts incomplete fields into visible evidence gaps instead of
+hiding them.
+
+17
+00:02:01,633 --> 00:02:08,811
+For Customer Analytics, EMOS structures eighteen attributes across Business,
+Technology, Dependency, Economics, Data and Risk, and Target-State DNA.
+
+18
+00:02:09,111 --> 00:02:15,737
+Eleven attributes are verified, one is incomplete, and six are missing, producing
+a deterministic evidence-completeness score of sixty-one percent.
+
+19
+00:02:17,258 --> 00:02:25,204
+The structured evidence passes into the Gemini reasoning pipeline and the
+canonical six-R framework: Retain, Retire, Rehost, Replatform, Refactor, or
+Repurchase.
+
+20
+00:02:25,504 --> 00:02:36,280
+The result explains its recommendation, alternatives, risks, assumptions, evidence
+gaps, and next actions. Model confidence and deterministic completeness remain
+distinct, while readiness stays Needs Evidence when critical facts are missing.
+
+21
+00:02:37,800 --> 00:02:39,511
+A decision is not frozen in time.
+
+22
+00:02:39,811 --> 00:02:47,199
+Architects can add verified evidence, preserve the assessment history, and revisit
+the recommendation as dependencies, constraints, and enterprise standards become
+clearer.
+
+23
+00:02:48,717 --> 00:02:53,441
+Governed decisions then move into program alignment, deterministic wave planning,
+and mobilization readiness.
+
+24
+00:02:53,741 --> 00:03:02,948
+Sponsors, owners, outcomes, platform strategy, security, people, delivery, and
+open evidence gates remain visible. The Executive Pack turns that context into a
+portable decision artifact.
+
+25
+00:03:04,467 --> 00:03:10,951
+The beta uses a React and TypeScript experience with Tailwind CSS and Vite, backed
+by Node.js and Express on Google Cloud Run.
+
+26
+00:03:11,251 --> 00:03:24,903
+Firebase Authentication provides Google sign-in. Cloud Firestore stores owner-
+bound portfolios, assessments, conversations, and program context. Google Secret
+Manager protects server credentials. Gemini three point six Flash is the primary
+model, supported by a resilient fallback ladder.
+
+27
+00:03:26,425 --> 00:03:29,242
+This beta does not deploy autonomous agents or subagents.
+
+28
+00:03:29,542 --> 00:03:37,988
+It uses one governed Gemini decision pipeline with deterministic evidence scoring,
+prompt fencing, secret redaction, vendor-neutral reasoning, taxonomy enforcement,
+and readiness checks.
+
+29
+00:03:38,288 --> 00:03:48,473
+The roadmap proposes Google ADK specialist agents for risk and governance,
+business value, target architecture, wave planning, execution, and validation,
+with human approval gates and agent-to-agent interoperability.
+
+30
+00:03:50,008 --> 00:03:53,676
+Marketplace distribution is a planned direction, not a current listing or
+approval.
+
+31
+00:03:53,976 --> 00:04:02,167
+The intended path starts with Google Cloud Marketplace, then evaluates other
+hyperscaler marketplaces and relevant agentic-AI marketplaces as the product and
+governance model mature.
+
+32
+00:04:03,675 --> 00:04:08,400
+Modernization starts with knowing what you have, understanding what matters, and
+making decisions you can explain.
+
+33
+00:04:08,700 --> 00:04:15,782
+Explore the EMOS beta, inspect a workload's evidence, generate a recommendation,
+and help shape the operating system for continuous enterprise modernization.
