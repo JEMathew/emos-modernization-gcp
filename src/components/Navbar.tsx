@@ -40,7 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Enterprise Modernization Operating System
               </span>
               <span className="text-[10px] font-sans uppercase tracking-wider text-[var(--emos-accent)] font-medium px-2 py-0.5 rounded bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] hidden sm:inline">
-                Decision Intelligence
+                Enterprise Modernization
               </span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] text-[var(--emos-text-muted)]">
@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Desktop / Tablet Navigation: Portfolio, Decision Intelligence, Assessments */}
+        {/* Desktop / Tablet Navigation: Portfolio, 6R Recommendations, Assessments */}
         <nav className="hidden md:flex items-center gap-1 p-1 bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] rounded-xl">
           <button
             id="nav-tab-portfolio"
@@ -96,7 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
-            <span>Decision Intelligence</span>
+            <span>6R Recommendations</span>
           </button>
 
           <button
@@ -124,9 +124,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             id="walkthrough-btn"
             onClick={onOpenWalkthrough}
             className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:border-[var(--emos-border-strong)] text-xs font-medium transition-colors"
-            title="View Guided Tour & Validation"
+            title="Open Product Tour"
           >
-            Guide & Validation
+            Product Tour
           </button>
 
           <button
@@ -216,7 +216,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           }`}
         >
           <Sparkles className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
-          <span>Decision Intel</span>
+          <span>6R Review</span>
         </button>
 
         <button

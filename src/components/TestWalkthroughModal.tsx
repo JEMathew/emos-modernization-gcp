@@ -8,6 +8,8 @@ import {
   Sparkles,
   Route,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
   Code2,
 } from 'lucide-react';
 
@@ -24,41 +26,46 @@ interface TestCase {
   expectedResult: string;
 }
 
-const FIVE_MINUTE_TOUR_STEPS = [
+const PRODUCT_TOUR_STEPS = [
   {
     step: 1,
-    title: 'Explore a Sample Workload',
+    stage: 'Discover',
+    title: 'Choose a workload',
     icon: Layers,
-    description: 'Browse seeded enterprise workloads (e.g. Core Banking Modernization, Real-time Fraud Detection, Legacy EDW Pipeline) or import your application inventory via CSV.',
-    action: 'Select any workload card from the Portfolio view to inspect architectural scope.',
+    description: 'Start with a sample workload or import your own CSV or JSON portfolio.',
+    action: 'Open a workload card and scan its stack, dependencies, risk signals, and evidence score.',
   },
   {
     step: 2,
-    title: 'Review Enterprise DNA & Evidence Gaps',
+    stage: 'Understand',
+    title: 'Inspect Enterprise DNA',
     icon: Sparkles,
-    description: 'Inspect verified technical parameters across runtime stack, database dependencies, compliance tier, and criticality. Instantly see unverified parameters highlighted as missing evidence gaps.',
-    action: 'Click "View Enterprise DNA" on a workload to examine the evidence completeness baseline (e.g. 78% complete).',
+    description: 'See what the system knows and which architecture fields still need evidence.',
+    action: 'Select "View Enterprise DNA" and review the verified and missing attributes.',
   },
   {
     step: 3,
-    title: 'Generate or Inspect the 6R Recommendation',
+    stage: 'Assess',
+    title: 'Generate a 6R assessment',
     icon: ShieldCheck,
-    description: 'Request a Gemini modernization assessment grounded by Enterprise DNA evidence. The engine classifies the workload into one of six canonical dispositions: Retain, Retire, Rehost, Replatform, Refactor, or Repurchase.',
-    action: 'Click "Assess for Modernization" to trigger the server-side analysis with resilient model fallback.',
+    description: 'Use the structured evidence to produce a recommended Retain, Retire, Rehost, Replatform, Refactor, or Repurchase path.',
+    action: 'Select "Assess for Modernization" to request the recommendation.',
   },
   {
     step: 4,
-    title: 'Review Rationale, Risks, and Missing Evidence',
+    stage: 'Decide',
+    title: 'Review and refine',
     icon: ArrowRight,
-    description: 'Inspect structured decision outputs including executive rationale, viable secondary alternatives, critical risks, and missing evidence flags. Refine context using multi-turn conversational dialogue.',
-    action: 'Use the follow-up prompt bar to submit additional evidence and observe real-time rationale refinement.',
+    description: 'Compare the rationale, alternatives, risks, confidence, and evidence gaps.',
+    action: 'Add new evidence in the follow-up box and check how the recommendation changes.',
   },
   {
     step: 5,
-    title: 'Connect the Decision to Plan & Mobilize',
+    stage: 'Mobilize',
+    title: 'Build the mobilization plan',
     icon: Route,
-    description: 'Group assessed workloads into structured execution waves based on disposition, operational criticality, and evidence readiness. Export an executive decision briefing pack for stakeholders.',
-    action: 'Navigate to "Plan & Mobilize" to inspect portfolio wave distribution and export executive decision artifacts.',
+    description: 'Group assessed workloads into delivery waves based on business priority and readiness.',
+    action: 'Open "Plan & Mobilize" and export the executive briefing.',
   },
 ];
 
@@ -280,21 +287,22 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
 }) => {
   const [activeView, setActiveView] = useState<'tour' | 'technical'>('tour');
   const [technicalSubTab, setTechnicalSubTab] = useState<'tests' | 'rules'>('tests');
+  const [activeTourStep, setActiveTourStep] = useState(0);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-[var(--emos-surface-modal)] rounded-2xl border border-[var(--emos-border-subtle)] shadow-2xl w-full max-w-3xl max-h-[88vh] flex flex-col overflow-hidden text-[var(--emos-text-primary)]">
+      <div className="bg-[var(--emos-surface-modal)] rounded-2xl border border-[var(--emos-border-subtle)] shadow-2xl w-full max-w-4xl max-h-[88vh] flex flex-col overflow-hidden text-[var(--emos-text-primary)]">
         {/* Modal Header */}
         <div className="px-5 sm:px-6 py-4 border-b border-[var(--emos-border-subtle)] flex items-center justify-between bg-[var(--emos-bg-secondary)]">
           <div>
             <h3 className="font-serif font-medium text-[var(--emos-text-primary)] text-base flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-[var(--emos-accent)]" />
-              EMOS Guided Tour & Validation
+              EMOS Product Tour
             </h3>
             <p className="text-xs text-[var(--emos-text-secondary)] mt-0.5">
-              Interactive 5-minute product walkthrough, system architecture, and Firestore security rule validation.
+              Follow one workload from portfolio evidence to a modernization plan.
             </p>
           </div>
           <button
@@ -317,7 +325,7 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>5-Minute Guided Tour</span>
+            <span>Product Tour</span>
           </button>
           <button
             onClick={() => setActiveView('technical')}
@@ -328,55 +336,89 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
             }`}
           >
             <Code2 className="w-3.5 h-3.5" />
-            <span>Technical Validation</span>
+            <span>Technical Reference</span>
           </button>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {activeView === 'tour' ? (
-            /* View 1: 5-Minute Guided Tour */
-            <div className="space-y-4">
-              <div className="p-3.5 rounded-xl bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-xs text-[var(--emos-text-primary)]">
-                <p className="font-semibold text-[var(--emos-accent-text)]">Judge & Enterprise Evaluator Path:</p>
-                <p className="text-[var(--emos-text-secondary)] mt-0.5">
-                  Follow these 5 steps to complete a comprehensive modernization assessment cycle from estate discovery to executive wave mobilization in under 5 minutes.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                {FIVE_MINUTE_TOUR_STEPS.map((stepItem) => {
+            /* View 1: Product Tour */
+            <div className="space-y-5">
+              <div className="grid grid-cols-5 gap-1.5 sm:gap-2" aria-label="Product tour stages">
+                {PRODUCT_TOUR_STEPS.map((stepItem, index) => {
                   const IconComp = stepItem.icon;
+                  const isActive = index === activeTourStep;
+                  const isComplete = index < activeTourStep;
                   return (
-                    <div
+                    <button
                       key={stepItem.step}
-                      className="p-4 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] space-y-2 text-left"
+                      onClick={() => setActiveTourStep(index)}
+                      aria-label={`Step ${stepItem.step}: ${stepItem.stage}`}
+                      className={`rounded-xl border px-2 py-3 flex flex-col items-center gap-1.5 transition-colors cursor-pointer ${
+                        isActive
+                          ? 'bg-[var(--emos-accent-subtle)] border-[var(--emos-accent-border)] text-[var(--emos-accent-text)]'
+                          : 'bg-[var(--emos-surface)] border-[var(--emos-border-subtle)] text-[var(--emos-text-muted)] hover:text-[var(--emos-text-secondary)]'
+                      }`}
                     >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-6 h-6 rounded-full bg-[#A88554] text-black font-mono font-bold text-xs flex items-center justify-center shrink-0">
-                          {stepItem.step}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <IconComp className="w-4 h-4 text-[var(--emos-accent)] shrink-0" />
-                          <h4 className="text-xs sm:text-sm font-semibold text-[var(--emos-text-primary)]">
-                            {stepItem.title}
-                          </h4>
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-[var(--emos-text-secondary)] leading-relaxed pl-8">
-                        {stepItem.description}
-                      </p>
-
-                      <div className="ml-8 p-2.5 rounded-lg bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] flex items-start gap-2 text-xs">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[var(--emos-accent)] shrink-0 mt-0.5" />
-                        <span className="text-[var(--emos-text-primary)] font-medium">
-                          Suggested Action: <span className="font-normal text-[var(--emos-text-secondary)]">{stepItem.action}</span>
-                        </span>
-                      </div>
-                    </div>
+                      <span className={`w-8 h-8 rounded-full flex items-center justify-center ${isActive || isComplete ? 'bg-[#A88554] text-black' : 'bg-[var(--emos-bg-tertiary)] text-[var(--emos-text-muted)]'}`}>
+                        {isComplete ? <CheckCircle2 className="w-4 h-4" /> : <IconComp className="w-4 h-4" />}
+                      </span>
+                      <span className="text-[10px] sm:text-xs font-semibold">{stepItem.stage}</span>
+                    </button>
                   );
                 })}
+              </div>
+
+              {(() => {
+                const stepItem = PRODUCT_TOUR_STEPS[activeTourStep];
+                const IconComp = stepItem.icon;
+                return (
+                  <div className="min-h-[260px] rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5 sm:p-7 flex flex-col justify-between text-left">
+                    <div>
+                      <div className="flex items-center gap-3 mb-5">
+                        <span className="w-12 h-12 rounded-2xl bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] flex items-center justify-center text-[var(--emos-accent)]">
+                          <IconComp className="w-6 h-6" />
+                        </span>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--emos-accent-text)] font-semibold">Step {stepItem.step} of {PRODUCT_TOUR_STEPS.length}</p>
+                          <h4 className="font-serif text-xl sm:text-2xl font-semibold text-[var(--emos-text-primary)] mt-1">{stepItem.title}</h4>
+                        </div>
+                      </div>
+                      <p className="text-sm sm:text-base text-[var(--emos-text-secondary)] leading-relaxed max-w-2xl">{stepItem.description}</p>
+                    </div>
+
+                    <div className="mt-6 p-4 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] flex items-start gap-3">
+                      <ArrowRight className="w-4 h-4 text-[var(--emos-accent)] shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-[var(--emos-text-muted)] font-semibold">Try it in EMOS</p>
+                        <p className="text-sm text-[var(--emos-text-primary)] mt-1">{stepItem.action}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  onClick={() => setActiveTourStep((current) => Math.max(0, current - 1))}
+                  disabled={activeTourStep === 0}
+                  className="px-4 py-2 rounded-xl border border-[var(--emos-border-subtle)] text-xs font-semibold flex items-center gap-1.5 disabled:opacity-35 disabled:cursor-not-allowed hover:bg-[var(--emos-surface-hover)] transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Previous
+                </button>
+                <div className="flex items-center gap-1.5" aria-label={`Tour progress: step ${activeTourStep + 1} of ${PRODUCT_TOUR_STEPS.length}`}>
+                  {PRODUCT_TOUR_STEPS.map((stepItem, index) => (
+                    <span key={stepItem.step} className={`h-1.5 rounded-full transition-all ${index === activeTourStep ? 'w-6 bg-[var(--emos-accent)]' : 'w-1.5 bg-[var(--emos-border-strong)]'}`} />
+                  ))}
+                </div>
+                <button
+                  onClick={() => setActiveTourStep((current) => Math.min(PRODUCT_TOUR_STEPS.length - 1, current + 1))}
+                  disabled={activeTourStep === PRODUCT_TOUR_STEPS.length - 1}
+                  className="px-4 py-2 rounded-xl bg-[#A88554] hover:bg-[#BCA075] text-black text-xs font-semibold flex items-center gap-1.5 disabled:opacity-35 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next step <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
           ) : (

@@ -55,7 +55,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
                   Enterprise Modernization Operating System
                 </span>
                 <span className="text-[10px] font-sans uppercase tracking-wider text-[var(--emos-accent-text)] font-medium px-2 py-0.5 rounded bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] hidden sm:inline">
-                  Decision Intelligence
+                  Enterprise Modernization
                 </span>
               </div>
             </div>
@@ -64,13 +64,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
           <div className="flex items-center gap-2.5 sm:gap-3">
             <ThemeSelector />
 
-            <button
-              id="landing-walkthrough-nav-btn"
-              onClick={onOpenWalkthrough}
-              className="text-xs font-medium text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] transition-colors cursor-pointer hidden sm:inline-flex min-h-[34px] items-center"
-            >
-              5-Minute Tour
-            </button>
             <button
               id="landing-header-signin-btn"
               onClick={handleSignIn}
@@ -88,7 +81,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
         <div className="text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] text-xs font-medium">
             <Sparkles className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
-            <span>Ideathon Release: Decision Intelligence • Enterprise Modernization Operating System</span>
+            <span>Public Beta • Enterprise Modernization Operating System</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-[var(--emos-text-primary)] max-w-3xl mx-auto leading-tight">
@@ -141,7 +134,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
               onClick={onOpenWalkthrough}
               className="w-full sm:w-auto px-5 py-3.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-[var(--emos-text-primary)] text-sm font-medium transition-colors cursor-pointer min-h-[44px]"
             >
-              View Guided Tour
+              Explore Product Tour
             </button>
           </div>
 
@@ -209,7 +202,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
             <span className="font-serif font-semibold text-[var(--emos-text-primary)]">EMOS</span>
             <span>—</span>
             <span>Enterprise Modernization Operating System</span>
-            <span className="hidden md:inline">• Ideathon Demonstration</span>
+            <span className="hidden md:inline">• Public Beta</span>
           </div>
           <div className="flex items-center gap-6">
             <a

@@ -187,8 +187,9 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     renderWithTheme(<LandingPage onOpenWalkthrough={onOpenWalkthrough} onNavigate={vi.fn()} />);
 
     // Required user-facing copy
-    expect(screen.getByRole('button', { name: /5-Minute Tour/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /View Guided Tour/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Explore Product Tour/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/Public Beta/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Enterprise Modernization/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Evidence-Grounded 6R Recommendations/i)).toBeInTheDocument();
     expect(screen.getByText(/User-Isolated Storage/i)).toBeInTheDocument();
     expect(screen.getByText(/User-Isolated Data Access/i)).toBeInTheDocument();
@@ -204,16 +205,17 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.queryByText(/Never turns weak evidence/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/zero password storage/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/ensuring enterprise-grade credential management/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ideathon Release/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Decision Intelligence/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /5-Minute Tour/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /View Guided Tour/i })).not.toBeInTheDocument();
 
-    // Walkthrough triggers from header and hero buttons
-    fireEvent.click(screen.getByRole('button', { name: /5-Minute Tour/i }));
+    // The single product-tour entry point triggers the walkthrough.
+    fireEvent.click(screen.getByRole('button', { name: /Explore Product Tour/i }));
     expect(onOpenWalkthrough).toHaveBeenCalledTimes(1);
-
-    fireEvent.click(screen.getByRole('button', { name: /View Guided Tour/i }));
-    expect(onOpenWalkthrough).toHaveBeenCalledTimes(2);
   });
 
-  it('renders Guide & Validation in authenticated navigation and triggers walkthrough', () => {
+  it('renders Product Tour in authenticated navigation and triggers walkthrough', () => {
     const onOpenWalkthrough = vi.fn();
     renderWithTheme(
       <Navbar
@@ -226,32 +228,35 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
       />
     );
 
-    const guideBtn = screen.getByRole('button', { name: /Guide & Validation/i });
+    const guideBtn = screen.getByRole('button', { name: /Product Tour/i });
     expect(guideBtn).toBeInTheDocument();
+    expect(screen.getByText(/6R Recommendations/i)).toBeInTheDocument();
     expect(screen.queryByText(/Verification & Test Guide/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Guide & Validation/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Decision Intelligence/i)).not.toBeInTheDocument();
 
     fireEvent.click(guideBtn);
     expect(onOpenWalkthrough).toHaveBeenCalledTimes(1);
   });
 
-  it('renders EMOS Guided Tour & Validation modal with 5-Minute Guided Tour and Technical Validation views', () => {
+  it('renders the focused EMOS Product Tour and progressively disclosed Technical Reference', () => {
     const onClose = vi.fn();
     renderWithTheme(<TestWalkthroughModal isOpen={true} onClose={onClose} />);
 
     // Title and view tabs
-    expect(screen.getByRole('heading', { name: /EMOS Guided Tour & Validation/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /5-Minute Guided Tour/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Technical Validation/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /EMOS Product Tour/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Product Tour$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Technical Reference/i })).toBeInTheDocument();
 
-    // Default view: 5-Minute Guided Tour steps
-    expect(screen.getByText(/Explore a Sample Workload/i)).toBeInTheDocument();
-    expect(screen.getByText(/Review Enterprise DNA & Evidence Gaps/i)).toBeInTheDocument();
-    expect(screen.getByText(/Generate or Inspect the 6R Recommendation/i)).toBeInTheDocument();
-    expect(screen.getByText(/Review Rationale, Risks, and Missing Evidence/i)).toBeInTheDocument();
-    expect(screen.getByText(/Connect the Decision to Plan & Mobilize/i)).toBeInTheDocument();
+    // Default view: one focused step rather than a text-heavy list.
+    expect(screen.getByText(/Choose a workload/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Inspect Enterprise DNA/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Next step/i }));
+    expect(screen.getByText(/Inspect Enterprise DNA/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Choose a workload/i)).not.toBeInTheDocument();
 
-    // Switch to Technical Validation
-    fireEvent.click(screen.getByRole('button', { name: /Technical Validation/i }));
+    // Switch to Technical Reference
+    fireEvent.click(screen.getByRole('button', { name: /Technical Reference/i }));
     expect(screen.getByRole('button', { name: /Automated & Functional Test Scenarios/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Firestore Security Rules & Proof/i })).toBeInTheDocument();
     expect(screen.queryByText(/zero executable risk/i)).not.toBeInTheDocument();
