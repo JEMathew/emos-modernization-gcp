@@ -200,7 +200,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
           {saveStatus === 'idle' && (
             <span className="text-[var(--emos-text-muted)] text-[11px] uppercase tracking-wider flex items-center gap-1.5 truncate">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-              EMOS Decision Intelligence • Canonical 6R Modernization Engine
+              EMOS Modernization Assessment • Canonical 6R Engine
             </span>
           )}
         </div>
@@ -403,7 +403,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--emos-accent)] font-semibold">
-                  EMOS Decision Intelligence
+                  EMOS Modernization Assessment
                 </span>
                 <div className="h-[1px] flex-1 bg-[var(--emos-accent-border)]" />
                 <button
@@ -524,7 +524,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[11px] text-[var(--emos-accent)] font-medium mb-1">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>EMOS Decision Intelligence • Enterprise Modernization Operating System</span>
+                <span>EMOS Modernization Workspace • Enterprise Modernization Operating System</span>
               </div>
               <h2 className="text-2xl sm:text-4xl font-serif text-[var(--emos-text-primary)] tracking-tight">
                 What workload would you like to assess?
