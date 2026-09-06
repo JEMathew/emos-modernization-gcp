@@ -69,7 +69,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
               onClick={onOpenWalkthrough}
               className="text-xs font-medium text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] transition-colors cursor-pointer hidden sm:inline-flex min-h-[34px] items-center"
             >
-              Test Scenarios
+              5-Minute Tour
             </button>
             <button
               id="landing-header-signin-btn"
@@ -96,7 +96,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
           </h1>
 
           <p className="text-sm sm:text-base lg:text-lg text-[var(--emos-text-secondary)] max-w-2xl mx-auto font-normal leading-relaxed">
-            Continuous modernization from intelligence to governed action to measurable outcomes. Assess enterprise workloads across canonical 6R dispositions (Retain, Retire, Rehost, Replatform, Refactor, Repurchase) grounded in deterministic Enterprise DNA evidence completeness.
+            Continuous modernization from intelligence to governed action to measurable outcomes. Assess enterprise workloads across canonical 6R dispositions (Retain, Retire, Rehost, Replatform, Refactor, Repurchase) based on structured Enterprise DNA evidence and clearly identified gaps.
           </p>
 
           {authError && (
@@ -141,16 +141,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
               onClick={onOpenWalkthrough}
               className="w-full sm:w-auto px-5 py-3.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-[var(--emos-text-primary)] text-sm font-medium transition-colors cursor-pointer min-h-[44px]"
             >
-              Architecture & Tests
+              View Guided Tour
             </button>
           </div>
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-[var(--emos-text-muted)]">
             <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> Canonical 6R Decisions
+              <CheckCircle2 className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> Evidence-Grounded 6R Recommendations
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> Owner-Locked Firestore
+              <CheckCircle2 className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> User-Isolated Storage
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> Multi-Turn Evidence Continuity
@@ -174,9 +174,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
             <div className="w-10 h-10 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] flex items-center justify-center text-[var(--emos-accent)]">
               <Lock className="w-5 h-5 text-[var(--emos-accent)]" />
             </div>
-            <h3 className="font-serif text-[var(--emos-text-primary)] text-base font-semibold">Zero Cross-Tenant Leakage</h3>
+            <h3 className="font-serif text-[var(--emos-text-primary)] text-base font-semibold">User-Isolated Data Access</h3>
             <p className="text-[var(--emos-text-secondary)] text-xs leading-relaxed">
-              Strict Attribute-Based Access Control (ABAC) in Cloud Firestore guarantees that enterprise assessments are locked to <code className="bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] px-1 py-0.5 rounded text-[11px]">/users/&#123;uid&#125;</code>.
+              Firestore security rules restrict database reads and writes to records associated with the authenticated user ID.
             </p>
           </div>
 
@@ -186,7 +186,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
             </div>
             <h3 className="font-serif text-[var(--emos-text-primary)] text-base font-semibold">Evidence & Risk Discovery</h3>
             <p className="text-[var(--emos-text-secondary)] text-xs leading-relaxed">
-              Never turns weak evidence into falsely confident advice. Identifies critical missing data, dependency risks, and evaluates decision readiness.
+              Highlights weak evidence instead of treating it as high-confidence support. Identifies critical missing data, dependency risks, and evaluates decision readiness.
             </p>
           </div>
         </div>
@@ -196,16 +196,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
           <div className="flex items-center gap-3">
             <ShieldCheck className="w-6 h-6 text-[var(--emos-accent)] shrink-0" />
             <div className="text-xs text-[var(--emos-text-secondary)]">
-              <span className="font-medium text-[var(--emos-text-primary)]">Federated Identity Governance:</span> Employs Google Sign-In with zero password storage in application code, ensuring enterprise-grade credential management.
+              <span className="font-medium text-[var(--emos-text-primary)]">Federated Identity Governance:</span> Uses Google Sign-In so account passwords are handled by Google and Firebase Authentication rather than collected by EMOS application code.
             </div>
           </div>
-          <button
-            id="test-guide-link"
-            onClick={onOpenWalkthrough}
-            className="text-xs font-semibold text-[var(--emos-accent)] underline underline-offset-4 hover:text-[var(--emos-accent-text)] shrink-0 cursor-pointer"
-          >
-            Review Security Test Specs →
-          </button>
         </div>
       </main>
 

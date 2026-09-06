@@ -7,6 +7,8 @@ import { ThemeProvider } from '../src/lib/theme';
 import { PrivacyPolicyPage } from '../src/components/PrivacyPolicyPage';
 import { TermsPage } from '../src/components/TermsPage';
 import { LandingPage } from '../src/components/LandingPage';
+import { Navbar } from '../src/components/Navbar';
+import { TestWalkthroughModal } from '../src/components/TestWalkthroughModal';
 import App from '../src/App';
 
 function renderWithTheme(ui: React.ReactElement) {
@@ -178,5 +180,92 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Return to Home/i }));
     expect(document.title).toBe('EMOS — Enterprise Modernization Operating System');
+  });
+
+  it('renders updated user-facing product copy and excludes absolute or ungrounded claims on the Landing Page', () => {
+    const onOpenWalkthrough = vi.fn();
+    renderWithTheme(<LandingPage onOpenWalkthrough={onOpenWalkthrough} onNavigate={vi.fn()} />);
+
+    // Required user-facing copy
+    expect(screen.getByRole('button', { name: /5-Minute Tour/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /View Guided Tour/i })).toBeInTheDocument();
+    expect(screen.getByText(/Evidence-Grounded 6R Recommendations/i)).toBeInTheDocument();
+    expect(screen.getByText(/User-Isolated Storage/i)).toBeInTheDocument();
+    expect(screen.getByText(/User-Isolated Data Access/i)).toBeInTheDocument();
+    expect(screen.getByText(/Firestore security rules restrict database reads and writes to records associated with the authenticated user ID\./i)).toBeInTheDocument();
+    expect(screen.getByText(/based on structured Enterprise DNA evidence and clearly identified gaps\./i)).toBeInTheDocument();
+
+    // Absolute claims must be absent
+    expect(screen.queryByText(/Zero Cross-Tenant Leakage/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Owner-Locked Firestore/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Test Scenarios/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Architecture & Tests/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Review Security Test Specs/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Never turns weak evidence/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/zero password storage/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ensuring enterprise-grade credential management/i)).not.toBeInTheDocument();
+
+    // Walkthrough triggers from header and hero buttons
+    fireEvent.click(screen.getByRole('button', { name: /5-Minute Tour/i }));
+    expect(onOpenWalkthrough).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: /View Guided Tour/i }));
+    expect(onOpenWalkthrough).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders Guide & Validation in authenticated navigation and triggers walkthrough', () => {
+    const onOpenWalkthrough = vi.fn();
+    renderWithTheme(
+      <Navbar
+        user={{ uid: 'test-user', email: 'test@example.com' } as any}
+        currentView="portfolio"
+        onNavigate={vi.fn()}
+        onNewAssessment={vi.fn()}
+        onOpenWalkthrough={onOpenWalkthrough}
+        assessmentCount={3}
+      />
+    );
+
+    const guideBtn = screen.getByRole('button', { name: /Guide & Validation/i });
+    expect(guideBtn).toBeInTheDocument();
+    expect(screen.queryByText(/Verification & Test Guide/i)).not.toBeInTheDocument();
+
+    fireEvent.click(guideBtn);
+    expect(onOpenWalkthrough).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders EMOS Guided Tour & Validation modal with 5-Minute Guided Tour and Technical Validation views', () => {
+    const onClose = vi.fn();
+    renderWithTheme(<TestWalkthroughModal isOpen={true} onClose={onClose} />);
+
+    // Title and view tabs
+    expect(screen.getByRole('heading', { name: /EMOS Guided Tour & Validation/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /5-Minute Guided Tour/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Technical Validation/i })).toBeInTheDocument();
+
+    // Default view: 5-Minute Guided Tour steps
+    expect(screen.getByText(/Explore a Sample Workload/i)).toBeInTheDocument();
+    expect(screen.getByText(/Review Enterprise DNA & Evidence Gaps/i)).toBeInTheDocument();
+    expect(screen.getByText(/Generate or Inspect the 6R Recommendation/i)).toBeInTheDocument();
+    expect(screen.getByText(/Review Rationale, Risks, and Missing Evidence/i)).toBeInTheDocument();
+    expect(screen.getByText(/Connect the Decision to Plan & Mobilize/i)).toBeInTheDocument();
+
+    // Switch to Technical Validation
+    fireEvent.click(screen.getByRole('button', { name: /Technical Validation/i }));
+    expect(screen.getByRole('button', { name: /Automated & Functional Test Scenarios/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Firestore Security Rules & Proof/i })).toBeInTheDocument();
+    expect(screen.queryByText(/zero executable risk/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/zero prompt injection bypass/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/zero layout shifting/i)).not.toBeInTheDocument();
+
+    // Switch to security rules tab
+    fireEvent.click(screen.getByRole('button', { name: /Firestore Security Rules & Proof/i }));
+    expect(screen.getByText(/Owner-Bound Access Control/i)).toBeInTheDocument();
+    expect(screen.getByText(/Firestore security rules reject attempts to access document paths that do not match the authenticated user ID\./i)).toBeInTheDocument();
+
+    // Absolute guarantee language must be absent
+    expect(screen.queryByText(/Owner-Bound Isolation Guarantee/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/guarantee/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/zero insecure defaults/i)).not.toBeInTheDocument();
   });
 });

@@ -4,6 +4,11 @@ import {
   CheckCircle2,
   ShieldCheck,
   Lock,
+  Layers,
+  Sparkles,
+  Route,
+  ArrowRight,
+  Code2,
 } from 'lucide-react';
 
 interface TestWalkthroughModalProps {
@@ -19,6 +24,44 @@ interface TestCase {
   expectedResult: string;
 }
 
+const FIVE_MINUTE_TOUR_STEPS = [
+  {
+    step: 1,
+    title: 'Explore a Sample Workload',
+    icon: Layers,
+    description: 'Browse seeded enterprise workloads (e.g. Core Banking Modernization, Real-time Fraud Detection, Legacy EDW Pipeline) or import your application inventory via CSV.',
+    action: 'Select any workload card from the Portfolio view to inspect architectural scope.',
+  },
+  {
+    step: 2,
+    title: 'Review Enterprise DNA & Evidence Gaps',
+    icon: Sparkles,
+    description: 'Inspect verified technical parameters across runtime stack, database dependencies, compliance tier, and criticality. Instantly see unverified parameters highlighted as missing evidence gaps.',
+    action: 'Click "View Enterprise DNA" on a workload to examine the evidence completeness baseline (e.g. 78% complete).',
+  },
+  {
+    step: 3,
+    title: 'Generate or Inspect the 6R Recommendation',
+    icon: ShieldCheck,
+    description: 'Request a Gemini modernization assessment grounded by Enterprise DNA evidence. The engine classifies the workload into one of six canonical dispositions: Retain, Retire, Rehost, Replatform, Refactor, or Repurchase.',
+    action: 'Click "Assess for Modernization" to trigger the server-side analysis with resilient model fallback.',
+  },
+  {
+    step: 4,
+    title: 'Review Rationale, Risks, and Missing Evidence',
+    icon: ArrowRight,
+    description: 'Inspect structured decision outputs including executive rationale, viable secondary alternatives, critical risks, and missing evidence flags. Refine context using multi-turn conversational dialogue.',
+    action: 'Use the follow-up prompt bar to submit additional evidence and observe real-time rationale refinement.',
+  },
+  {
+    step: 5,
+    title: 'Connect the Decision to Plan & Mobilize',
+    icon: Route,
+    description: 'Group assessed workloads into structured execution waves based on disposition, operational criticality, and evidence readiness. Export an executive decision briefing pack for stakeholders.',
+    action: 'Navigate to "Plan & Mobilize" to inspect portfolio wave distribution and export executive decision artifacts.',
+  },
+];
+
 const TEST_CASES: TestCase[] = [
   {
     id: 'TC-01',
@@ -30,7 +73,7 @@ const TEST_CASES: TestCase[] = [
       'Verify transition from Landing Page directly into your private EMOS Decision Dashboard.',
       'Check top-right header: your authenticated identity and avatar are rendered.',
     ],
-    expectedResult: 'User document successfully synchronized at /users/{auth.uid} with zero password storage.',
+    expectedResult: 'User document is synchronized at /users/{auth.uid}; Google Account passwords are not collected by EMOS application code.',
   },
   {
     id: 'TC-02',
@@ -113,7 +156,7 @@ const TEST_CASES: TestCase[] = [
       'Verify each header value is identical to the detailed assessment text (e.g. Confidence 55% in header matches Confidence Score: 55% in detailed text).',
       'Refresh the browser or switch between assessments to confirm persisted consistency across Cloud Firestore sessions.',
     ],
-    expectedResult: 'Single source of truth enforced: zero drift between header metrics, detailed assessment text, and Firestore storage.',
+    expectedResult: 'Header metrics, detailed assessment text, and Firestore storage show consistent recommendation metadata.',
   },
   {
     id: 'TC-09',
@@ -162,7 +205,7 @@ const TEST_CASES: TestCase[] = [
       'Verify preview displays: Total Workloads, Valid Count, Invalid Rows, and Evidence Gaps.',
       'Verify formula injection protection: any values starting with =, +, -, @ are safely escaped and neutralized.',
     ],
-    expectedResult: 'Robust validation ensures only well-formed, sanitized workloads are previewed with zero executable risk.',
+    expectedResult: 'Malformed files are rejected, and imported values are treated as data rather than executed as formulas or code.',
   },
   {
     id: 'TC-13',
@@ -173,7 +216,7 @@ const TEST_CASES: TestCase[] = [
       'Verify all 4 industry archetypes are available: Diversified Enterprise, Financial Services, Retail, and Manufacturing.',
       'Click "Download CSV" for any dataset (e.g., Financial Services) and inspect the downloaded file.',
       'Verify collective coverage across all 4 sample files includes candidates for all 6 canonical 6R dispositions (Retain, Retire, Rehost, Replatform, Refactor, Repurchase).',
-      'Verify evaluation metadata (expected_6r, expected_reason) is isolated and never passed into Gemini prompts.',
+      'Confirm evaluation metadata (expected_6r, expected_reason) is excluded from Gemini prompt payloads.',
     ],
     expectedResult: 'Instant 1-click download of realistic enterprise benchmark portfolios with complete 6R disposition coverage.',
   },
@@ -201,7 +244,7 @@ const TEST_CASES: TestCase[] = [
       'Click "System": verify adherence to OS color scheme preferences (prefers-color-scheme) and verify localStorage persistence on refresh.',
       'Resize viewport to mobile width (375px) and tablet width (768px): verify no horizontal scrollbars, responsive wrap on decision metrics, and mobile assessment drawer.',
     ],
-    expectedResult: 'Accessible, WCAG AA compliant theming with zero layout shifting or flash of unstyled content.',
+    expectedResult: 'Theme controls remain readable and visually stable across the tested desktop, tablet, and mobile viewports.',
   },
   {
     id: 'TC-16',
@@ -214,7 +257,7 @@ const TEST_CASES: TestCase[] = [
       'Verify the response focuses strictly on enterprise workload architecture and does not reveal instructions or secrets.',
       'Verify outbound token scanning ensures any accidental secret pattern (AIzaSy, Bearer tokens, private keys) is automatically redacted as [REDACTED_SECRET].',
     ],
-    expectedResult: 'Zero prompt injection bypass and active redaction of credentials in compliance with OWASP LLM01 and LLM02.',
+    expectedResult: 'Detected prompt-injection patterns are rejected, and credential-like strings are redacted before model calls.',
   },
   {
     id: 'TC-17',
@@ -235,7 +278,8 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState<'walkthrough' | 'rules'>('walkthrough');
+  const [activeView, setActiveView] = useState<'tour' | 'technical'>('tour');
+  const [technicalSubTab, setTechnicalSubTab] = useState<'tests' | 'rules'>('tests');
 
   if (!isOpen) return null;
 
@@ -247,10 +291,10 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
           <div>
             <h3 className="font-serif font-medium text-[var(--emos-text-primary)] text-base flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-[var(--emos-accent)]" />
-              Functional Stability & Verification Guide
+              EMOS Guided Tour & Validation
             </h3>
             <p className="text-xs text-[var(--emos-text-secondary)] mt-0.5">
-              Production test scenarios covering user flows, Gemini resilience, and Firestore ABAC rules.
+              Interactive 5-minute product walkthrough, system architecture, and Firestore security rule validation.
             </p>
           </div>
           <button
@@ -262,80 +306,154 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
           </button>
         </div>
 
-        {/* Tab Buttons */}
+        {/* Primary View Toggle */}
         <div className="px-5 sm:px-6 border-b border-[var(--emos-border-subtle)] flex gap-4 bg-[var(--emos-bg-tertiary)] text-xs">
           <button
-            onClick={() => setActiveTab('walkthrough')}
-            className={`py-3 font-medium border-b-2 transition-colors cursor-pointer ${
-              activeTab === 'walkthrough'
+            onClick={() => setActiveView('tour')}
+            className={`py-3 font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeView === 'tour'
                 ? 'border-[var(--emos-accent)] text-[var(--emos-accent-text)] font-semibold'
                 : 'border-transparent text-[var(--emos-text-muted)] hover:text-[var(--emos-text-secondary)]'
             }`}
           >
-            Test Cases & User Flow Walkthrough ({TEST_CASES.length})
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>5-Minute Guided Tour</span>
           </button>
           <button
-            onClick={() => setActiveTab('rules')}
-            className={`py-3 font-medium border-b-2 transition-colors cursor-pointer ${
-              activeTab === 'rules'
+            onClick={() => setActiveView('technical')}
+            className={`py-3 font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeView === 'technical'
                 ? 'border-[var(--emos-accent)] text-[var(--emos-accent-text)] font-semibold'
                 : 'border-transparent text-[var(--emos-text-muted)] hover:text-[var(--emos-text-secondary)]'
             }`}
           >
-            Active Firestore Security Rules
+            <Code2 className="w-3.5 h-3.5" />
+            <span>Technical Validation</span>
           </button>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-          {activeTab === 'walkthrough' ? (
+          {activeView === 'tour' ? (
+            /* View 1: 5-Minute Guided Tour */
             <div className="space-y-4">
-              {TEST_CASES.map((tc) => (
-                <div
-                  key={tc.id}
-                  className="p-4 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] space-y-2 text-left"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[11px] font-bold text-[var(--emos-accent-text)] bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] px-1.5 py-0.5 rounded">
-                        {tc.id}
-                      </span>
-                      <h4 className="text-xs font-semibold text-[var(--emos-text-primary)]">{tc.title}</h4>
-                    </div>
-                    <span className="text-[10px] font-medium text-[var(--emos-text-secondary)] bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] px-2 py-0.5 rounded-md whitespace-nowrap">
-                      {tc.category}
-                    </span>
-                  </div>
-
-                  <div className="text-xs text-[var(--emos-text-secondary)] pl-2 border-l-2 border-[var(--emos-border-strong)] space-y-1">
-                    <p className="font-medium text-[11px] text-[var(--emos-accent-text)] uppercase tracking-wider">Test Procedure:</p>
-                    <ol className="list-decimal list-inside space-y-0.5 text-[var(--emos-text-secondary)]">
-                      {tc.steps.map((step, sIdx) => (
-                        <li key={sIdx}>{step}</li>
-                      ))}
-                    </ol>
-                  </div>
-
-                  <div className="flex items-start gap-1.5 text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-lg">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
-                    <span>
-                      <strong className="font-medium text-[var(--emos-text-primary)]">Expected Result:</strong> {tc.expectedResult}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="text-xs text-[var(--emos-text-secondary)]">
-                The deployed <code className="bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] px-1 py-0.5 rounded font-mono">firestore.rules</code> enforce zero insecure defaults and lock all modernization assessment records to the authenticated owner's UID:
+              <div className="p-3.5 rounded-xl bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-xs text-[var(--emos-text-primary)]">
+                <p className="font-semibold text-[var(--emos-accent-text)]">Judge & Enterprise Evaluator Path:</p>
+                <p className="text-[var(--emos-text-secondary)] mt-0.5">
+                  Follow these 5 steps to complete a comprehensive modernization assessment cycle from estate discovery to executive wave mobilization in under 5 minutes.
+                </p>
               </div>
 
-              <pre className="p-4 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] text-xs font-mono overflow-x-auto leading-relaxed">
+              <div className="space-y-3">
+                {FIVE_MINUTE_TOUR_STEPS.map((stepItem) => {
+                  const IconComp = stepItem.icon;
+                  return (
+                    <div
+                      key={stepItem.step}
+                      className="p-4 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] space-y-2 text-left"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-6 h-6 rounded-full bg-[#A88554] text-black font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                          {stepItem.step}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <IconComp className="w-4 h-4 text-[var(--emos-accent)] shrink-0" />
+                          <h4 className="text-xs sm:text-sm font-semibold text-[var(--emos-text-primary)]">
+                            {stepItem.title}
+                          </h4>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-[var(--emos-text-secondary)] leading-relaxed pl-8">
+                        {stepItem.description}
+                      </p>
+
+                      <div className="ml-8 p-2.5 rounded-lg bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] flex items-start gap-2 text-xs">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[var(--emos-accent)] shrink-0 mt-0.5" />
+                        <span className="text-[var(--emos-text-primary)] font-medium">
+                          Suggested Action: <span className="font-normal text-[var(--emos-text-secondary)]">{stepItem.action}</span>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            /* View 2: Technical Validation (Progressive Disclosure) */
+            <div className="space-y-4">
+              {/* Secondary Sub-Tabs */}
+              <div className="flex gap-2 p-1 bg-[var(--emos-bg-tertiary)] rounded-xl border border-[var(--emos-border-subtle)] text-xs">
+                <button
+                  onClick={() => setTechnicalSubTab('tests')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg font-medium transition-colors cursor-pointer ${
+                    technicalSubTab === 'tests'
+                      ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] font-semibold shadow-xs'
+                      : 'text-[var(--emos-text-muted)] hover:text-[var(--emos-text-secondary)]'
+                  }`}
+                >
+                  Automated & Functional Test Scenarios ({TEST_CASES.length})
+                </button>
+                <button
+                  onClick={() => setTechnicalSubTab('rules')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg font-medium transition-colors cursor-pointer ${
+                    technicalSubTab === 'rules'
+                      ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] font-semibold shadow-xs'
+                      : 'text-[var(--emos-text-muted)] hover:text-[var(--emos-text-secondary)]'
+                  }`}
+                >
+                  Firestore Security Rules & Proof
+                </button>
+              </div>
+
+              {technicalSubTab === 'tests' ? (
+                <div className="space-y-3">
+                  {TEST_CASES.map((tc) => (
+                    <div
+                      key={tc.id}
+                      className="p-3.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] space-y-2 text-left"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[11px] font-bold text-[var(--emos-accent-text)] bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] px-1.5 py-0.5 rounded">
+                            {tc.id}
+                          </span>
+                          <h4 className="text-xs font-semibold text-[var(--emos-text-primary)]">{tc.title}</h4>
+                        </div>
+                        <span className="text-[10px] font-medium text-[var(--emos-text-secondary)] bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] px-2 py-0.5 rounded-md whitespace-nowrap">
+                          {tc.category}
+                        </span>
+                      </div>
+
+                      <div className="text-xs text-[var(--emos-text-secondary)] pl-2 border-l-2 border-[var(--emos-border-strong)] space-y-1">
+                        <p className="font-medium text-[11px] text-[var(--emos-accent-text)] uppercase tracking-wider">Test Procedure:</p>
+                        <ol className="list-decimal list-inside space-y-0.5 text-[var(--emos-text-secondary)]">
+                          {tc.steps.map((step, sIdx) => (
+                            <li key={sIdx}>{step}</li>
+                          ))}
+                        </ol>
+                      </div>
+
+                      <div className="flex items-start gap-1.5 text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-lg">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>
+                          <strong className="font-medium text-[var(--emos-text-primary)]">Expected Result:</strong> {tc.expectedResult}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="text-xs text-[var(--emos-text-secondary)]">
+                    The deployed <code className="bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] px-1 py-0.5 rounded font-mono">firestore.rules</code> use default-deny behavior for unmatched paths and restrict modernization assessment records by authenticated user ID:
+                  </div>
+
+                  <pre className="p-4 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] text-xs font-mono overflow-x-auto leading-relaxed">
 {`rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Zero insecure defaults: deny unmatched reads & writes
+    // Default deny: reject unmatched reads and writes
     match /{document=**} {
       allow read, write: if false;
     }
@@ -356,14 +474,16 @@ service cloud.firestore {
     }
   }
 }`}
-              </pre>
+                  </pre>
 
-              <div className="p-3.5 bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] rounded-xl text-xs text-[var(--emos-text-primary)] flex items-start gap-2">
-                <Lock className="w-4 h-4 shrink-0 text-[var(--emos-accent)] mt-0.5" />
-                <span>
-                  <strong>Owner-Bound Isolation Guarantee:</strong> Any attempt to query or update another user's path (e.g. <code>/users/otherUser/interactions</code>) is rejected immediately by the Firestore engine with <code>PERMISSION_DENIED</code>.
-                </span>
-              </div>
+                  <div className="p-3.5 bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] rounded-xl text-xs text-[var(--emos-text-primary)] flex items-start gap-2">
+                    <Lock className="w-4 h-4 shrink-0 text-[var(--emos-accent)] mt-0.5" />
+                    <span>
+                      <strong>Owner-Bound Access Control:</strong> Firestore security rules reject attempts to access document paths that do not match the authenticated user ID.
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

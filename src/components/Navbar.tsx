@@ -124,9 +124,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             id="walkthrough-btn"
             onClick={onOpenWalkthrough}
             className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:border-[var(--emos-border-strong)] text-xs font-medium transition-colors"
-            title="View Interactive Test Scenarios & Verification"
+            title="View Guided Tour & Validation"
           >
-            Verification & Test Guide
+            Guide & Validation
           </button>
 
           <button
