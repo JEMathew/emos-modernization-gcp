@@ -146,6 +146,7 @@ describe('/api/chat release contract', () => {
     expect(directives['script-src']).toContain('https://apis.google.com');
     expect(directives['frame-src']).toContain('https://codev-0326.firebaseapp.com');
     expect(directives['frame-src']).toContain('https://accounts.google.com');
+    expect(directives['frame-src']).toContain('https://drive.google.com');
     expect(directives['frame-src']).toContain("'self'");
 
     // script-src and frame-src do not contain wildcard '*'
