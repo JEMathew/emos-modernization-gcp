@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock3,
-  ExternalLink,
   Library,
   Map,
   Play,
@@ -15,7 +14,6 @@ import {
 import { LearningVideoModal } from './LearningVideoModal';
 import { ThemeSelector } from './ThemeSelector';
 import {
-  CANONICAL_DRIVE_LIBRARY_URL,
   CURRENT_BETA_CAPABILITIES,
   FUTURE_ROADMAP_CAPABILITIES,
   LEARNING_CATEGORIES,
@@ -135,17 +133,8 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <a
-                  href={CANONICAL_DRIVE_LIBRARY_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-5 text-sm font-bold text-black transition-opacity hover:opacity-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  Open complete video library
-                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
-                </a>
-                <a
                   href="#catalogue"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 text-sm font-semibold text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-5 text-sm font-bold text-black transition-opacity hover:opacity-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   Browse all 20 lessons
                 </a>

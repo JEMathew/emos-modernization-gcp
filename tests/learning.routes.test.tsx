@@ -6,7 +6,6 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import App from '../src/App';
 import { LearningCenterPage } from '../src/components/LearningCenterPage';
 import {
-  CANONICAL_DRIVE_LIBRARY_URL,
   LEARNING_CATEGORIES,
   LEARNING_VIDEOS,
 } from '../src/data/learningVideos';
@@ -124,14 +123,12 @@ describe('Public EMOS Learning Center (/learn)', () => {
     });
   });
 
-  it('provides in-portal playback actions and a secure canonical-library fallback', () => {
+  it('keeps users in the portal for catalogue browsing and playback', () => {
     renderLearningCenter();
 
     expect(screen.getAllByRole('button', { name: /Play .* in EMOS/i })).toHaveLength(20);
-    const libraryLink = screen.getByRole('link', { name: /Open complete video library/i });
-    expect(libraryLink).toHaveAttribute('href', CANONICAL_DRIVE_LIBRARY_URL);
-    expect(libraryLink).toHaveAttribute('target', '_blank');
-    expect(libraryLink).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(screen.queryByRole('link', { name: /Open complete video library/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Browse all 20 lessons/i })).toHaveAttribute('href', '#catalogue');
   });
 
   it('filters the catalogue by search text', () => {
