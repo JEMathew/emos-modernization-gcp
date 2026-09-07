@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, LogOut, Plus, ShieldCheck, Database, User as UserIcon, Layers, FileText, Route } from 'lucide-react';
+import { Sparkles, LogOut, Plus, ShieldCheck, Database, User as UserIcon, Layers, FileText, Route, Library } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { signOut } from '../lib/firebase';
 import { ThemeSelector } from './ThemeSelector';
@@ -120,6 +120,17 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Actions & User */}
         <div className="flex items-center gap-1.5 sm:gap-2.5">
+          <a
+            id="navbar-learning-center-link"
+            href="/learn"
+            aria-label="Open Learning Center"
+            title="Open Learning Center"
+            className="inline-flex min-h-[36px] min-w-[36px] items-center justify-center gap-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] px-2 text-xs font-medium text-[var(--emos-text-secondary)] transition-colors hover:text-[var(--emos-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)] xl:px-3"
+          >
+            <Library className="h-4 w-4" aria-hidden="true" />
+            <span className="hidden xl:inline">Learning Center</span>
+          </a>
+
           <button
             id="walkthrough-btn"
             onClick={onOpenWalkthrough}
