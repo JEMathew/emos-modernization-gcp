@@ -124,17 +124,14 @@ describe('Public EMOS Learning Center (/learn)', () => {
     });
   });
 
-  it('provides secure, accurately labelled links to the canonical video library', () => {
+  it('provides in-portal playback actions and a secure canonical-library fallback', () => {
     renderLearningCenter();
 
-    const videoLinks = screen.getAllByRole('link', { name: /Open video library for/i });
-    expect(videoLinks).toHaveLength(20);
-    for (const link of videoLinks) {
-      expect(link).toHaveAttribute('href', CANONICAL_DRIVE_LIBRARY_URL);
-      expect(link).toHaveAttribute('target', '_blank');
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-      expect(link).toHaveTextContent('Open video library');
-    }
+    expect(screen.getAllByRole('button', { name: /Play .* in EMOS/i })).toHaveLength(20);
+    const libraryLink = screen.getByRole('link', { name: /Open complete video library/i });
+    expect(libraryLink).toHaveAttribute('href', CANONICAL_DRIVE_LIBRARY_URL);
+    expect(libraryLink).toHaveAttribute('target', '_blank');
+    expect(libraryLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
   it('filters the catalogue by search text', () => {

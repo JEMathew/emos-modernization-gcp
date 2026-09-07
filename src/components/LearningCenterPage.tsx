@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -6,10 +6,13 @@ import {
   ExternalLink,
   Library,
   Map,
+  Play,
   Search,
   ShieldCheck,
   Sparkles,
+  VideoOff,
 } from 'lucide-react';
+import { LearningVideoModal } from './LearningVideoModal';
 import { ThemeSelector } from './ThemeSelector';
 import {
   CANONICAL_DRIVE_LIBRARY_URL,
@@ -19,22 +22,29 @@ import {
   LEARNING_HERO_IMAGE,
   LEARNING_VIDEOS,
   type LearningCategory,
+  type LearningVideo,
 } from '../data/learningVideos';
 
 interface LearningCenterPageProps {
   onNavigate: (path: string) => void;
+  videos?: readonly LearningVideo[];
 }
 
 type CategoryFilter = 'All Categories' | LearningCategory;
 
-export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({ onNavigate }) => {
+export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
+  onNavigate,
+  videos = LEARNING_VIDEOS,
+}) => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<CategoryFilter>('All Categories');
+  const [selectedVideo, setSelectedVideo] = useState<LearningVideo | null>(null);
+  const playbackTriggerRef = useRef<HTMLElement | null>(null);
 
   const filteredVideos = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
 
-    return LEARNING_VIDEOS.filter((video) => {
+    return videos.filter((video) => {
       const matchesCategory = category === 'All Categories' || video.category === category;
       const searchableText = [
         video.sequence,
@@ -49,7 +59,7 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({ onNaviga
 
       return matchesCategory && (!normalizedQuery || searchableText.includes(normalizedQuery));
     });
-  }, [category, query]);
+  }, [category, query, videos]);
 
   const groupedVideos = LEARNING_CATEGORIES.map((group) => ({
     category: group,
@@ -60,6 +70,13 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({ onNaviga
     event.preventDefault();
     onNavigate(path);
   };
+
+  const openVideo = (video: LearningVideo, trigger: HTMLElement) => {
+    playbackTriggerRef.current = trigger;
+    setSelectedVideo(video);
+  };
+
+  const closeVideo = useCallback(() => setSelectedVideo(null), []);
 
   return (
     <div className="min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] font-sans transition-colors">
@@ -255,16 +272,27 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({ onNaviga
                             <code className="mt-auto block break-all rounded-lg border border-[var(--emos-code-border)] bg-[var(--emos-code-bg)] px-3 py-2 text-[10px] text-[var(--emos-text-muted)]">
                               File: {video.fileName}
                             </code>
-                            <a
-                              href={CANONICAL_DRIVE_LIBRARY_URL}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={`Open video library for ${video.sequence}: ${video.title}`}
-                              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-tertiary)] px-4 text-xs font-bold text-[var(--emos-text-primary)] transition-colors hover:border-[var(--emos-accent-border)] hover:text-[var(--emos-accent-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)]"
-                            >
-                              Open video library
-                              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                            </a>
+                            {video.driveFileId ? (
+                              <button
+                                type="button"
+                                onClick={(event) => openVideo(video, event.currentTarget)}
+                                aria-label={`Play ${video.sequence}: ${video.title} in EMOS`}
+                                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-4 text-xs font-bold text-black transition-opacity hover:opacity-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)]"
+                              >
+                                <Play className="h-3.5 w-3.5" aria-hidden="true" />
+                                Play in EMOS
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled
+                                aria-label={`Video temporarily unavailable for ${video.sequence}: ${video.title}`}
+                                className="inline-flex min-h-10 cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-tertiary)] px-4 text-xs font-bold text-[var(--emos-text-muted)] opacity-75"
+                              >
+                                <VideoOff className="h-3.5 w-3.5" aria-hidden="true" />
+                                Temporarily unavailable
+                              </button>
+                            )}
                           </div>
                         </article>
                       ))}
@@ -334,6 +362,14 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({ onNaviga
           </nav>
         </div>
       </footer>
+
+      {selectedVideo && (
+        <LearningVideoModal
+          video={selectedVideo}
+          onClose={closeVideo}
+          returnFocusTo={playbackTriggerRef.current}
+        />
+      )}
     </div>
   );
 };
