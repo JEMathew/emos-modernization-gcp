@@ -19,9 +19,20 @@ export interface LearningVideo {
   category: LearningCategory;
   tags: string[];
   fileName: string;
+  driveFileId?: string;
   thumbnailUrl: string;
   duration?: string;
 }
+
+export const getDrivePreviewUrl = (driveFileId?: string) =>
+  driveFileId
+    ? `https://drive.google.com/file/d/${encodeURIComponent(driveFileId)}/preview`
+    : undefined;
+
+export const getDriveViewUrl = (driveFileId?: string) =>
+  driveFileId
+    ? `https://drive.google.com/file/d/${encodeURIComponent(driveFileId)}/view`
+    : undefined;
 
 const THUMBNAILS = {
   '00': new URL('../../docs/learning/thumbnails/00-beta-introduction.svg', import.meta.url).href,
@@ -60,6 +71,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Start Here',
     tags: ['Introduction'],
     fileName: 'EMOS-Beta-Introduction.mp4',
+    driveFileId: '1I5DLsarRnhBbxMUS-GpO5ew7WLZ2Gt6t',
     thumbnailUrl: THUMBNAILS['00'],
     duration: '4:17',
   },
@@ -71,6 +83,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Start Here',
     tags: ['Getting Started', 'Authentication'],
     fileName: 'F01-sign-in-enter-the-private-workspace.mp4',
+    driveFileId: '1PRAQZP4pQYggRhFAyhWe18A2q55E-0BX',
     thumbnailUrl: THUMBNAILS.F01,
   },
   {
@@ -80,6 +93,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Start Here',
     tags: ['Getting Started', 'Product Tour'],
     fileName: 'F02-take-the-guided-product-tour.mp4',
+    driveFileId: '1M6IJtGqJ629ovhjdUo_HrxXusIWo_8r3',
     thumbnailUrl: THUMBNAILS.F02,
   },
   {
@@ -90,6 +104,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Assess and Decide',
     tags: ['Decision Intelligence', 'Canonical 6R'],
     fileName: 'F03-submit-a-workload-for-a-6r-assessment.mp4',
+    driveFileId: '1ydFW2t4JMMdNjknaqAvZrtWB4tUe92GT',
     thumbnailUrl: THUMBNAILS.F03,
   },
   {
@@ -100,6 +115,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Assess and Decide',
     tags: ['Decision Intelligence', 'Explainability'],
     fileName: 'F04-explore-options-generate-an-executive-decision.mp4',
+    driveFileId: '1eu_L9GN7YkdncjOHeNvCqoB2VI3fuev-',
     thumbnailUrl: THUMBNAILS.F04,
   },
   {
@@ -110,6 +126,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Assess and Decide',
     tags: ['Decision Intelligence', 'Gemini Follow-up'],
     fileName: 'F05-refine-an-assessment-with-new-evidence.mp4',
+    driveFileId: '17DflA2QwWNSDup7RO3rkD58nIDumK49T',
     thumbnailUrl: THUMBNAILS.F05,
   },
   {
@@ -120,6 +137,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Trust and Governance',
     tags: ['Trust & Governance', 'Firestore'],
     fileName: 'F06-verify-owner-bound-persistence-privacy.mp4',
+    driveFileId: '14r-JcDRJJ2kOSugSPBMWhS6_BW5yZT47',
     thumbnailUrl: THUMBNAILS.F06,
   },
   {
@@ -129,6 +147,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Trust and Governance',
     tags: ['Trust & Governance', 'History'],
     fileName: 'F07-search-filter-manage-assessment-history.mp4',
+    driveFileId: '1mf5Wu4J2zddYcOYI25CHyfjULn-9Urf0',
     thumbnailUrl: THUMBNAILS.F07,
   },
   {
@@ -139,6 +158,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Trust and Governance',
     tags: ['Trust & Governance', 'Vendor Neutrality'],
     fileName: 'F08-preserve-cloud-platform-neutrality.mp4',
+    driveFileId: '14MqrVx4ohNT2DoULGq7wNuV8MSdGEb_5',
     thumbnailUrl: THUMBNAILS.F08,
   },
   {
@@ -149,6 +169,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Trust and Governance',
     tags: ['Trust & Governance', 'Consistency'],
     fileName: 'F09-validate-assessment-score-consistency.mp4',
+    driveFileId: '1A-s4cJh5frA_tO7BhAw1C00oG5hnjEUv',
     thumbnailUrl: THUMBNAILS.F09,
   },
   {
@@ -158,6 +179,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Portfolio and Enterprise DNA',
     tags: ['Portfolio & DNA', 'Discovery'],
     fileName: 'F10-explore-the-sample-enterprise-portfolio.mp4',
+    driveFileId: '1thTOicdmNhgKBUbDo_chi49E9K6v3oYe',
     thumbnailUrl: THUMBNAILS.F10,
   },
   {
@@ -168,6 +190,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Portfolio and Enterprise DNA',
     tags: ['Portfolio & DNA', 'Evidence Gaps'],
     fileName: 'F11-inspect-enterprise-dna-evidence-gaps.mp4',
+    driveFileId: '1Dzt4Eylca78TNs5h4ADYZ1HAmMSu0I6N',
     thumbnailUrl: THUMBNAILS.F11,
   },
   {
@@ -178,6 +201,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Portfolio and Enterprise DNA',
     tags: ['Portfolio & DNA', 'Guided Flow'],
     fileName: 'F12-go-from-enterprise-dna-to-assessment-in-one-click.mp4',
+    driveFileId: '1WWd0pDY65tR9w_0TFVK592Vnf7ObpdLY',
     thumbnailUrl: THUMBNAILS.F12,
   },
   {
@@ -188,6 +212,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Portfolio and Enterprise DNA',
     tags: ['Portfolio & DNA', 'BYOP'],
     fileName: 'F13-import-a-csv-or-json-portfolio.mp4',
+    driveFileId: '1cEEOiEqP9nc1-_JFGRjqIiP5YcRa-qeT',
     thumbnailUrl: THUMBNAILS.F13,
   },
   {
@@ -197,6 +222,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Portfolio and Enterprise DNA',
     tags: ['Portfolio & DNA', 'Sample Data'],
     fileName: 'F14-download-a-sample-enterprise-dataset.mp4',
+    driveFileId: '13vtt5oLqqkPTQSbVT4EM-_ktlUL6ubX8',
     thumbnailUrl: THUMBNAILS.F14,
   },
   {
@@ -206,6 +232,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Portfolio and Enterprise DNA',
     tags: ['Portfolio & DNA', 'BYOP'],
     fileName: 'F15-assess-manage-imported-workloads.mp4',
+    driveFileId: '17uiUFzV-YAm059DrpxkR0DIlHUCm-DK-',
     thumbnailUrl: THUMBNAILS.F15,
   },
   {
@@ -216,6 +243,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Product Experience and Security',
     tags: ['Product Experience', 'Accessibility'],
     fileName: 'F16-switch-appearance-use-responsive-layouts.mp4',
+    driveFileId: '1uWNSBy0U5hdXE8xup9zXUISnVVioz5Vn',
     thumbnailUrl: THUMBNAILS.F16,
   },
   {
@@ -226,6 +254,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Product Experience and Security',
     tags: ['Security', 'AI Guardrails'],
     fileName: 'F17-fence-adversarial-prompts-redact-secrets.mp4',
+    driveFileId: '1ngfDnl0APUqLquIFzCoVbfP5smNs7B5I',
     thumbnailUrl: THUMBNAILS.F17,
   },
   {
@@ -236,6 +265,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Product Experience and Security',
     tags: ['Security', 'Release Controls'],
     fileName: 'F18-enforce-canonical-6r-evidence-readiness.mp4',
+    driveFileId: '103c_WhQGhG1ygK_Y8w6E3J3Ca2xRDUBR',
     thumbnailUrl: THUMBNAILS.F18,
   },
   {
@@ -246,6 +276,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     category: 'Plan and Mobilize',
     tags: ['Planning & Mobilization', 'Wave Planning'],
     fileName: 'F19-plan-mobilize-the-modernization-program.mp4',
+    driveFileId: '1CcbmWr2GPGRc-7BlUiesR7skhcJkXOA9',
     thumbnailUrl: THUMBNAILS.F19,
   },
 ];
