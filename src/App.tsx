@@ -11,6 +11,7 @@ import { Dashboard } from './components/Dashboard';
 import { TestWalkthroughModal } from './components/TestWalkthroughModal';
 import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
 import { TermsPage } from './components/TermsPage';
+import { LearningCenterPage } from './components/LearningCenterPage';
 import { ThemeProvider } from './lib/theme';
 import { Sparkles } from 'lucide-react';
 
@@ -71,6 +72,11 @@ export default function App() {
       return;
     }
 
+    if (currentPath === '/learn') {
+      document.title = 'Learning Center — EMOS';
+      return;
+    }
+
     document.title = 'EMOS — Enterprise Modernization Operating System';
   }, [currentPath]);
 
@@ -91,6 +97,10 @@ export default function App() {
 
     if (currentPath === '/terms') {
       return <TermsPage user={currentUser} onNavigate={navigateTo} />;
+    }
+
+    if (currentPath === '/learn') {
+      return <LearningCenterPage onNavigate={navigateTo} />;
     }
 
     if (isAuthChecking) {

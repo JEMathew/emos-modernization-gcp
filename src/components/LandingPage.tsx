@@ -7,7 +7,8 @@ import {
   ArrowRight,
   BrainCircuit,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Library
 } from 'lucide-react';
 import { signInWithGoogle, getFriendlyAuthErrorMessage } from '../lib/firebase';
 import { ThemeSelector } from './ThemeSelector';
@@ -67,6 +68,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
+            <a
+              id="landing-header-learn-link"
+              href="/learn"
+              onClick={(event) => {
+                if (onNavigate) {
+                  event.preventDefault();
+                  onNavigate('/learn');
+                }
+              }}
+              className="hidden min-h-[34px] items-center gap-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] px-3 text-xs font-semibold text-[var(--emos-text-secondary)] transition-colors hover:text-[var(--emos-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)] sm:inline-flex"
+            >
+              <Library className="h-3.5 w-3.5" aria-hidden="true" />
+              Learn
+            </a>
             <ThemeSelector />
 
             <button
@@ -210,6 +225,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <span className="hidden md:inline">• Public Beta</span>
           </div>
           <div className="flex items-center gap-6">
+            <a
+              id="footer-learn-link"
+              href="/learn"
+              onClick={(e) => {
+                if (onNavigate) {
+                  e.preventDefault();
+                  onNavigate('/learn');
+                }
+              }}
+              className="text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:underline underline-offset-4 transition-colors font-medium"
+            >
+              Learning Center
+            </a>
             <a
               id="footer-privacy-link"
               href="/privacy"

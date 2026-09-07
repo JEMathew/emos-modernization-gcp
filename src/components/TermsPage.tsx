@@ -64,6 +64,13 @@ export const TermsPage: React.FC<TermsPageProps> = ({ user, onNavigate }) => {
           <div className="flex items-center gap-2 sm:gap-3">
             <nav className="hidden sm:flex items-center gap-1 p-1 bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] rounded-xl text-xs font-medium">
               <button
+                id="terms-header-learn-btn"
+                onClick={() => onNavigate('/learn')}
+                className="px-2.5 sm:px-3 py-1.5 rounded-lg text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] transition-colors cursor-pointer"
+              >
+                Learning Center
+              </button>
+              <button
                 id="terms-header-policy-btn"
                 onClick={() => onNavigate('/privacy')}
                 className="px-2.5 sm:px-3 py-1.5 rounded-lg text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] transition-colors cursor-pointer"
@@ -275,6 +282,13 @@ export const TermsPage: React.FC<TermsPageProps> = ({ user, onNavigate }) => {
             <span className="hidden md:inline">• Ideathon Demonstration</span>
           </div>
           <div className="flex items-center gap-6">
+            <button
+              id="terms-footer-learn-btn"
+              onClick={() => onNavigate('/learn')}
+              className="text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:underline underline-offset-4 transition-colors font-medium cursor-pointer"
+            >
+              Learning Center
+            </button>
             <button
               id="terms-footer-privacy-btn"
               onClick={() => onNavigate('/privacy')}
