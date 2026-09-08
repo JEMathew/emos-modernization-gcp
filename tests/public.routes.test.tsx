@@ -190,11 +190,20 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByRole('button', { name: /Explore Product Tour/i })).toBeInTheDocument();
     expect(screen.getAllByText(/Public Beta/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Enterprise Modernization/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Evidence-Grounded 6R Recommendations/i)).toBeInTheDocument();
-    expect(screen.getByText(/User-Isolated Storage/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Your legacy estate is blocking business initiatives you have already committed to\./i })).toBeInTheDocument();
+    expect(screen.getByText(/EMOS helps leaders decide what to modernize, sequences the work, and measures whether it delivered\./i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Optimized for your business outcomes — not a provider's cloud consumption\./i })).toBeInTheDocument();
+    expect(screen.getByText(/Independent of any cloud or platform vendor, it recommends the best-fit future state without benefiting from increased platform consumption\./i)).toBeInTheDocument();
+    expect(screen.getByText(/Evidence-grounded 6R/i)).toBeInTheDocument();
+    expect(screen.getByText(/User-isolated storage/i)).toBeInTheDocument();
     expect(screen.getByText(/User-Isolated Data Access/i)).toBeInTheDocument();
     expect(screen.getByText(/Firestore security rules restrict database reads and writes to records associated with the authenticated user ID\./i)).toBeInTheDocument();
-    expect(screen.getByText(/based on structured Enterprise DNA evidence and clearly identified gaps\./i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^Retain$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Retire$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Rehost$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Replatform$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Refactor$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Repurchase$/i).length).toBeGreaterThan(0);
 
     // Absolute claims must be absent
     expect(screen.queryByText(/Zero Cross-Tenant Leakage/i)).not.toBeInTheDocument();
