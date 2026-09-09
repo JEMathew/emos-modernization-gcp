@@ -154,7 +154,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
               <span className="text-[10px] text-[var(--emos-text-secondary)] font-mono bg-[var(--emos-bg-tertiary)] px-2 py-0.5 rounded border border-[var(--emos-border-subtle)]">3 Workloads</span>
             </div>
             <p className="text-[11px] text-[var(--emos-text-secondary)] mt-2 leading-relaxed">
-              Use representative enterprise workloads: Legacy Java/Oracle monolith, Core Banking mainframe, and an Enterprise Data Warehouse with verified evidence baselines.
+              Use representative enterprise workloads: Customer Analytics on Java and Oracle, an Enterprise Data Warehouse, and Document Management—with explicit known, incomplete and missing evidence.
             </p>
           </div>
 

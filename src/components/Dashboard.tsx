@@ -54,6 +54,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorKind, setErrorKind] = useState<'reasoning' | 'persistence' | null>(null);
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isMobileHistoryOpen, setIsMobileHistoryOpen] = useState(false);
@@ -79,6 +80,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         console.error("Failed to load user interactions:", error);
         setIsLoadingHistory(false);
         setSaveStatus('error');
+        setErrorKind('persistence');
         setErrorMessage("Unable to fetch Firestore history. Please check permissions.");
       }
     );
@@ -122,7 +124,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     setCurrentView('workspace');
     setIsProcessing(true);
     setSaveStatus('saving');
+    setErrorKind(null);
     setErrorMessage(null);
+
+    let failureKind: 'reasoning' | 'persistence' = 'reasoning';
 
     try {
       const allWorkloads = [...SAMPLE_PORTFOLIO, ...importedWorkloads];
@@ -172,14 +177,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       };
 
       // 2. Guaranteed Transaction Verification: persist to Cloud Firestore
+      failureKind = 'persistence';
       await saveInteraction(user.uid, newInteraction);
 
       setSelectedId(newId);
       setSaveStatus('saved');
+      setErrorKind(null);
     } catch (err: any) {
       console.error("Failed to generate or save assessment:", err);
       setSaveStatus('error');
-      setErrorMessage(err?.message || "Failed to generate assessment or persist to Firestore.");
+      setErrorKind(failureKind);
+      setErrorMessage(err?.message || (failureKind === 'reasoning'
+        ? "AI reasoning is unavailable. Your saved assessment data is unaffected."
+        : "Could not save the assessment to Firestore."));
       throw err;
     } finally {
       setIsProcessing(false);
@@ -258,7 +268,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
     setIsProcessing(true);
     setSaveStatus('saving');
+    setErrorKind(null);
     setErrorMessage(null);
+
+    let failureKind: 'reasoning' | 'persistence' = 'reasoning';
 
     const now = new Date().toISOString();
 
@@ -316,13 +329,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         updatePayload.trustIndicators = updatedAttrs.trustIndicators;
       }
 
+      failureKind = 'persistence';
       await updateInteraction(user.uid, interactionId, updatePayload);
 
       setSaveStatus('saved');
+      setErrorKind(null);
     } catch (err: any) {
       console.error("Failed to process follow-up:", err);
       setSaveStatus('error');
-      setErrorMessage(err?.message || "Failed to process follow-up with Gemini.");
+      setErrorKind(failureKind);
+      setErrorMessage(err?.message || (failureKind === 'reasoning'
+        ? "AI reasoning is unavailable. Your saved assessment data is unaffected."
+        : "Could not save the follow-up to Firestore."));
       throw err;
     } finally {
       setIsProcessing(false);
@@ -339,6 +357,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     } catch (err: any) {
       console.error("Failed to delete assessment:", err);
       setSaveStatus('error');
+      setErrorKind('persistence');
       setErrorMessage("Failed to delete assessment from Firestore.");
     }
   };
@@ -346,12 +365,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   // Handler: Retry Save
   const handleRetrySave = async (interaction: Interaction) => {
     setSaveStatus('saving');
+    setErrorKind(null);
     setErrorMessage(null);
     try {
       await saveInteraction(user.uid, interaction);
       setSaveStatus('saved');
+      setErrorKind(null);
     } catch (err: any) {
       setSaveStatus('error');
+      setErrorKind('persistence');
       setErrorMessage(err?.message || "Retry save failed.");
     }
   };
@@ -484,6 +506,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             isProcessing={isProcessing}
             saveStatus={saveStatus}
             errorMessage={errorMessage}
+            errorKind={errorKind}
           />
         )}
 

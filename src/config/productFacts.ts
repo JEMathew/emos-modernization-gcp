@@ -1,10 +1,12 @@
 export const EMOS_FACTS = {
-  founderExperience: '15+',
+  founderExperience: '16+',
   governedApplications: '5,000+',
   evidenceAttributes: 18,
   evidenceDimensions: 6,
   readinessThreshold: 70,
-  walkthroughCount: 20,
+  walkthroughCount: 19,
+  introductionCount: 1,
+  learningLibraryLabel: '19 Walkthroughs + Introduction',
 } as const;
 export const MODERNIZATION_LIFECYCLE = [
   'Align',

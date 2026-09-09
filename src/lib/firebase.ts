@@ -69,6 +69,8 @@ googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
+export const POST_AUTH_ROUTE_KEY = 'emos-post-auth-route';
+
 // Mobile platform detection for redirect-based authentication flow
 export function isMobileBrowser(userAgent?: string): boolean {
   const ua = userAgent ?? (typeof navigator !== 'undefined' ? navigator.userAgent : '');

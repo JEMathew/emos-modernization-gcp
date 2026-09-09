@@ -6,7 +6,7 @@ Collect comparable evidence about whether an enterprise practitioner can use EMO
 
 ## Participants
 
-Run five to eight moderated sessions per meaningful release across enterprise architects, portfolio managers, transformation leaders and technology executives. Record role and context; do not combine different roles into one undifferentiated score.
+Run five moderated task-based sessions per meaningful release across enterprise architects, portfolio managers, transformation leaders and technology executives. Use the same tasks each time, observe silently and administer SUS at the end. Record role and context; do not combine different roles into one undifferentiated score.
 
 ## Data Boundary
 
@@ -30,6 +30,24 @@ Use the synthetic Apex portfolio or sanitized representative data. Do not collec
 6. In the authenticated beta, locate the portfolio template, identify the three required fields and explain how partial evidence is treated.
 7. Find the Trust and Evaluation page and identify what is stored, what an AI provider may see and the current beta limitations.
 8. Locate the design-partner path and explain what commitment is being requested.
+
+## Start Architecture-Review Recruitment in Parallel
+
+Recruit at least one person who currently participates in an architecture review board while the authenticated handoff and Decision Brief are being improved. The eventual test is artifact-first, not demo-first: give the reviewer the brief without the product walkthrough and ask whether they can approve, reject or request the next evidence from that artifact alone.
+
+## Separate Conformance From Real-World Accuracy
+
+The public readiness-gate suite demonstrates that the deterministic implementation conforms to EMOS's published rules. It is not evidence that those rules are accurate for enterprise decisions.
+
+For the first design-partner accuracy experiment:
+
+1. Ask the partner's architect to select about twenty representative or sanitized workloads.
+2. Before showing EMOS output, have that architect label each workload `should block` or `should pass`, record the rationale and identify any critical gaps.
+3. Run the same records through EMOS without changing the labels.
+4. Compare the blind external labels with EMOS outcomes and review every disagreement.
+5. Report the sample, label source, confusion matrix and limitations. Do not generalize beyond the observed cases.
+
+Labels authored by the EMOS founder remain conformance cases regardless of how many are added; only independent blind labels can begin to test decision accuracy.
 
 ## Observation Sheet
 
@@ -61,3 +79,5 @@ After the tasks, administer the standard ten-item System Usability Scale without
 ## Release Decision
 
 Prioritize observed blockers that prevent task completion, create an unsafe interpretation or stop the artifact entering governance. Treat feature requests without a demonstrated workflow or buyer consequence as hypotheses, not commitments.
+
+The current beta is ready for design-partner conversations once the authenticated sandbox-to-product handoff is verified. It is not yet evidence of real-world decision accuracy or production readiness.

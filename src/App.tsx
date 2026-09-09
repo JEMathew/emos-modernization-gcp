@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, processRedirectResult, getFriendlyAuthErrorMessage } from './lib/firebase';
+import { auth, processRedirectResult, getFriendlyAuthErrorMessage, POST_AUTH_ROUTE_KEY } from './lib/firebase';
 import { LandingPage } from './components/LandingPage';
 import { Dashboard } from './components/Dashboard';
 import { TestWalkthroughModal } from './components/TestWalkthroughModal';
@@ -16,6 +16,14 @@ import { PublicSandboxPage } from './components/PublicSandboxPage';
 import { TrustCenterPage } from './components/TrustCenterPage';
 import { ThemeProvider } from './lib/theme';
 import { Sparkles } from 'lucide-react';
+
+export function consumePostAuthRoute(storage: Pick<Storage, 'getItem' | 'removeItem'>): string | null {
+  const route = storage.getItem(POST_AUTH_ROUTE_KEY);
+  if (route) {
+    storage.removeItem(POST_AUTH_ROUTE_KEY);
+  }
+  return route;
+}
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -46,6 +54,13 @@ export default function App() {
       if (isMounted) {
         setCurrentUser(user);
         setIsAuthChecking(false);
+        if (user) {
+          const postAuthRoute = consumePostAuthRoute(window.sessionStorage);
+          if (postAuthRoute === '/') {
+            window.history.replaceState({}, '', postAuthRoute);
+            setCurrentPath(postAuthRoute);
+          }
+        }
       }
     });
 

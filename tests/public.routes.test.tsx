@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
-import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, beforeAll, afterEach } from 'vitest';
 import { ThemeProvider } from '../src/lib/theme';
 import { PrivacyPolicyPage } from '../src/components/PrivacyPolicyPage';
@@ -9,7 +9,8 @@ import { TermsPage } from '../src/components/TermsPage';
 import { LandingPage } from '../src/components/LandingPage';
 import { Navbar } from '../src/components/Navbar';
 import { TestWalkthroughModal } from '../src/components/TestWalkthroughModal';
-import App from '../src/App';
+import { PublicSandboxPage } from '../src/components/PublicSandboxPage';
+import App, { consumePostAuthRoute } from '../src/App';
 
 function renderWithTheme(ui: React.ReactElement) {
   return render(<ThemeProvider>{ui}</ThemeProvider>);
@@ -41,6 +42,7 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
 
   afterEach(() => {
     cleanup();
+    window.sessionStorage.clear();
   });
 
   beforeEach(() => {
@@ -194,6 +196,40 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByText(/Model confidence cannot override this calculated gate/i)).toBeInTheDocument();
   });
 
+  it('shows the necessary-but-not-sufficient gate as synthetic evidence improves', () => {
+    renderWithTheme(<PublicSandboxPage onNavigate={vi.fn()} />);
+    fireEvent.click(screen.getByRole('tab', { name: /Evidence/i }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Define Target Strategy/i }));
+    expect(screen.getAllByText('78%').length).toBeGreaterThan(0);
+    expect(screen.getByText(/Dependency Details · Migration Downtime Tolerance/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: /Decision Gate/i }));
+    expect(screen.getByText(/No 6R Disposition Should Be Approved Yet/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: /Evidence/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Close Critical Gaps/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /Decision Gate/i }));
+    expect(screen.getAllByText('89%').length).toBeGreaterThan(0);
+    expect(screen.getByText(/Ready for Human Review—Not Automatically Approved/i)).toBeInTheDocument();
+  });
+
+  it('continues into the authenticated product after a successful sandbox sign-in', async () => {
+    const onNavigate = vi.fn();
+    renderWithTheme(<PublicSandboxPage onNavigate={onNavigate} onSignIn={async () => ({ uid: 'test-user' })} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Continue With Google/i }));
+
+    await waitFor(() => expect(onNavigate).toHaveBeenCalledWith('/'));
+    expect(window.sessionStorage.getItem('emos-post-auth-route')).toBeNull();
+  });
+
+  it('consumes the bounded post-auth route used after a mobile redirect', () => {
+    window.sessionStorage.setItem('emos-post-auth-route', '/');
+    expect(consumePostAuthRoute(window.sessionStorage)).toBe('/');
+    expect(consumePostAuthRoute(window.sessionStorage)).toBeNull();
+  });
+
   it('renders a public Trust and Evaluation page with honest beta boundaries', () => {
     window.history.pushState({}, '', '/trust');
     render(<App />);
@@ -201,6 +237,9 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByRole('heading', { level: 1, name: /Evaluate the Evidence Behind EMOS/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /What the Model Sees/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /Current Beta Boundary/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Readiness-Gate Conformance Suite/i })).toBeInTheDocument();
+    expect(screen.getByText(/not proof of real-world decision accuracy/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Open Data-Control Questions/i })).toBeInTheDocument();
     expect(screen.getByText(/Commercial pricing has not been set/i)).toBeInTheDocument();
     expect(screen.queryByText(/Initializing secure authentication/i)).not.toBeInTheDocument();
   });
@@ -253,6 +292,7 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByRole('button', { name: /^Product Tour$/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Explore Without Sign-In/i })).toHaveAttribute('href', '/sandbox');
     expect(screen.getByText(/Beta v1\.0 Publicly Live/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/19 Walkthroughs \+ Introduction/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Enterprise Modernization/i).length).toBeGreaterThan(0);
     expect(screen.getByRole('heading', { name: /Your legacy estate is blocking business initiatives you have already committed to\./i })).toBeInTheDocument();
     expect(screen.getByText(/EMOS helps leaders decide what to modernize and sequence the work—and is being built to measure whether it delivered the promised business outcome\./i)).toBeInTheDocument();
@@ -281,7 +321,7 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
 
     chooseMenuItem('About', /^Founder$/i);
     expect(screen.getByText(/Built by someone who had this problem/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/15\+ Years/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/16\+ Years/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/3\+ Years Building, Shipping and Launching Products into New Markets/i)).toBeInTheDocument();
     expect(screen.getByText(/Modern Data Platforms: Cloud Data Warehouse on GCP and Data Lakehouse on AWS/i)).toBeInTheDocument();
     expect(screen.getByText(/1\+ Year Leading Data Products/i)).toBeInTheDocument();
