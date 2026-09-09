@@ -34,6 +34,12 @@ const expectedTitles = [
   'Plan and mobilize the modernization program',
 ];
 
+class MockIntersectionObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 function renderLearningCenter(onNavigate = vi.fn()) {
   return render(
     <ThemeProvider>
@@ -45,6 +51,7 @@ function renderLearningCenter(onNavigate = vi.fn()) {
 describe('Public EMOS Learning Center (/learn)', () => {
   beforeAll(() => {
     window.scrollTo = vi.fn();
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: vi.fn().mockImplementation((query: string) => ({
@@ -73,7 +80,7 @@ describe('Public EMOS Learning Center (/learn)', () => {
     window.history.pushState({}, '', '/learn');
     render(<App />);
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Learn EMOS' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'See EMOS in Motion' })).toBeInTheDocument();
     expect(screen.getByText(/No EMOS sign-in required/i)).toBeInTheDocument();
     expect(screen.queryByText(/Initializing secure authentication/i)).not.toBeInTheDocument();
     expect(window.location.pathname).toBe('/learn');
@@ -168,7 +175,7 @@ describe('Public EMOS Learning Center (/learn)', () => {
     renderLearningCenter();
 
     expect(screen.getByRole('heading', { name: 'Implemented in Beta v1.0' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Future EMOS roadmap' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Future EMOS Roadmap' })).toBeInTheDocument();
     expect(
       screen.getByText(/not claimed as implemented in this beta/i),
     ).toBeInTheDocument();

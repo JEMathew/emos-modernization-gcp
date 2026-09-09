@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach, beforeAll, afterEach } from 'vitest';
 import { ThemeProvider } from '../src/lib/theme';
 import { PrivacyPolicyPage } from '../src/components/PrivacyPolicyPage';
@@ -18,6 +18,12 @@ function renderWithTheme(ui: React.ReactElement) {
 describe('Public Governance Routes (/privacy & /terms)', () => {
   beforeAll(() => {
     window.scrollTo = vi.fn();
+    class MockIntersectionObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: vi.fn().mockImplementation((query: string) => ({
@@ -173,6 +179,59 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByText(/1\. Decision-Support and Ideathon Demonstration/i)).toBeInTheDocument();
   });
 
+  it('renders the public evaluation sandbox without requiring Google Sign-In', () => {
+    window.history.pushState({}, '', '/sandbox');
+    render(<App />);
+
+    expect(screen.getByRole('heading', { level: 1, name: /See EMOS Refuse False Certainty/i })).toBeInTheDocument();
+    expect(screen.getByText(/Read-Only · Synthetic Data · No Sign-In/i)).toBeInTheDocument();
+    expect(screen.getAllByText('61%').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('70%').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Initializing secure authentication/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: /Decision Gate/i }));
+    expect(screen.getByText(/No 6R Disposition Should Be Approved Yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/Model confidence cannot override this calculated gate/i)).toBeInTheDocument();
+  });
+
+  it('renders a public Trust and Evaluation page with honest beta boundaries', () => {
+    window.history.pushState({}, '', '/trust');
+    render(<App />);
+
+    expect(screen.getByRole('heading', { level: 1, name: /Evaluate the Evidence Behind EMOS/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /What the Model Sees/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Current Beta Boundary/i })).toBeInTheDocument();
+    expect(screen.getByText(/Commercial pricing has not been set/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Initializing secure authentication/i)).not.toBeInTheDocument();
+  });
+
+  it('opens the responsive navigation and routes directly to the Scenario experience', () => {
+    renderWithTheme(<LandingPage onOpenWalkthrough={vi.fn()} onNavigate={vi.fn()} />);
+
+    const menuButton = screen.getByRole('button', { name: /Open Navigation Menu/i });
+    fireEvent.click(menuButton);
+
+    const mobileNav = screen.getByRole('navigation', { name: /Mobile Landing Page Navigation/i });
+    expect(mobileNav).toBeInTheDocument();
+    expect(within(mobileNav).getByRole('link', { name: /Public Sandbox/i })).toHaveAttribute('href', '/sandbox');
+    expect(within(mobileNav).getByRole('link', { name: /Trust and Evaluation/i })).toHaveAttribute('href', '/trust');
+
+    fireEvent.click(within(mobileNav).getByRole('link', { name: /^Scenario$/i }));
+    expect(window.location.hash).toBe('#scenario');
+    expect(screen.getByRole('heading', { name: /The Initiative the Estate Is Blocking/i })).toBeInTheDocument();
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('honours the Scenario hash on direct load and browser navigation', () => {
+    window.history.pushState({}, '', '/#scenario');
+    renderWithTheme(<LandingPage onOpenWalkthrough={vi.fn()} onNavigate={vi.fn()} />);
+    expect(screen.getByRole('heading', { name: /The Initiative the Estate Is Blocking/i })).toBeInTheDocument();
+
+    window.history.pushState({}, '', '/#why-emos');
+    fireEvent(window, new PopStateEvent('popstate'));
+    expect(screen.getByRole('heading', { name: /Optimized for Your Business Outcomes/i })).toBeInTheDocument();
+  });
+
   it('updates the document title when entering and leaving a public legal route', () => {
     window.history.pushState({}, '', '/privacy');
     render(<App />);
@@ -185,25 +244,63 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
   it('renders updated user-facing product copy and excludes absolute or ungrounded claims on the Landing Page', () => {
     const onOpenWalkthrough = vi.fn();
     renderWithTheme(<LandingPage onOpenWalkthrough={onOpenWalkthrough} onNavigate={vi.fn()} />);
+    const chooseMenuItem = (menu: 'EMOS' | 'About', item: RegExp) => {
+      fireEvent.click(screen.getAllByRole('button', { name: menu })[0]);
+      fireEvent.click(screen.getAllByRole('menuitem', { name: item })[0]);
+    };
 
     // Required user-facing copy
-    expect(screen.getByRole('button', { name: /Explore Product Tour/i })).toBeInTheDocument();
-    expect(screen.getAllByText(/Public Beta/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: /^Product Tour$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Explore Without Sign-In/i })).toHaveAttribute('href', '/sandbox');
+    expect(screen.getByText(/Beta v1\.0 Publicly Live/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Enterprise Modernization/i).length).toBeGreaterThan(0);
     expect(screen.getByRole('heading', { name: /Your legacy estate is blocking business initiatives you have already committed to\./i })).toBeInTheDocument();
-    expect(screen.getByText(/EMOS helps leaders decide what to modernize, sequences the work, and measures whether it delivered\./i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /Optimized for your business outcomes — not a provider's cloud consumption\./i })).toBeInTheDocument();
+    expect(screen.getByText(/EMOS helps leaders decide what to modernize and sequence the work—and is being built to measure whether it delivered the promised business outcome\./i)).toBeInTheDocument();
+    expect(screen.getByText(/Watch the evidence become a decision\./i)).toBeInTheDocument();
+
+    chooseMenuItem('EMOS', /^How It Works$/i);
+    expect(screen.getAllByText(/Evidence Before Action\./i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Six Dimensions · Eighteen Attributes/i)).toBeInTheDocument();
+    expect(screen.getByText(/Nothing Hand-Waved\. Every gap remains visible\./i)).toBeInTheDocument();
+
+    chooseMenuItem('EMOS', /^Why EMOS$/i);
+    expect(screen.getByRole('heading', { name: /Optimized for your business outcomes—not a provider's cloud consumption\./i })).toBeInTheDocument();
     expect(screen.getByText(/Independent of any cloud or platform vendor, it recommends the best-fit future state without benefiting from increased platform consumption\./i)).toBeInTheDocument();
-    expect(screen.getByText(/Evidence-grounded 6R/i)).toBeInTheDocument();
-    expect(screen.getByText(/User-isolated storage/i)).toBeInTheDocument();
-    expect(screen.getByText(/User-Isolated Data Access/i)).toBeInTheDocument();
-    expect(screen.getByText(/Firestore security rules restrict database reads and writes to records associated with the authenticated user ID\./i)).toBeInTheDocument();
     expect(screen.getAllByText(/^Retain$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Retire$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Rehost$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Replatform$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Refactor$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Repurchase$/i).length).toBeGreaterThan(0);
+
+    chooseMenuItem('About', /^Vision$/i);
+    expect(screen.getByText(/Full Product Vision/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Learn$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Reassess$/i)).toBeInTheDocument();
+    expect(screen.getByText(/A vendor-neutral operating system for enterprise modernization/i)).toBeInTheDocument();
+
+    chooseMenuItem('About', /^Founder$/i);
+    expect(screen.getByText(/Built by someone who had this problem/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/15\+ Years/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/3\+ Years Building, Shipping and Launching Products into New Markets/i)).toBeInTheDocument();
+    expect(screen.getByText(/Modern Data Platforms: Cloud Data Warehouse on GCP and Data Lakehouse on AWS/i)).toBeInTheDocument();
+    expect(screen.getByText(/1\+ Year Leading Data Products/i)).toBeInTheDocument();
+    expect(screen.getByText(/Established the First Product Management Community of Practice at Boeing India and Tally/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Connect With Jincen E Mathew on LinkedIn/i })).toHaveAttribute(
+      'href',
+      'https://www.linkedin.com/in/jincenmathew/',
+    );
+
+    fireEvent.click(screen.getAllByRole('link', { name: /^Design Partner$/i })[0]);
+    expect(screen.getByText(/Become a founding design partner/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Confirm Design Partner Interest by Email/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('to=jeasom@gmail.com'),
+    );
+    expect(screen.getByRole('link', { name: 'jeasom@gmail.com' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('mailto:jeasom@gmail.com'),
+    );
 
     // Absolute claims must be absent
     expect(screen.queryByText(/Zero Cross-Tenant Leakage/i)).not.toBeInTheDocument();
@@ -220,7 +317,8 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.queryByRole('button', { name: /View Guided Tour/i })).not.toBeInTheDocument();
 
     // The single product-tour entry point triggers the walkthrough.
-    fireEvent.click(screen.getByRole('button', { name: /Explore Product Tour/i }));
+    fireEvent.click(screen.getByRole('link', { name: /EMOS Enterprise Modernization Operating System/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Product Tour$/i }));
     expect(onOpenWalkthrough).toHaveBeenCalledTimes(1);
   });
 

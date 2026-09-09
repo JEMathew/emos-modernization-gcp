@@ -17,6 +17,21 @@ export interface SampleCsvDataset {
   csvContent: string;
 }
 
+export const EMOS_TEMPLATE_CSV = `workload_id,workload_name,workload_type,business_capability,business_criticality,modernization_drivers,runtime,database,hosting,technology_lifecycle_risk,known_dependencies,dependency_details,infrastructure_cost,licensing_cost,tco_baseline,customer_data,data_volume_velocity,compliance_constraints,target_cloud_platform,target_architecture_constraints,migration_downtime_tolerance
+APP-001,Replace with your workload name,Application,,,,,,,,,,,,,,,,,,`;
+
+export const EMOS_FIELD_GUIDE = [
+  ['Required', 'workload_id', 'A unique identifier for each workload.'],
+  ['Required', 'workload_name', 'The application, platform or system name.'],
+  ['Required', 'workload_type', 'Application or Data Platform.'],
+  ['Evidence', 'business_*', 'Capability, criticality and modernization drivers.'],
+  ['Evidence', 'runtime / database / hosting', 'Current technology and deployment context.'],
+  ['Evidence', 'known_dependencies / dependency_details', 'Interfaces and dependency constraints.'],
+  ['Evidence', 'infrastructure_cost / licensing_cost / tco_baseline', 'Current economics and TCO evidence.'],
+  ['Evidence', 'customer_data / data_volume_velocity / compliance_constraints', 'Data characteristics and risk constraints.'],
+  ['Evidence', 'target_* / migration_downtime_tolerance', 'Target-state and transition constraints.'],
+] as const;
+
 export const DIVERSIFIED_ENTERPRISE_CSV = `workload_id,workload_name,workload_type,business_capability,business_criticality,modernization_drivers,runtime,database,hosting,technology_lifecycle_risk,known_dependencies,dependency_details,infrastructure_cost,licensing_cost,tco_baseline,customer_data,data_volume_velocity,compliance_constraints,target_cloud_platform,target_architecture_constraints,migration_downtime_tolerance,expected_6r,expected_reason
 HR-PORTAL-01,Global Employee Directory,Application,HR Management,Low,"Low usage, Duplicate modern corporate directory active, High patching overhead",PHP 5.6,MySQL 5.5,On-premises,High,3 downstream LDAP syncs,LDAP sync only with deprecation notice underway,Low,Low,Established,Employee Contact,Under 100MB,Internal only,None,Decommission,Full downtime allowed,Retire,Candidate for decommissioning; capability superseded by modern enterprise HR suite
 FIN-GL-LEGACY,Legacy General Ledger,Application,Core Financial Accounting,High,"Data center lease expiring, Strict regulatory freeze, System stable with zero defect backlog",Java 17 LTS,PostgreSQL 15,On-premises Colocation,Low,12 financial ledger interfaces,Well-documented REST and SFTP feeds,Moderate,Low,Calculated,Financial Ledger Records,1.5 TB,SOX and GAAP compliant,IaaS Cloud,Lift-and-shift VM migration without redesign,Weekend 12-hour maintenance window,Rehost,Candidate for Rehost; modern stable stack with urgent data center exit driver and low defect rate

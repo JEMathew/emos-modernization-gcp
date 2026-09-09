@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import type { ImportValidationResult, EnterpriseWorkload } from '../types';
 import { MAX_FILE_SIZE_LABEL, MAX_IMPORT_WORKLOADS, parseAndValidatePortfolioFile } from '../utils/portfolioImporter';
-import { SAMPLE_DATASETS, type SampleCsvDataset } from '../data/sampleCsvs';
+import { EMOS_FIELD_GUIDE, EMOS_TEMPLATE_CSV, SAMPLE_DATASETS, type SampleCsvDataset } from '../data/sampleCsvs';
 
 interface ImportPortfolioModalProps {
   isOpen: boolean;
@@ -112,6 +112,18 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadTemplate = () => {
+    const blob = new Blob([EMOS_TEMPLATE_CSV], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'emos-portfolio-template.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-fadeIn">
       <div className="bg-[var(--emos-surface-modal)] border border-[var(--emos-border-subtle)] rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
@@ -164,7 +176,7 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
             }`}
           >
             <Download className="w-4 h-4" />
-            Download Sample Datasets (4 Archetypes)
+            Templates & Sample Data
           </button>
         </div>
 
@@ -199,12 +211,12 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
                     <UploadCloud className="w-6 h-6" />
                   </div>
                   <h3 className="text-sm font-semibold text-[var(--emos-text-primary)] mb-1">
-                    Click to browse or drag & drop portfolio file
+                    Start With What You Have
                   </h3>
-                  <p className="text-xs text-[var(--emos-text-secondary)] mb-4">
-                    Supports <span className="text-[var(--emos-accent-text)] font-medium">.csv</span> and{' '}
-                    <span className="text-[var(--emos-accent-text)] font-medium">.json</span> files up to {MAX_FILE_SIZE_LABEL} and {MAX_IMPORT_WORKLOADS} workloads. Files exceeding either limit are rejected.
+                  <p className="mx-auto mb-4 max-w-2xl text-xs leading-5 text-[var(--emos-text-secondary)]">
+                    Upload an EMOS-formatted <span className="font-medium text-[var(--emos-accent-text)]">.csv</span> or <span className="font-medium text-[var(--emos-accent-text)]">.json</span> portfolio. Only Workload ID, Workload Name and Workload Type are required; partial evidence is accepted so EMOS can show what is missing. Maximum {MAX_FILE_SIZE_LABEL} and {MAX_IMPORT_WORKLOADS} workloads.
                   </p>
+                  <p className="mb-4 text-xs font-semibold text-[var(--emos-text-primary)]">Click to browse or drag and drop your portfolio file</p>
                   <div className="inline-flex items-center gap-2 text-[11px] text-[var(--emos-text-muted)] bg-[var(--emos-bg-tertiary)] px-3 py-1.5 rounded-full border border-[var(--emos-border-subtle)]">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                     Formula injection protection & input sanitization enforced
@@ -375,6 +387,16 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
 
           {activeTab === 'samples' && (
             <div className="space-y-4">
+              <div className="flex flex-col gap-4 rounded-xl border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div><h3 className="text-sm font-semibold text-[var(--emos-text-primary)]">Blank EMOS Portfolio Template</h3><p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--emos-text-secondary)]">Preserve the headers, replace the example row and provide only the evidence you have. Missing optional attributes become visible evidence gaps—not import failures.</p></div>
+                <button onClick={handleDownloadTemplate} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#A88554] px-4 text-xs font-semibold text-black"><Download className="h-4 w-4" />Download Blank Template</button>
+              </div>
+
+              <details className="group rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-4">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold"><span>View Field Guide</span><span className="text-[var(--emos-accent)] transition-transform group-open:rotate-45">+</span></summary>
+                <div className="mt-4 overflow-x-auto border-t border-[var(--emos-border-subtle)] pt-4"><table className="w-full min-w-[36rem] text-left text-xs"><thead className="text-[var(--emos-text-muted)]"><tr><th className="pb-2 pr-3">Type</th><th className="pb-2 pr-3">Field</th><th className="pb-2">Purpose</th></tr></thead><tbody className="divide-y divide-[var(--emos-border-subtle)]">{EMOS_FIELD_GUIDE.map(([type, field, purpose]) => <tr key={field}><td className="py-2 pr-3 font-semibold text-[var(--emos-accent-text)]">{type}</td><td className="py-2 pr-3 font-mono">{field}</td><td className="py-2 text-[var(--emos-text-secondary)]">{purpose}</td></tr>)}</tbody></table></div>
+              </details>
+
               <div className="bg-[var(--emos-surface)] p-4 rounded-xl border border-[var(--emos-border-subtle)]">
                 <h3 className="text-sm font-semibold text-[var(--emos-text-primary)] mb-1">
                   Ready-to-Use Enterprise Portfolio Datasets
@@ -382,6 +404,7 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
                 <p className="text-xs text-[var(--emos-text-secondary)]">
                   Each sample dataset is a fictional enterprise portfolio tailored to an industry archetype.
                   Collectively, they contain candidates for all 6 canonical 6R dispositions (Retain, Retire, Rehost, Replatform, Refactor, Repurchase).
+                  Use these to understand the schema before adapting a sanitized export from your own inventory.
                 </p>
               </div>
 
@@ -429,6 +452,7 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
                   <span className="text-[var(--emos-text-primary)] font-medium">never</span> passed to Gemini or included in the Enterprise DNA assessment payload.
                 </div>
               </div>
+              <div className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] p-3.5 text-xs leading-5 text-[var(--emos-text-secondary)]"><strong className="text-[var(--emos-text-primary)]">Current Beta Boundary:</strong> Header capitalization, spaces and hyphens are normalized automatically. Arbitrary ServiceNow, LeanIX or spreadsheet column names still need to be mapped to the EMOS template before upload.</div>
             </div>
           )}
         </div>

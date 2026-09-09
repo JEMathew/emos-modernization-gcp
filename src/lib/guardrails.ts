@@ -4,6 +4,8 @@ import type {
   EnterpriseDna,
   EnterpriseWorkload,
 } from '../types';
+import { EMOS_FACTS } from '../config/productFacts';
+import { evaluateEvidenceReadiness } from './readiness';
 
 /**
  * EMOS — Enterprise Modernization Operating System
@@ -353,14 +355,9 @@ export function validateAndReconcileAssessment({
     : 'NEEDS EVIDENCE';
 
   // Identify critical missing evidence in DNA if provided
-  let hasCriticalGaps = evidenceCompleteness < 70;
+  let hasCriticalGaps = evidenceCompleteness < EMOS_FACTS.readinessThreshold;
   if (workloadDna) {
-    const missingTarget = workloadDna.targetState.some((f) => f.status !== 'known');
-    const missingTco = workloadDna.economics.some((f) => f.id === 'e3' && f.status !== 'known');
-    const incompleteDeps = workloadDna.dependency.some((f) => f.status !== 'known');
-    if (missingTarget || missingTco || incompleteDeps) {
-      hasCriticalGaps = true;
-    }
+    hasCriticalGaps = evaluateEvidenceReadiness(workloadDna).decisionReadiness === 'NEEDS EVIDENCE';
   } else if (targetPlatformVerified !== true) {
     hasCriticalGaps = true;
   }

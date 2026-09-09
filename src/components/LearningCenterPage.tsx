@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -17,7 +18,6 @@ import {
   CURRENT_BETA_CAPABILITIES,
   FUTURE_ROADMAP_CAPABILITIES,
   LEARNING_CATEGORIES,
-  LEARNING_HERO_IMAGE,
   LEARNING_VIDEOS,
   type LearningCategory,
   type LearningVideo,
@@ -38,6 +38,7 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
   const [category, setCategory] = useState<CategoryFilter>('All Categories');
   const [selectedVideo, setSelectedVideo] = useState<LearningVideo | null>(null);
   const playbackTriggerRef = useRef<HTMLElement | null>(null);
+  const reduceMotion = useReducedMotion();
 
   const filteredVideos = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -77,9 +78,9 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
   const closeVideo = useCallback(() => setSelectedVideo(null), []);
 
   return (
-    <div className="min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] font-sans transition-colors">
-      <header className="sticky top-0 z-30 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]/95 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+    <div className="emos-landing min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] font-sans transition-colors">
+      <header className="sticky top-0 z-30 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]/88 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-[88rem] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           <a
             href="/"
             onClick={navigate('/')}
@@ -110,46 +111,44 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
       </header>
 
       <main>
-        <section className="mx-auto max-w-7xl px-4 pb-8 pt-8 sm:px-6 sm:pb-12 sm:pt-12 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl border border-[var(--emos-border-subtle)] bg-[#08152a] shadow-2xl shadow-black/10">
-            <img
-              src={LEARNING_HERO_IMAGE}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover opacity-35"
-              aria-hidden="true"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#08152a] via-[#08152a]/90 to-[#08152a]/35" />
-            <div className="relative max-w-3xl space-y-5 px-6 py-12 text-white sm:px-10 sm:py-16 lg:px-14 lg:py-20">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200/25 bg-cyan-200/10 px-3 py-1 text-xs font-semibold text-cyan-100">
+        <section className="landing-scene landing-video relative overflow-hidden border-b border-[var(--emos-border-subtle)]">
+          <div className="pointer-events-none absolute inset-0 landing-grid opacity-40" aria-hidden="true" />
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="relative mx-auto max-w-[88rem] px-4 py-14 sm:px-6 sm:py-16 lg:px-8"
+          >
+            <div className="max-w-4xl space-y-5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] px-3 py-1.5 text-xs font-semibold text-[var(--emos-accent-text)]">
                 <Library className="h-3.5 w-3.5" aria-hidden="true" />
-                Public Beta v1.0 · No EMOS sign-in required
+                Beta v1.0 Publicly Live · No EMOS Sign-In Required
               </div>
-              <h1 className="font-serif text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                Learn EMOS
+              <h1 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+                See EMOS in Motion
               </h1>
-              <p className="max-w-2xl text-sm leading-relaxed text-slate-200 sm:text-base">
-                Follow the enterprise modernization journey from portfolio discovery and Enterprise DNA
-                through explainable 6R decisions, wave planning, and mobilization readiness.
+              <p className="max-w-3xl text-base leading-8 text-[var(--emos-text-secondary)]">
+                Follow the evidence-to-decision journey from portfolio discovery and Enterprise DNA through explainable 6R recommendations, governance, wave planning and mobilization readiness.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#catalogue"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-5 text-sm font-bold text-black transition-opacity hover:opacity-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-5 text-sm font-bold text-black transition-all hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)]"
                 >
-                  Browse all 20 lessons
+                  Browse All 20 Lessons
                 </a>
               </div>
             </div>
-          </div>
+          </motion.div>
         </section>
 
-        <section id="catalogue" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-8 sm:px-6 lg:px-8">
+        <section id="catalogue" className="mx-auto max-w-[88rem] scroll-mt-24 px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
           <div className="mb-7 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--emos-accent-text)]">
-                Beta walkthrough catalogue
+                Beta Walkthrough Catalogue
               </p>
-              <h2 className="mt-2 font-serif text-3xl font-bold tracking-tight">Choose a learning path</h2>
+              <h2 className="mt-2 font-serif text-3xl font-bold tracking-tight">Choose a Learning Path</h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--emos-text-secondary)]">
                 For a concise end-to-end journey, watch 00 and then F10 → F11 → F12 → F03 → F04 → F19.
               </p>
@@ -215,10 +214,15 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
 
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                       {group.videos.map((video) => (
-                        <article
+                        <motion.article
                           key={video.sequence}
                           data-testid={`video-${video.sequence.toLowerCase()}`}
-                          className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-lg"
+                          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                          viewport={{ once: true, amount: 0.12 }}
+                          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                          whileHover={reduceMotion ? undefined : { y: -5 }}
+                          className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] shadow-sm hover:shadow-xl"
                         >
                           <img
                             src={video.thumbnailUrl}
@@ -283,7 +287,7 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
                               </button>
                             )}
                           </div>
-                        </article>
+                        </motion.article>
                       ))}
                     </div>
                   </section>
@@ -302,8 +306,8 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
         </section>
 
         <section className="border-y border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]">
-          <div className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8">
-            <article className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-6">
+          <div className="mx-auto grid max-w-[88rem] gap-6 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8">
+            <motion.article initial={reduceMotion ? false : { opacity: 0, x: -16 }} whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-6">
               <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
                 <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
                 <h2 className="font-serif text-xl font-bold">Implemented in Beta v1.0</h2>
@@ -316,12 +320,12 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
                   </li>
                 ))}
               </ul>
-            </article>
+            </motion.article>
 
-            <article className="rounded-2xl border border-violet-500/25 bg-violet-500/5 p-6">
+            <motion.article initial={reduceMotion ? false : { opacity: 0, x: 16 }} whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} className="rounded-2xl border border-violet-500/25 bg-violet-500/5 p-6">
               <div className="flex items-center gap-2 text-violet-700 dark:text-violet-300">
                 <Map className="h-5 w-5" aria-hidden="true" />
-                <h2 className="font-serif text-xl font-bold">Future EMOS roadmap</h2>
+                <h2 className="font-serif text-xl font-bold">Future EMOS Roadmap</h2>
               </div>
               <p className="mt-3 text-xs leading-relaxed text-[var(--emos-text-muted)]">
                 These capabilities describe the broader product direction and are not claimed as implemented in this beta.
@@ -334,18 +338,20 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
                   </li>
                 ))}
               </ul>
-            </article>
+            </motion.article>
           </div>
         </section>
       </main>
 
       <footer className="border-t border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] px-4 py-8 text-xs text-[var(--emos-text-muted)] sm:px-6">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
+        <div className="mx-auto flex max-w-[88rem] flex-col items-center justify-between gap-4 sm:flex-row">
           <p className="text-center sm:text-left">
             <span className="font-serif font-bold text-[var(--emos-text-primary)]">EMOS</span> — Enterprise Modernization Operating System · Public Beta v1.0
           </p>
           <nav aria-label="Learning Center footer" className="flex flex-wrap justify-center gap-5">
             <a href="/" onClick={navigate('/')} className="font-medium hover:text-[var(--emos-text-primary)] hover:underline">Home</a>
+            <a href="/sandbox" onClick={navigate('/sandbox')} className="font-medium hover:text-[var(--emos-text-primary)] hover:underline">Public Sandbox</a>
+            <a href="/trust" onClick={navigate('/trust')} className="font-medium hover:text-[var(--emos-text-primary)] hover:underline">Trust &amp; Evaluation</a>
             <a href="/privacy" onClick={navigate('/privacy')} className="font-medium hover:text-[var(--emos-text-primary)] hover:underline">Privacy Policy</a>
             <a href="/terms" onClick={navigate('/terms')} className="font-medium hover:text-[var(--emos-text-primary)] hover:underline">Terms of Service</a>
           </nav>
