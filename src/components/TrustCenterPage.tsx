@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  ArrowLeft, BrainCircuit, Database, ExternalLink, FileCode2, KeyRound,
-  LockKeyhole, Scale, ShieldCheck,
+  AlertTriangle, ArrowLeft, BrainCircuit, CheckCircle2, Database, ExternalLink,
+  FileCode2, KeyRound, LockKeyhole, Scale, ShieldCheck,
 } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import { ThemeSelector } from './ThemeSelector';
@@ -45,9 +45,17 @@ const TRUST_AREAS = [
   {
     icon: FileCode2,
     title: 'Inspectable Beta',
-    text: `The source repository, automated tests and all ${EMOS_FACTS.walkthroughCount} public learning videos are available for evaluation.`,
+    text: `The source repository, automated tests and ${EMOS_FACTS.learningLibraryLabel} are available for evaluation.`,
     evidence: 'Claims should be assessed against the shipped Beta v1.0 behavior and documented limitations.',
   },
+] as const;
+
+const CONFORMANCE_CASES = [
+  ['61%', 'NEEDS EVIDENCE', 'Below threshold with critical gaps'],
+  ['67%', 'NEEDS EVIDENCE', 'Nearest score below threshold'],
+  ['72%', 'READY', 'Above threshold with no critical gaps'],
+  ['94%', 'NEEDS EVIDENCE', 'Above threshold with a critical gap'],
+  ['100%', 'READY', 'Complete record, repeated deterministically'],
 ] as const;
 
 export const TrustCenterPage: React.FC<TrustCenterPageProps> = ({ onNavigate }) => {
@@ -75,10 +83,20 @@ export const TrustCenterPage: React.FC<TrustCenterPageProps> = ({ onNavigate }) 
             {TRUST_AREAS.map(({ icon: Icon, title, text, evidence }, index) => <motion.article key={title} className="rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5" initial={reduceMotion ? false : { opacity: 0, y: 18 }} whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.05 }}><Icon className="h-5 w-5 text-[var(--emos-accent)]" /><h2 className="mt-4 font-serif text-2xl font-semibold">{title}</h2><p className="mt-3 text-sm leading-6 text-[var(--emos-text-secondary)]">{text}</p><p className="mt-4 border-t border-[var(--emos-border-subtle)] pt-4 text-xs leading-5 text-[var(--emos-text-muted)]"><strong className="text-[var(--emos-text-primary)]">Evidence:</strong> {evidence}</p></motion.article>)}
           </div>
 
+          <section className="mt-8 overflow-hidden rounded-2xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)]">
+            <div className="grid gap-6 border-b border-[var(--emos-border-subtle)] p-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+              <div><div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-300"><CheckCircle2 className="h-5 w-5" /><span className="text-xs font-semibold uppercase tracking-[0.14em]">Public Conformance Evidence</span></div><h2 className="mt-3 font-serif text-3xl font-semibold">Readiness-Gate Conformance Suite</h2><p className="mt-4 text-sm leading-6 text-[var(--emos-text-secondary)]">Six labelled boundary and consistency tests pass, including zero false-ready outcomes across five deliberately blocking cases. The rules, cases and source are public.</p><a href="https://github.com/JEMathew/emos-modernization-gcp/blob/main/tests/readiness.evals.test.ts" target="_blank" rel="noreferrer" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--emos-border-strong)] px-4 text-sm font-semibold">Inspect the Conformance Tests <ExternalLink className="h-4 w-4" /></a></div>
+              <div className="grid gap-2 sm:grid-cols-2">{CONFORMANCE_CASES.map(([score, state, reason]) => <div key={`${score}-${reason}`} className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] p-4"><div className="flex items-center justify-between gap-3"><strong className="font-mono text-lg">{score}</strong><span className={`rounded-full px-2 py-1 font-mono text-[10px] font-bold ${state === 'READY' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/10 text-amber-700 dark:text-amber-300'}`}>{state}</span></div><p className="mt-2 text-xs leading-5 text-[var(--emos-text-muted)]">{reason}</p></div>)}</div>
+            </div>
+            <div className="flex gap-3 bg-[var(--emos-bg-secondary)] p-5"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" /><p className="text-sm leading-6 text-[var(--emos-text-secondary)]"><strong className="text-[var(--emos-text-primary)]">What This Proves—and What It Does Not:</strong> The suite demonstrates that the deterministic code conforms to the published readiness rules. It is not proof of real-world decision accuracy. That requires blind labels supplied by independent enterprise practitioners on their own representative workloads.</p></div>
+          </section>
+
           <div className="mt-8 grid gap-4 lg:grid-cols-2">
             <section className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-6"><h2 className="font-serif text-2xl font-semibold">Current Beta Boundary</h2><ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--emos-text-secondary)]"><li>Use synthetic or sanitized representative data only.</li><li>EMOS provides decision support, not architectural certification or migration authorization.</li><li>It does not provision infrastructure, staff delivery teams or execute migrations.</li><li>No external security certification is claimed for Beta v1.0.</li></ul></section>
-            <section className="rounded-2xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-6"><h2 className="font-serif text-2xl font-semibold">Evaluation and Pricing</h2><p className="mt-4 text-sm leading-6 text-[var(--emos-text-secondary)]">There is no charge to explore the public beta or sandbox. Commercial pricing has not been set. Founding design-partner scope and terms are discussed directly so the evaluation can match the portfolio, evidence and governance context.</p><div className="mt-5 flex flex-wrap gap-3"><button onClick={() => onNavigate('/sandbox')} className="min-h-11 rounded-xl bg-[#A88554] px-4 text-sm font-semibold text-black">Open Public Sandbox</button><a href="mailto:jeasom@gmail.com?subject=EMOS%20Trust%20or%20Design%20Partner%20Question" className="inline-flex min-h-11 items-center rounded-xl border border-[var(--emos-border-strong)] px-4 text-sm font-semibold">Ask a Question</a></div></section>
+            <section className="rounded-2xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-6"><h2 className="font-serif text-2xl font-semibold">Evaluation and Pricing</h2><p className="mt-4 text-sm leading-6 text-[var(--emos-text-secondary)]">There is no charge to explore the public beta or sandbox. Commercial pricing has not been set. Founding design-partner scope and terms are discussed directly so the evaluation can match the portfolio, evidence and governance context.</p><div className="mt-5 flex flex-wrap gap-3"><button onClick={() => onNavigate('/sandbox')} className="min-h-11 rounded-xl bg-[#A88554] px-4 text-sm font-semibold text-black">Open Public Sandbox</button><a href="mailto:jeasom@gmail.com?subject=EMOS%20Trust%20or%20Design%20Partner%20Question" className="inline-flex min-h-11 items-center rounded-xl border border-[var(--emos-border-strong)] px-4 text-sm font-semibold">Ask Jincen E Mathew a Question</a></div></section>
           </div>
+
+          <section className="mt-4 rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-6"><h2 className="font-serif text-2xl font-semibold">Open Data-Control Questions Before Design-Partner Data</h2><p className="mt-3 text-sm leading-6 text-[var(--emos-text-secondary)]">The Privacy Policy documents current record-level deletion and its limitations. Beta v1.0 does not yet provide account-wide self-service deletion or a contractual retention period. Provider-specific logging, training-use and processing-region terms must be confirmed against the deployed service and governing agreements before any partner supplies data beyond the synthetic or sanitized boundary.</p><button onClick={() => onNavigate('/privacy')} className="mt-4 text-sm font-semibold text-[var(--emos-accent-text)] underline underline-offset-4">Review the Current Privacy Boundary</button></section>
 
           <div className="mt-8 flex flex-wrap gap-4 text-sm"><button onClick={() => onNavigate('/privacy')} className="font-semibold text-[var(--emos-accent-text)] underline underline-offset-4">Privacy Policy</button><button onClick={() => onNavigate('/terms')} className="font-semibold text-[var(--emos-accent-text)] underline underline-offset-4">Terms of Service</button><a href="https://github.com/JEMathew/emos-modernization-gcp" target="_blank" rel="noreferrer" className="font-semibold text-[var(--emos-accent-text)] underline underline-offset-4">Review the Source and Tests</a></div>
         </section>

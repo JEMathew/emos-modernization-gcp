@@ -36,6 +36,7 @@ interface ReflectionWorkspaceProps {
   isProcessing: boolean;
   saveStatus: 'idle' | 'saving' | 'saved' | 'error';
   errorMessage: string | null;
+  errorKind?: 'reasoning' | 'persistence' | null;
 }
 
 // Canonical Prompt Starters specified in requirements
@@ -77,6 +78,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
   isProcessing,
   saveStatus,
   errorMessage,
+  errorKind = null,
 }) => {
   const [draftContent, setDraftContent] = useState('');
   const [selectedMode, setSelectedMode] = useState<AssessmentMode>('assess');
@@ -178,11 +180,11 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
     <div id="modernization-workspace" className="flex-1 flex flex-col h-full lg:h-[calc(100vh-4rem)] bg-[var(--emos-bg)] overflow-hidden text-[var(--emos-text-primary)] transition-colors">
       {/* Top Status & Sync Bar */}
       <div className="px-4 sm:px-6 py-2.5 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-start gap-2 min-w-0">
           {saveStatus === 'saving' && (
             <span className="inline-flex items-center gap-2 text-[var(--emos-text-secondary)] truncate">
               <span className="w-2 h-2 rounded-full bg-[var(--emos-accent)] animate-pulse shrink-0" />
-              Persisting Assessment to Cloud Firestore...
+              Processing Assessment Securely...
             </span>
           )}
           {saveStatus === 'saved' && (
@@ -192,9 +194,14 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
             </span>
           )}
           {saveStatus === 'error' && (
-            <span className="inline-flex items-center gap-1.5 text-rose-500 font-medium truncate">
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-              Sync issue: {errorMessage || 'Could not save assessment to Firestore.'}
+            <span className="inline-flex items-start gap-1.5 text-rose-500 font-medium whitespace-normal leading-5" role="alert">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              <span>
+              {errorKind === 'reasoning' ? 'AI reasoning unavailable — ' : 'Sync issue — '}
+              {errorMessage || (errorKind === 'reasoning'
+                ? 'Your saved assessment data is unaffected. Try again from the message box.'
+                : 'Could not save assessment to Firestore.')}
+              </span>
             </span>
           )}
           {saveStatus === 'idle' && (
@@ -216,7 +223,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
             </button>
           )}
 
-          {saveStatus === 'error' && activeInteraction && onRetrySave && (
+          {saveStatus === 'error' && errorKind !== 'reasoning' && activeInteraction && onRetrySave && (
             <button
               id="retry-save-btn"
               onClick={() => onRetrySave(activeInteraction)}

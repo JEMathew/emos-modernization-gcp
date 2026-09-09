@@ -108,6 +108,27 @@ describe('/api/chat release contract', () => {
     });
     expect(result.status).toBe(502);
     expect(result.body.error).not.toContain('persuasive answer');
+    expect(result.body.code).toBe('AI_GUARDRAIL_REJECTED');
+  });
+
+  it('distinguishes an unavailable Gemini connection from a persistence failure', async () => {
+    const priorKey = process.env.GEMINI_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    setContentGeneratorForTests(undefined);
+
+    try {
+      const result = await withAuth(request(app).post('/api/chat')).send({
+        message: 'Assess Java 8', history: [], mode: 'assess',
+      });
+
+      expect(result.status).toBe(503);
+      expect(result.body.code).toBe('AI_REASONING_UNAVAILABLE');
+      expect(result.body.error).toContain('saved assessment data is unaffected');
+      expect(result.body.error).not.toMatch(/Firestore|sync/i);
+    } finally {
+      if (priorKey === undefined) delete process.env.GEMINI_API_KEY;
+      else process.env.GEMINI_API_KEY = priorKey;
+    }
   });
 
   it('validates title requests and model metadata output', async () => {

@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { EnterpriseDna } from '../src/types';
 import { SAMPLE_PORTFOLIO } from '../src/data/samplePortfolio';
 import { EMOS_FACTS } from '../src/config/productFacts';
-import { evaluateEvidenceReadiness } from '../src/lib/readiness';
+import { applySyntheticEvidenceStage, evaluateEvidenceReadiness, READINESS_DEMO_STAGES } from '../src/lib/readiness';
+import { buildEvidenceActionPlanCsv } from '../src/lib/sampleDecisionBrief';
 
 function allKnownDna(): EnterpriseDna {
   const dna = structuredClone(SAMPLE_PORTFOLIO[0].dna);
@@ -73,5 +74,30 @@ describe('labelled evidence-readiness evaluation set', () => {
       markMissing(allKnownDna(), ['d2']),
     ];
     expect(labelledBlockedCases.filter((dna) => evaluateEvidenceReadiness(dna).decisionReadiness === 'READY')).toHaveLength(0);
+  });
+
+  it('demonstrates that the threshold is necessary but not sufficient across the public stages', () => {
+    const results = READINESS_DEMO_STAGES.map((_stage, index) =>
+      evaluateEvidenceReadiness(applySyntheticEvidenceStage(SAMPLE_PORTFOLIO[0].dna, index)),
+    );
+
+    expect(results.map((result) => result.completeness)).toEqual([61, 67, 78, 89]);
+    expect(results.map((result) => result.decisionReadiness)).toEqual([
+      'NEEDS EVIDENCE',
+      'NEEDS EVIDENCE',
+      'NEEDS EVIDENCE',
+      'READY',
+    ]);
+    expect(results[2].thresholdMet).toBe(true);
+    expect(results[2].criticalGaps).toEqual(['Dependency Details', 'Migration Downtime Tolerance']);
+    expect(results[3].criticalGaps).toHaveLength(0);
+  });
+
+  it('exports unresolved evidence as an assignable CSV action plan', () => {
+    const csv = buildEvidenceActionPlanCsv(SAMPLE_PORTFOLIO[0]);
+    expect(csv).toContain('"Dimension","Evidence Gap","Current Status","Owner","Evidence Source","Due Date"');
+    expect(csv).toContain('"Economics","Detailed TCO Baseline","missing"');
+    expect(csv).toContain('"Dependencies","Dependency Details","incomplete"');
+    expect(csv).not.toContain('"Business","Business Capability"');
   });
 });

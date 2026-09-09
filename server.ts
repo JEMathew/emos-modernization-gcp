@@ -376,6 +376,13 @@ app.post("/api/chat", requireAuthenticatedUser, async (req, res) => {
       return res.status(400).json({ error: promptGuard.securityNotice || "Unsafe input rejected." });
     }
 
+    if (!process.env.GEMINI_API_KEY && !contentGeneratorOverride) {
+      return res.status(503).json({
+        error: "This environment has no server-side Gemini connection. Your saved assessment data is unaffected.",
+        code: "AI_REASONING_UNAVAILABLE",
+      });
+    }
+
     // Determine system instructions based on assessment mode with explicit Security Fences
     let systemInstruction = `You are EMOS — Enterprise Modernization Decision Intelligence, an expert enterprise architecture and cloud modernization advisor.
 Your purpose is to help enterprise users turn modernization conversations and available evidence into structured, explainable modernization assessments.
@@ -539,8 +546,15 @@ ${systemInstruction}`;
     return res.json(payload);
   } catch (error: any) {
     console.error("Error in /api/chat:", redactSecrets(error instanceof Error ? error.message : String(error)));
-    return res.status(error instanceof GuardrailValidationError ? 502 : 500).json({
-      error: "Modernization reasoning service encountered an error. Please verify your inputs and try again.",
+    if (error instanceof GuardrailValidationError) {
+      return res.status(502).json({
+        error: "The AI response did not satisfy EMOS decision guardrails. No assessment changes were saved.",
+        code: "AI_GUARDRAIL_REJECTED",
+      });
+    }
+    return res.status(503).json({
+      error: "AI reasoning is temporarily unavailable. Your saved assessment data is unaffected. Try again from the message box.",
+      code: "AI_REASONING_UNAVAILABLE",
     });
   }
 });

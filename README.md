@@ -28,6 +28,7 @@ The current Decision Intelligence capability determines *what* should happen bas
 - **Demo Videos**: [Complete library on Google Drive](https://drive.google.com/drive/folders/1ONwIDuVpKqu3DJzmHgzrtYTeJaOUXqQ1?usp=drive_link) · [Narrated EMOS Beta introduction](docs/demo/EMOS-Beta-Introduction.mp4)
 - **Subtitles**: [WebVTT](docs/demo/EMOS-Beta-Introduction.vtt) · [SRT](docs/demo/EMOS-Beta-Introduction.srt)
 - **Repository**: [github.com/JEMathew/emos-modernization-gcp](https://github.com/JEMathew/emos-modernization-gcp)
+- **Ideathon Evidence**: [Requirement map and two-minute judge path](docs/IDEATHON_DELIVERABLES.md) · [Google AI Studio security constitution](docs/AI_STUDIO_SECURITY_CONSTITUTION.md) · [Claim-to-source evidence index](docs/EVIDENCE_INDEX.md)
 
 [<img src="docs/learning/emos-learning-background.png" alt="Open the public EMOS Beta v1.0 Learning Center" width="760">](docs/LEARN.md)
 

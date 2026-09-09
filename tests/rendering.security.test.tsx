@@ -82,6 +82,65 @@ describe('safe assessment rendering', () => {
     expect(writeText).not.toHaveBeenCalledWith(expect.stringMatching(/Rebuild|99%|Decision Readiness:\*\* READY/));
   });
 
+  it('does not present an AI availability failure as a Firestore sync failure', () => {
+    const interaction: Interaction = {
+      id: 'assessment-availability',
+      userId: 'owner-1',
+      title: 'Payments',
+      category: 'Legacy Application',
+      mode: 'assess',
+      content: 'Java 8 workload',
+      geminiResponse: 'Existing saved assessment',
+      turns: [],
+      createdAt: new Date(0).toISOString(),
+      updatedAt: new Date(0).toISOString(),
+    };
+
+    render(<ReflectionWorkspace
+      activeInteraction={interaction}
+      onSaveNew={async () => undefined}
+      onSendFollowUp={async () => undefined}
+      onRetrySave={async () => undefined}
+      isProcessing={false}
+      saveStatus="error"
+      errorKind="reasoning"
+      errorMessage="Your saved assessment data is unaffected."
+    />);
+
+    expect(screen.getByText(/AI reasoning unavailable —/)).toBeInTheDocument();
+    expect(screen.queryByText(/Sync issue —/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Retry Save/i })).not.toBeInTheDocument();
+  });
+
+  it('keeps Retry Save available for an actual persistence failure', () => {
+    const interaction: Interaction = {
+      id: 'assessment-persistence',
+      userId: 'owner-1',
+      title: 'Payments',
+      category: 'Legacy Application',
+      mode: 'assess',
+      content: 'Java 8 workload',
+      geminiResponse: 'Existing saved assessment',
+      turns: [],
+      createdAt: new Date(0).toISOString(),
+      updatedAt: new Date(0).toISOString(),
+    };
+
+    render(<ReflectionWorkspace
+      activeInteraction={interaction}
+      onSaveNew={async () => undefined}
+      onSendFollowUp={async () => undefined}
+      onRetrySave={async () => undefined}
+      isProcessing={false}
+      saveStatus="error"
+      errorKind="persistence"
+      errorMessage="Could not save assessment to Firestore."
+    />);
+
+    expect(screen.getByText(/Sync issue —/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Retry Save/i })).toBeInTheDocument();
+  });
+
   it('renders alignment, deterministic waves, and mobilization readiness', () => {
     const alignment: ProgramAlignment = {
       userId: 'owner-1', programName: 'Core modernization', executiveSponsor: 'CTO', securityApprover: 'CISO delegate', deliveryOwner: 'Program director',
