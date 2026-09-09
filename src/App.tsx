@@ -12,6 +12,8 @@ import { TestWalkthroughModal } from './components/TestWalkthroughModal';
 import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
 import { TermsPage } from './components/TermsPage';
 import { LearningCenterPage } from './components/LearningCenterPage';
+import { PublicSandboxPage } from './components/PublicSandboxPage';
+import { TrustCenterPage } from './components/TrustCenterPage';
 import { ThemeProvider } from './lib/theme';
 import { Sparkles } from 'lucide-react';
 
@@ -77,6 +79,16 @@ export default function App() {
       return;
     }
 
+    if (currentPath === '/sandbox') {
+      document.title = 'Public Evaluation Sandbox — EMOS';
+      return;
+    }
+
+    if (currentPath === '/trust') {
+      document.title = 'Trust and Evaluation — EMOS';
+      return;
+    }
+
     document.title = 'EMOS — Enterprise Modernization Operating System';
   }, [currentPath]);
 
@@ -101,6 +113,14 @@ export default function App() {
 
     if (currentPath === '/learn') {
       return <LearningCenterPage onNavigate={navigateTo} />;
+    }
+
+    if (currentPath === '/sandbox') {
+      return <PublicSandboxPage onNavigate={navigateTo} />;
+    }
+
+    if (currentPath === '/trust') {
+      return <TrustCenterPage onNavigate={navigateTo} />;
     }
 
     if (isAuthChecking) {

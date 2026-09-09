@@ -6,8 +6,17 @@ import {
   parseCsvPortfolio,
   parseJsonPortfolio,
 } from '../src/utils/portfolioImporter';
+import { EMOS_TEMPLATE_CSV } from '../src/data/sampleCsvs';
 
 describe('canonical portfolio import limits', () => {
+  it('provides a valid starter template with the required fields and visible evidence gaps', () => {
+    const result = parseCsvPortfolio(EMOS_TEMPLATE_CSV, 'emos-portfolio-template.csv', 'alice');
+    expect(result.validRecords).toHaveLength(1);
+    expect(result.invalidRecords).toHaveLength(0);
+    expect(result.validRecords[0]).toMatchObject({ id: 'APP-001', type: 'Application' });
+    expect(result.totalEvidenceGaps).toBeGreaterThan(0);
+  });
+
   it('uses one documented 5MB / 200 workload contract', () => {
     expect(MAX_FILE_SIZE_BYTES).toBe(5 * 1024 * 1024);
     expect(MAX_FILE_SIZE_LABEL).toBe('5MB');

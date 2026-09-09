@@ -35,6 +35,12 @@ const EXPECTED_DRIVE_IDS: Record<string, string> = {
   'F19-plan-mobilize-the-modernization-program.mp4': '1CcbmWr2GPGRc-7BlUiesR7skhcJkXOA9',
 };
 
+class MockIntersectionObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 function renderLearningCenter(videos?: readonly LearningVideo[]) {
   return render(
     <ThemeProvider>
@@ -45,6 +51,7 @@ function renderLearningCenter(videos?: readonly LearningVideo[]) {
 
 describe('EMOS Learning Center embedded video playback', () => {
   beforeEach(() => {
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: vi.fn().mockImplementation((query: string) => ({
