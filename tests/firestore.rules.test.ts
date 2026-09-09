@@ -6,7 +6,7 @@ import {
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
-import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 let testEnv: RulesTestEnvironment;
 
@@ -96,6 +96,31 @@ describe('Firestore owner isolation and integrity', () => {
     await assertSucceeds(updateDoc(ref, { title: 'Updated title' }));
     await assertSucceeds(getDocs(collection(db, 'users/alice/interactions')));
     await assertSucceeds(deleteDoc(ref));
+  });
+
+  it('persists and reloads multi-turn conversation turns while maintaining owner isolation', async () => {
+    const aliceDb = testEnv.authenticatedContext('alice').firestore();
+    const bobDb = testEnv.authenticatedContext('bob').firestore();
+    const ref = doc(aliceDb, 'users/alice/interactions/assessment-turns');
+    await assertSucceeds(setDoc(ref, validInteraction('alice', 'assessment-turns')));
+
+    const turns = [
+      { role: 'user', content: 'What are the main database migration risks?', timestamp: new Date(1000).toISOString() },
+      { role: 'model', content: 'The main database migration risks are PL/SQL packages and database links.', timestamp: new Date(2000).toISOString() },
+    ];
+
+    // Owner can persist conversation turns
+    await assertSucceeds(updateDoc(ref, { turns }));
+
+    // Owner can reload persisted conversation turns
+    const snapshot = await assertSucceeds(getDoc(ref));
+    expect(snapshot.data()?.turns).toHaveLength(2);
+    expect(snapshot.data()?.turns[0].content).toBe('What are the main database migration risks?');
+    expect(snapshot.data()?.turns[1].content).toContain('PL/SQL packages');
+
+    // Other users cannot read or modify the conversation turns
+    await assertFails(getDoc(doc(bobDb, 'users/alice/interactions/assessment-turns')));
+    await assertFails(updateDoc(doc(bobDb, 'users/alice/interactions/assessment-turns'), { turns: [] }));
   });
 
   it('denies cross-user reads, queries, writes, updates, and deletes', async () => {

@@ -36,7 +36,7 @@ interface ReflectionWorkspaceProps {
   isProcessing: boolean;
   saveStatus: 'idle' | 'saving' | 'saved' | 'error';
   errorMessage: string | null;
-  errorKind?: 'reasoning' | 'persistence' | null;
+  errorKind?: 'reasoning' | 'persistence' | 'guardrail' | null;
 }
 
 // Canonical Prompt Starters specified in requirements
@@ -197,9 +197,11 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
             <span className="inline-flex items-start gap-1.5 text-rose-500 font-medium whitespace-normal leading-5" role="alert">
               <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               <span>
-              {errorKind === 'reasoning' ? 'AI reasoning unavailable — ' : 'Sync issue — '}
+              {errorKind === 'reasoning' ? 'AI reasoning unavailable — ' : errorKind === 'guardrail' ? 'Guardrail rejected — ' : 'Sync issue — '}
               {errorMessage || (errorKind === 'reasoning'
                 ? 'Your saved assessment data is unaffected. Try again from the message box.'
+                : errorKind === 'guardrail'
+                ? 'The AI response did not satisfy EMOS decision guardrails. No assessment changes were saved.'
                 : 'Could not save assessment to Firestore.')}
               </span>
             </span>
@@ -223,7 +225,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
             </button>
           )}
 
-          {saveStatus === 'error' && errorKind !== 'reasoning' && activeInteraction && onRetrySave && (
+          {saveStatus === 'error' && errorKind !== 'reasoning' && errorKind !== 'guardrail' && activeInteraction && onRetrySave && (
             <button
               id="retry-save-btn"
               onClick={() => onRetrySave(activeInteraction)}

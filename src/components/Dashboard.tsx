@@ -54,7 +54,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [errorKind, setErrorKind] = useState<'reasoning' | 'persistence' | null>(null);
+  const [errorKind, setErrorKind] = useState<'reasoning' | 'persistence' | 'guardrail' | null>(null);
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isMobileHistoryOpen, setIsMobileHistoryOpen] = useState(false);
@@ -145,6 +145,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         generateAssessmentMeta(content),
       ]);
 
+      if (chatRes.type !== 'assessment') {
+        throw new Error('Expected initial modernization assessment response.');
+      }
+
       // Consume the server-reconciled assessment and metadata as one canonical result.
       const attributes = chatRes.attributes;
 
@@ -168,11 +172,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         confidenceScore: attributes.confidenceScore,
         evidenceCompleteness: attributes.evidenceCompleteness,
         decisionReadiness: attributes.decisionReadiness,
-        trustIndicators: attributes.trustIndicators || chatRes.trustIndicators || {
+        trustIndicators: {
           inputValidated: true,
-          evidenceGrounded: attributes.isGrounded ?? true,
+          evidenceGrounded: attributes.isGrounded ?? attributes.trustIndicators?.evidenceGrounded ?? chatRes.trustIndicators?.evidenceGrounded ?? true,
           schemaValidated: true,
-          wasRepaired: attributes.wasRepaired,
+          wasRepaired: attributes.wasRepaired ?? attributes.trustIndicators?.wasRepaired ?? chatRes.trustIndicators?.wasRepaired,
         },
       };
 
@@ -185,10 +189,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       setErrorKind(null);
     } catch (err: any) {
       console.error("Failed to generate or save assessment:", err);
+      const isGuardrail = err?.code === 'AI_GUARDRAIL_REJECTED' || (typeof err?.message === 'string' && err.message.toLowerCase().includes('guardrail'));
+      const resolvedErrorKind: 'reasoning' | 'persistence' | 'guardrail' = isGuardrail ? 'guardrail' : failureKind;
       setSaveStatus('error');
-      setErrorKind(failureKind);
-      setErrorMessage(err?.message || (failureKind === 'reasoning'
+      setErrorKind(resolvedErrorKind);
+      setErrorMessage(err?.message || (resolvedErrorKind === 'reasoning'
         ? "AI reasoning is unavailable. Your saved assessment data is unaffected."
+        : resolvedErrorKind === 'guardrail'
+        ? "The AI response did not satisfy EMOS decision guardrails. No assessment changes were saved."
         : "Could not save the assessment to Firestore."));
       throw err;
     } finally {
@@ -305,29 +313,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         },
       ];
 
-      // If follow-up refined the assessment, update canonical attributes consistently
-      const updatedAttrs = response.attributes;
+      // Requirement 5: Follow-up prose must never modify:
+      // recommended6R, confidenceScore, evidenceCompleteness, decisionReadiness.
+      // Canonical assessment state may change only through a validated structured evidence update followed by deterministic recalculation.
       const updatePayload: Partial<Interaction> = {
         turns: updatedTurns,
       };
-      if (updatedAttrs.recommended6R) {
-        updatePayload.recommended6R = updatedAttrs.recommended6R;
-      }
-      if (typeof updatedAttrs.confidenceScore === 'number') {
-        updatePayload.confidenceScore = updatedAttrs.confidenceScore;
-      }
-      if (typeof updatedAttrs.evidenceCompleteness === 'number') {
-        updatePayload.evidenceCompleteness = updatedAttrs.evidenceCompleteness;
-      }
-      if (updatedAttrs.decisionReadiness) {
-        updatePayload.decisionReadiness = updatedAttrs.decisionReadiness;
-      }
-      if (updatedAttrs.workloadName) {
-        updatePayload.workloadName = updatedAttrs.workloadName;
-      }
-      if (updatedAttrs.trustIndicators) {
-        updatePayload.trustIndicators = updatedAttrs.trustIndicators;
-      }
 
       failureKind = 'persistence';
       await updateInteraction(user.uid, interactionId, updatePayload);
@@ -336,10 +327,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       setErrorKind(null);
     } catch (err: any) {
       console.error("Failed to process follow-up:", err);
+      const isGuardrail = err?.code === 'AI_GUARDRAIL_REJECTED' || (typeof err?.message === 'string' && err.message.toLowerCase().includes('guardrail'));
+      const resolvedErrorKind: 'reasoning' | 'persistence' | 'guardrail' = isGuardrail ? 'guardrail' : failureKind;
       setSaveStatus('error');
-      setErrorKind(failureKind);
-      setErrorMessage(err?.message || (failureKind === 'reasoning'
+      setErrorKind(resolvedErrorKind);
+      setErrorMessage(err?.message || (resolvedErrorKind === 'reasoning'
         ? "AI reasoning is unavailable. Your saved assessment data is unaffected."
+        : resolvedErrorKind === 'guardrail'
+        ? "The AI response did not satisfy EMOS decision guardrails. No assessment changes were saved."
         : "Could not save the follow-up to Firestore."));
       throw err;
     } finally {
