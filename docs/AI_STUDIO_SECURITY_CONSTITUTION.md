@@ -42,9 +42,12 @@ AI and untrusted content:
 - Send Gemini requests through the authenticated server boundary, never directly from the browser with a private key.
 - Fence user prompts, imported evidence, conversation history and prior model output as untrusted data.
 - Reject prompt-injection patterns and enforce bounded schemas and payload sizes.
+- Differentiate between initial assessments (structured 6R taxonomy, full schema validation, deterministic reconciliation) and follow-up turns (concise conversational answers).
+- Determine follow-up mode server-side from validated non-empty conversation history; never trust a client-supplied authorization flag.
 - Validate model output against the canonical six dispositions: Retain, Retire, Rehost, Replatform, Refactor and Repurchase.
-- Redact secrets from model output and fail closed when structured output is malformed.
+- Redact secrets from model output and fail closed when structured output is malformed or empty.
 - Do not allow model prose or confidence to override deterministic calculations or human approval gates.
+- Follow-up prose must never modify canonical assessment metrics (recommended6R, confidenceScore, evidenceCompleteness, decisionReadiness); canonical state changes only through validated structured evidence updates followed by deterministic recalculation.
 
 EMOS product integrity:
 - Calculate numeric evidence completeness, readiness, prioritization and wave logic deterministically in code.

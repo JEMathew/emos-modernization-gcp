@@ -59,13 +59,32 @@ export const assessmentAttributesSchema = z.object({
   }).strict(),
 }).strict();
 
-export const chatResponseSchema = z.object({
+export const assessmentResponseSchema = z.object({
+  type: z.literal('assessment'),
   response: z.string().min(1).max(50_000),
   sanitizedInput: z.string().max(MAX_PROMPT_LENGTH + 100),
   modelUsed: z.string().min(1).max(100),
   attributes: assessmentAttributesSchema,
   trustIndicators: assessmentAttributesSchema.shape.trustIndicators,
 }).strict();
+
+export const followUpResponseSchema = z.object({
+  type: z.literal('follow_up'),
+  response: z.string().min(1).max(50_000),
+  sanitizedInput: z.string().max(MAX_PROMPT_LENGTH + 100),
+  modelUsed: z.string().min(1).max(100),
+  trustIndicators: z.object({
+    inputValidated: z.literal(true),
+    evidenceGrounded: z.boolean(),
+    schemaValidated: z.literal(true),
+    wasRepaired: z.boolean().optional(),
+  }).strict(),
+}).strict();
+
+export const chatResponseSchema = z.discriminatedUnion('type', [
+  assessmentResponseSchema,
+  followUpResponseSchema,
+]);
 
 export const titleRequestSchema = z.object({
   content: z.string().min(1).max(MAX_PROMPT_LENGTH),

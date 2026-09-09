@@ -7,8 +7,14 @@ import type {
   EnterpriseDna,
 } from '../types';
 import { redactSecrets } from './guardrails';
-import { chatResponseSchema, titleResponseSchema } from './schemas';
+import {
+  assessmentResponseSchema,
+  chatResponseSchema,
+  followUpResponseSchema,
+  titleResponseSchema,
+} from './schemas';
 import { auth } from './firebase';
+import type { z } from 'zod';
 
 async function authenticatedHeaders(): Promise<HeadersInit> {
   const user = auth.currentUser;
@@ -31,13 +37,9 @@ export interface AssessmentAttributes {
   trustIndicators: TrustIndicators;
 }
 
-export interface ChatResponse {
-  response: string;
-  sanitizedInput: string;
-  modelUsed: string;
-  attributes: AssessmentAttributes;
-  trustIndicators: TrustIndicators;
-}
+export type AssessmentChatResponse = z.infer<typeof assessmentResponseSchema>;
+export type FollowUpChatResponse = z.infer<typeof followUpResponseSchema>;
+export type ChatResponse = AssessmentChatResponse | FollowUpChatResponse;
 
 export interface AssessmentMetaResponse {
   title: string;
@@ -72,7 +74,9 @@ export async function chatWithGemini(params: {
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || `Server returned error (${res.status}) while generating modernization assessment with Gemini.`);
+    const error = new Error(data.error || `Server returned error (${res.status}) while generating modernization assessment with Gemini.`);
+    (error as any).code = data.code;
+    throw error;
   }
 
   const json = await res.json();
