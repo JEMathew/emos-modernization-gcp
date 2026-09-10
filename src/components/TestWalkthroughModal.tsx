@@ -45,27 +45,27 @@ const PRODUCT_TOUR_STEPS = [
   },
   {
     step: 3,
-    stage: 'Assess',
-    title: 'Generate a 6R assessment',
+    stage: 'Decide',
+    title: 'Generate and review a 6R decision',
     icon: ShieldCheck,
-    description: 'Use the structured evidence to produce a recommended Retain, Retire, Rehost, Replatform, Refactor, or Repurchase path.',
-    action: 'Select "Assess for Modernization" to request the recommendation.',
+    description: 'Use structured evidence to produce a governed Retain, Retire, Rehost, Replatform, Refactor, or Repurchase recommendation with alternatives and risks.',
+    action: 'Select "Assess for Modernization," then review disposition, confidence, evidence completeness, readiness, and gaps.',
   },
   {
     step: 4,
-    stage: 'Decide',
-    title: 'Review and refine',
-    icon: ArrowRight,
-    description: 'Compare the rationale, alternatives, risks, confidence, and evidence gaps.',
-    action: 'Add new evidence in the follow-up box and check how the recommendation changes.',
+    stage: 'Plan',
+    title: 'Sequence governed decisions',
+    icon: Route,
+    description: 'Turn assessed workloads into transparent delivery waves while keeping evidence and readiness gates visible.',
+    action: 'Open Plan, complete the program context, and review the deterministic wave sequence.',
   },
   {
     step: 5,
     stage: 'Mobilize',
-    title: 'Build the mobilization plan',
-    icon: Route,
-    description: 'Group assessed workloads into delivery waves based on business priority and readiness.',
-    action: 'Open "Plan & Mobilize" and export the executive briefing.',
+    title: 'Prepare accountable mobilization',
+    icon: ArrowRight,
+    description: 'Review ownership, governance, platform, security, people, and delivery actions before implementation begins.',
+    action: 'Open Mobilize and export the Executive Pack. Trust controls remain active throughout every stage.',
   },
 ];
 
@@ -88,22 +88,22 @@ const TEST_CASES: TestCase[] = [
     category: '6R Decision Engine',
     steps: [
       'Click "New Assessment" or select the "Assess Legacy Application" prompt starter.',
-      'Select the "Assess" mode pill.',
       'Verify input describes Java/Oracle stack, costs, and integration constraints.',
-      'Click "Assess with Gemini" or press ⌘/Ctrl+Enter.',
+      'Click "Generate 6R Assessment" or press ⌘/Ctrl+Enter.',
     ],
     expectedResult: 'Gemini evaluates workload and outputs Recommended 6R Disposition, Executive Rationale, Viable Alternatives, and Critical Risks.',
   },
   {
     id: 'TC-03',
-    title: 'Explore Options & Executive Decision Modes',
+    title: 'Contextual Decision Follow-Ups',
     category: '6R Decision Engine',
     steps: [
-      'Create a new assessment and toggle to the "Explore Options" tab.',
-      'Submit a workload to compare viable modernization paths (e.g. Rehost vs Replatform vs Refactor).',
-      'Toggle to "Generate Decision" tab to request an executive board-ready modernization recommendation.',
+      'Open a completed assessment.',
+      'Select "Compare Options" and verify the current-evidence comparison prompt appears in the follow-up field.',
+      'Select "Executive Summary" and verify a board-ready summary prompt appears in the same field.',
+      'Submit either prompt to continue the owner-bound assessment dialogue.',
     ],
-    expectedResult: 'Backend prompt adapts system instructions to compare trade-offs or output high-certainty decision briefs.',
+    expectedResult: 'Contextual shortcuts continue the same saved assessment without creating a competing initial mode or changing deterministic metrics.',
   },
   {
     id: 'TC-04',
@@ -134,7 +134,7 @@ const TEST_CASES: TestCase[] = [
     category: 'Firestore Persistence',
     steps: [
       'Type keywords into the Recent Assessments sidebar search bar to filter by workload or 6R disposition.',
-      'Click category chips ("All", "Legacy Application", "Data Platform").',
+      'Click category chips ("All", "Application", "Data Platform").',
       'Hover over an assessment and click the Trash icon, then confirm deletion.',
     ],
     expectedResult: 'The document is immediately removed from Cloud Firestore and the sidebar updates in real-time.',
@@ -302,7 +302,7 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
               EMOS Product Tour
             </h3>
             <p className="text-xs text-[var(--emos-text-secondary)] mt-0.5">
-              Follow one workload from portfolio evidence to a modernization plan.
+              Follow one workload from discovery to mobilization. Trust controls apply throughout.
             </p>
           </div>
           <button
@@ -336,7 +336,7 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
             }`}
           >
             <Code2 className="w-3.5 h-3.5" />
-            <span>Technical Reference</span>
+            <span>Evaluation Evidence</span>
           </button>
         </div>
 
@@ -424,6 +424,9 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
           ) : (
             /* View 2: Technical Validation (Progressive Disclosure) */
             <div className="space-y-4">
+              <div className="rounded-xl border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] p-3 text-xs leading-relaxed text-[var(--emos-text-secondary)]">
+                <strong className="text-[var(--emos-text-primary)]">For evaluators and technical reviewers.</strong> This evidence supports hackathon judging and security review; it is not part of the normal end-user assessment workflow.
+              </div>
               {/* Secondary Sub-Tabs */}
               <div className="flex gap-2 p-1 bg-[var(--emos-bg-tertiary)] rounded-xl border border-[var(--emos-border-subtle)] text-xs">
                 <button
@@ -434,7 +437,7 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
                       : 'text-[var(--emos-text-muted)] hover:text-[var(--emos-text-secondary)]'
                   }`}
                 >
-                  Automated & Functional Test Scenarios ({TEST_CASES.length})
+                  Test Coverage ({TEST_CASES.length})
                 </button>
                 <button
                   onClick={() => setTechnicalSubTab('rules')}
@@ -444,7 +447,7 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
                       : 'text-[var(--emos-text-muted)] hover:text-[var(--emos-text-secondary)]'
                   }`}
                 >
-                  Firestore Security Rules & Proof
+                  Data Access Controls
                 </button>
               </div>
 

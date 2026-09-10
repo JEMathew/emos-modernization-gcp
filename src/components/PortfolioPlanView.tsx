@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowLeft, CheckCircle2, CircleAlert, Download, Flag, Layers3, Route,
+  ArrowLeft, CheckCircle2, CircleAlert, Download, Flag, Layers3,
   Save, ShieldCheck, Target, Users,
 } from 'lucide-react';
 import type { EnterpriseWorkload, Interaction, ProgramAlignment } from '../types';
 import { buildExecutiveDecisionHtml, buildMobilizationReadiness, buildModernizationWaves } from '../lib/wavePlanner';
+import { JourneyStage } from './JourneyStage';
 
 interface PortfolioPlanViewProps {
   workloads: EnterpriseWorkload[];
@@ -61,16 +62,22 @@ export const PortfolioPlanView: React.FC<PortfolioPlanViewProps> = ({
             <button onClick={onBack} className="inline-flex items-center gap-1.5 text-xs text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] cursor-pointer">
               <ArrowLeft className="w-3.5 h-3.5" /> Back to portfolio
             </button>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[var(--emos-accent-text)]">
-              <Route className="w-3.5 h-3.5" /> Plan → Mobilize
-            </div>
+            <JourneyStage
+              stage={activeSection === 'mobilize' ? 'Mobilize' : 'Plan'}
+              question={activeSection === 'mobilize'
+                ? 'What must be ready before delivery begins?'
+                : 'How should governed decisions be sequenced and funded?'}
+            />
             <h1 className="font-serif text-3xl text-[var(--emos-text-primary)]">Modernization Decision Cockpit</h1>
             <p className="max-w-3xl text-sm leading-relaxed text-[var(--emos-text-secondary)]">
               Align program intent, convert governed 6R decisions into deterministic waves, and expose the mobilization actions required before delivery begins.
             </p>
           </div>
-          <button onClick={exportPack} className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-[#A88554] px-4 py-2.5 text-sm font-semibold text-black shadow-sm transition hover:bg-[#BCA075] cursor-pointer">
-            <Download className="w-4 h-4" /> Export Executive Pack
+          <button
+            onClick={exportPack}
+            className="inline-flex min-h-[36px] shrink-0 self-start items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-[#A88554] px-3 py-1.5 text-xs font-semibold text-black shadow-sm transition-colors hover:bg-[#BCA075] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)] cursor-pointer sm:self-auto"
+          >
+            <Download className="h-4 w-4" /> Export Executive Pack
           </button>
         </div>
 

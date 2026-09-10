@@ -111,6 +111,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const activeInteraction = interactions.find((i) => i.id === selectedId) || null;
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [currentView, selectedId]);
+
   // Handler: Create and Save New Assessment
   const handleSaveNew = async ({
     content,
@@ -422,10 +426,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               setSelectedId(id);
               setCurrentView('workspace');
             }}
-            onNew={() => {
-              setSelectedId(null);
-              setCurrentView('workspace');
-            }}
             onDelete={handleDelete}
             isLoading={isLoadingHistory}
           />
@@ -454,11 +454,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                   setCurrentView('workspace');
                   setIsMobileHistoryOpen(false);
                 }}
-                onNew={() => {
-                  setSelectedId(null);
-                  setCurrentView('workspace');
-                  setIsMobileHistoryOpen(false);
-                }}
                 onDelete={handleDelete}
                 isLoading={isLoadingHistory}
                 onCloseMobile={() => setIsMobileHistoryOpen(false)}
@@ -476,7 +471,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             onDeleteImportedWorkload={handleDeleteImportedWorkload}
             onClearImportedPortfolio={handleClearImportedPortfolio}
             isProcessing={isProcessing}
-            onOpenPlan={() => setCurrentView('plan')}
           />
         )}
 
@@ -497,7 +491,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             onRetrySave={handleRetrySave}
             onOpenPortfolio={() => setCurrentView('portfolio')}
             onOpenDna={handleOpenDna}
-            onToggleMobileHistory={() => setIsMobileHistoryOpen(true)}
             isProcessing={isProcessing}
             saveStatus={saveStatus}
             errorMessage={errorMessage}

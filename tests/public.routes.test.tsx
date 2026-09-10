@@ -8,6 +8,7 @@ import { PrivacyPolicyPage } from '../src/components/PrivacyPolicyPage';
 import { TermsPage } from '../src/components/TermsPage';
 import { LandingPage } from '../src/components/LandingPage';
 import { Navbar } from '../src/components/Navbar';
+import { HistorySidebar } from '../src/components/HistorySidebar';
 import { TestWalkthroughModal } from '../src/components/TestWalkthroughModal';
 import { PublicSandboxPage } from '../src/components/PublicSandboxPage';
 import App, { consumePostAuthRoute } from '../src/App';
@@ -289,7 +290,9 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     };
 
     // Required user-facing copy
-    expect(screen.getByRole('button', { name: /^Product Tour$/i })).toBeInTheDocument();
+    const productTourButton = screen.getByRole('button', { name: /^Product Tour$/i });
+    expect(productTourButton).toBeInTheDocument();
+    expect(productTourButton).toHaveClass('border', 'bg-[var(--emos-surface)]');
     expect(screen.getByRole('link', { name: /Explore Without Sign-In/i })).toHaveAttribute('href', '/sandbox');
     expect(screen.getByText(/Beta v1\.0 Publicly Live/i)).toBeInTheDocument();
     expect(screen.getAllByText(/19 Walkthroughs \+ Introduction/i).length).toBeGreaterThan(0);
@@ -377,13 +380,52 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
 
     const guideBtn = screen.getByRole('button', { name: /Product Tour/i });
     expect(guideBtn).toBeInTheDocument();
-    expect(screen.getByText(/6R Recommendations/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^Decisions$/i)).toHaveLength(2);
+    expect(screen.getAllByText(/^History$/i)).toHaveLength(2);
+    expect(screen.queryByText(/6R Recommendations/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Assessments$/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/6R Decision Model/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/6R Enterprise Architecture/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Enterprise Modernization$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Verification & Test Guide/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Guide & Validation/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Decision Intelligence/i)).not.toBeInTheDocument();
 
     fireEvent.click(guideBtn);
     expect(onOpenWalkthrough).toHaveBeenCalledTimes(1);
+  });
+
+  it('presents legacy assessment categories with current user-facing labels', () => {
+    renderWithTheme(
+      <HistorySidebar
+        interactions={[
+          {
+            id: 'application-1', userId: 'test-user', title: 'Legacy Core', category: 'Legacy Application',
+            mode: 'assess', content: 'Assess the legacy core.', geminiResponse: '', turns: [],
+            createdAt: '2026-09-10T00:00:00.000Z', updatedAt: '2026-09-10T00:00:00.000Z',
+          },
+          {
+            id: 'problem-1', userId: 'test-user', title: 'Earlier Review', category: 'Problem Solving',
+            mode: 'reflection', content: 'Review the architecture issue.', geminiResponse: '', turns: [],
+            createdAt: '2026-09-10T00:00:00.000Z', updatedAt: '2026-09-10T00:00:00.000Z',
+          },
+        ]}
+        selectedId={null}
+        onSelect={vi.fn()}
+        onDelete={vi.fn()}
+        isLoading={false}
+      />
+    );
+
+    expect(screen.getAllByText(/^Application$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Architecture Review$/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/^Legacy Application$/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Problem Solving$/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^New Assessment$/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole('button', { name: /^Architecture Review$/i })[0]);
+    expect(screen.getByText('Earlier Review')).toBeInTheDocument();
+    expect(screen.queryByText('Legacy Core')).not.toBeInTheDocument();
   });
 
   it('renders the focused EMOS Product Tour and progressively disclosed Technical Reference', () => {
@@ -393,7 +435,7 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     // Title and view tabs
     expect(screen.getByRole('heading', { name: /EMOS Product Tour/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^Product Tour$/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Technical Reference/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Evaluation Evidence/i })).toBeInTheDocument();
 
     // Default view: one focused step rather than a text-heavy list.
     expect(screen.getByText(/Choose a workload/i)).toBeInTheDocument();
@@ -402,16 +444,18 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByText(/Inspect Enterprise DNA/i)).toBeInTheDocument();
     expect(screen.queryByText(/Choose a workload/i)).not.toBeInTheDocument();
 
-    // Switch to Technical Reference
-    fireEvent.click(screen.getByRole('button', { name: /Technical Reference/i }));
-    expect(screen.getByRole('button', { name: /Automated & Functional Test Scenarios/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Firestore Security Rules & Proof/i })).toBeInTheDocument();
+    // Switch to evaluation-only evidence.
+    fireEvent.click(screen.getByRole('button', { name: /Evaluation Evidence/i }));
+    expect(screen.getByText(/For evaluators and technical reviewers/i)).toBeInTheDocument();
+    expect(screen.getByText(/not part of the normal end-user assessment workflow/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Test Coverage/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Data Access Controls/i })).toBeInTheDocument();
     expect(screen.queryByText(/zero executable risk/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/zero prompt injection bypass/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/zero layout shifting/i)).not.toBeInTheDocument();
 
     // Switch to security rules tab
-    fireEvent.click(screen.getByRole('button', { name: /Firestore Security Rules & Proof/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Data Access Controls/i }));
     expect(screen.getByText(/Owner-Bound Access Control/i)).toBeInTheDocument();
     expect(screen.getByText(/Firestore security rules reject attempts to access document paths that do not match the authenticated user ID\./i)).toBeInTheDocument();
 

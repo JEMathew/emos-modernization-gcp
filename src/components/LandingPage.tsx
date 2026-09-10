@@ -281,10 +281,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
       </header>
 
       <main ref={journeyRef} id="top" className="relative overflow-hidden">
-        <div className="pointer-events-none absolute bottom-0 left-[max(1.5rem,calc(50%-42rem))] top-24 z-10 hidden w-px bg-[var(--emos-border-subtle)] xl:block" aria-hidden="true">
-          <motion.div className="h-full origin-top bg-gradient-to-b from-[#E5C492] via-[#7DD3FC] to-[#A88554]" style={{ scaleY: progress }} />
-        </div>
-
         <AnimatePresence initial={false}>
           <motion.div
             key={activeSection}
@@ -307,7 +303,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <a href="/sandbox" onClick={(event) => navigate(event, '/sandbox')} className="group inline-flex min-h-[50px] items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-6 text-sm font-semibold text-black shadow-lg transition-all hover:-translate-y-0.5 sm:text-base"><Sparkles className="h-5 w-5" />Explore Without Sign-In<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a>
                 <button id="primary-google-signin-btn" onClick={handleSignIn} disabled={isSigningIn} className="group flex min-h-[50px] items-center justify-center gap-3 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] px-5 text-sm font-semibold transition-all hover:-translate-y-0.5 disabled:opacity-75"><GoogleIcon />{isSigningIn ? 'Authenticating…' : 'Use Your Portfolio'}</button>
-                <button id="learn-more-walkthrough-btn" onClick={onOpenWalkthrough} className="min-h-[50px] rounded-xl px-4 text-sm font-semibold text-[var(--emos-text-secondary)] transition-all hover:bg-[var(--emos-surface-hover)] hover:text-[var(--emos-text-primary)]">Product Tour</button>
+                <button id="learn-more-walkthrough-btn" onClick={onOpenWalkthrough} className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] px-5 text-sm font-semibold text-[var(--emos-text-secondary)] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[var(--emos-surface-hover)] hover:text-[var(--emos-text-primary)]"><CirclePlay className="h-4 w-4 text-[var(--emos-accent)]" />Product Tour</button>
               </div>
               <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[var(--emos-text-muted)]">
                 <span className="inline-flex items-center gap-1.5"><CirclePlay className="h-3.5 w-3.5 text-[var(--emos-accent)]" />{EMOS_FACTS.learningLibraryLabel}</span>
