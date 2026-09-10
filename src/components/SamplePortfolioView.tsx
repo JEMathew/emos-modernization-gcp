@@ -12,10 +12,10 @@ import {
   FolderOpen,
   Search,
   FileSpreadsheet,
-  Route,
 } from 'lucide-react';
 import type { EnterpriseWorkload } from '../types';
 import { SAMPLE_PORTFOLIO } from '../data/samplePortfolio';
+import { JourneyStage } from './JourneyStage';
 
 interface SamplePortfolioViewProps {
   onSelectWorkload: (workload: EnterpriseWorkload) => void;
@@ -25,7 +25,6 @@ interface SamplePortfolioViewProps {
   onDeleteImportedWorkload?: (workloadId: string) => Promise<void>;
   onClearImportedPortfolio?: () => Promise<void>;
   isProcessing?: boolean;
-  onOpenPlan: () => void;
 }
 
 export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
@@ -36,7 +35,6 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
   onDeleteImportedWorkload,
   onClearImportedPortfolio,
   isProcessing = false,
-  onOpenPlan,
 }) => {
   const [activeTab, setActiveTab] = useState<'sample' | 'imported'>('sample');
   const [searchQuery, setSearchQuery] = useState('');
@@ -86,26 +84,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
     <div id="sample-portfolio-view" className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-5xl mx-auto w-full transition-colors">
       {/* Top Banner & Title */}
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[11px] text-[var(--emos-accent)] font-medium">
-            <span className="font-bold tracking-wider uppercase text-[var(--emos-accent-text)]">DISCOVER</span>
-            <span className="text-[var(--emos-text-muted)]">•</span>
-            <span>What workloads are in scope for modernization?</span>
-          </div>
-
-          {/* Subtle Modernization Journey Indicator */}
-          <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-[var(--emos-text-muted)] font-mono bg-[var(--emos-bg-tertiary)] px-2.5 py-1 rounded-lg border border-[var(--emos-border-subtle)]">
-            <span className="text-[var(--emos-accent-text)] font-semibold bg-[var(--emos-accent-subtle)] px-1.5 py-0.5 rounded border border-[var(--emos-accent-border)]">DISCOVER</span>
-            <span>→</span>
-            <span>UNDERSTAND</span>
-            <span>→</span>
-            <span>ASSESS</span>
-            <span>→</span>
-            <span>DECIDE</span>
-            <span>→</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">TRUST</span>
-          </div>
-        </div>
+        <JourneyStage stage="Discover" question="What workloads are in scope for modernization?" />
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
@@ -118,9 +97,6 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
           </div>
 
           <div className="flex flex-wrap gap-2 self-start sm:self-auto">
-            <button onClick={onOpenPlan} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] text-xs font-semibold shadow-sm transition-all cursor-pointer min-h-[38px]">
-              <Route className="w-4 h-4" /><span>Plan & Mobilize</span>
-            </button>
             <button
               id="import-portfolio-header-btn"
               onClick={onOpenImportModal}

@@ -47,10 +47,10 @@ Complete this section only after the exact candidate commit is published.
 ### Cloud Run and Secret Manager
 
 - [ ] Record the deployed commit: `PENDING`.
-- [ ] Record the live URL and verification date: `PENDING`.
+- [x] Record the live URL and verification date: `https://emos-modernization.ai.studio/` returned HTTP 200 on 10 September 2026; `/api/health` reported `status: ok` and a configured Gemini key without exposing its value.
 - [ ] Capture only the Cloud Run environment entry showing `GEMINI_API_KEY` uses `valueFrom.secretKeyRef`; never capture its value.
 - [ ] Capture the runtime service account's `roles/secretmanager.secretAccessor` binding with unnecessary identifiers redacted.
-- [ ] Confirm `/api/health` does not return the key or other secret material.
+- [x] Confirm `/api/health` does not return the key or other secret material; verified 10 September 2026.
 
 ### Firebase and CI
 
@@ -59,13 +59,23 @@ Complete this section only after the exact candidate commit is published.
 - [ ] Live Google Sign-In returns the user to the authenticated product.
 - [ ] A saved assessment and follow-up remain visible only under the authenticated account used for the test.
 
+### Public challenge submission
+
+- [x] Public source repository is reachable at `https://github.com/JEMathew/emos-modernization-gcp`.
+- [x] README documents the application, unique enhancements, Firestore rules, Secret Manager setup, Cloud Run deployment, and required campaign label.
+- [ ] Verify the deployed Cloud Run service has `dev-tutorial=cloud-run-ai-challenge`.
+- [ ] Publish the required social-media post or implementation write-up with `#AccelerateAIwithCloudRun`, highlighting the unique feature and Google AI Studio usage.
+- [ ] Submit the official form with email, Cloud Run project/service name, social/blog link, and repository link.
+
 ## Current verification snapshot
 
 - TypeScript check: passed locally; see `work_results/EVAL-UX-02-result.md`.
 - Unit, API contract and UI suites: passed locally; see the dated work result rather than relying on a permanent hardcoded count.
 - Production build: passed locally.
+- Production dependency audit: 0 vulnerabilities on 10 September 2026.
 - Firestore rules: test suite is committed and release-gated in GitHub Actions; the current Mac lacks the Java runtime needed to rerun it locally.
-- Deployment and external-configuration evidence: pending the approved publish step.
+- Public repository: verified reachable on 10 September 2026. The latest `main` release gate (`19a4ab8`) passed; the current UI clarity changes are committed locally and require release authentication, remote push, and their own green CI run.
+- Deployment: live endpoint verified on 10 September 2026; exact deployed commit, campaign label, Secret Manager binding, and IAM evidence remain pending.
 
 ## Original-feature explanation
 

@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
   Search,
-  Plus,
   Trash2,
   Calendar,
   Sparkles,
@@ -20,7 +19,6 @@ interface HistorySidebarProps {
   interactions: Interaction[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  onNew: () => void;
   onOpenPortfolio?: () => void;
   onDelete: (id: string) => void;
   isLoading: boolean;
@@ -28,11 +26,16 @@ interface HistorySidebarProps {
   onCloseMobile?: () => void;
 }
 
+const getCategoryLabel = (category?: string) => {
+  if (category === 'Legacy Application') return 'Application';
+  if (category === 'Problem Solving') return 'Architecture Review';
+  return category || 'Architecture';
+};
+
 export const HistorySidebar: React.FC<HistorySidebarProps> = ({
   interactions,
   selectedId,
   onSelect,
-  onNew,
   onOpenPortfolio,
   onDelete,
   isLoading,
@@ -46,7 +49,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
   const categories = useMemo(() => {
     const set = new Set<string>();
     interactions.forEach(item => {
-      if (item.category) set.add(item.category);
+      if (item.category) set.add(getCategoryLabel(item.category));
     });
     return Array.from(set);
   }, [interactions]);
@@ -61,7 +64,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
 
       const matchesCat =
         categoryFilter === 'all' ||
-        item.category?.toLowerCase() === categoryFilter.toLowerCase();
+        getCategoryLabel(item.category).toLowerCase() === categoryFilter.toLowerCase();
 
       return matchesSearch && matchesCat;
     });
@@ -140,15 +143,6 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
           </button>
         )}
 
-        <button
-          id="sidebar-new-btn"
-          onClick={onNew}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] border border-[var(--emos-border-subtle)] hover:border-[var(--emos-accent)] text-[var(--emos-text-primary)] text-xs font-semibold transition-all shadow-xs group cursor-pointer min-h-[38px]"
-        >
-          <Plus className="w-4 h-4 text-[var(--emos-accent)] group-hover:scale-110 transition-transform" />
-          <span>New Assessment</span>
-        </button>
-
         {/* Search */}
         <div className="relative">
           <Search className="w-3.5 h-3.5 text-[var(--emos-text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -164,7 +158,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
 
         {/* Category Filter Chips */}
         {categories.length > 0 && (
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]" aria-label="Filter assessments by workload or review type">
             <button
               onClick={() => setCategoryFilter('all')}
               className={`px-2.5 py-1 rounded-lg transition-colors shrink-0 cursor-pointer ${
@@ -267,7 +261,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
                       </span>
                     )}
                     <span className="px-2 py-0.5 rounded-md bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] font-medium truncate">
-                      {item.category || 'Architecture'}
+                      {getCategoryLabel(item.category)}
                     </span>
                   </div>
 

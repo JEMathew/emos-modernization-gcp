@@ -6,7 +6,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   CornerDownLeft,
-  Clock,
   Layers,
   Copy,
   Check,
@@ -17,9 +16,10 @@ import {
   AlertCircle,
   Dna,
   ArrowRight,
-  List
+  ChevronDown,
 } from 'lucide-react';
 import type { Interaction, AssessmentMode, Disposition6R, DecisionReadiness } from '../types';
+import { JourneyStage } from './JourneyStage';
 
 interface ReflectionWorkspaceProps {
   activeInteraction: Interaction | null;
@@ -32,7 +32,6 @@ interface ReflectionWorkspaceProps {
   onRetrySave?: (interaction: Interaction) => Promise<void>;
   onOpenPortfolio?: () => void;
   onOpenDna?: (workloadNameOrId: string) => void;
-  onToggleMobileHistory?: () => void;
   isProcessing: boolean;
   saveStatus: 'idle' | 'saving' | 'saved' | 'error';
   errorMessage: string | null;
@@ -42,28 +41,33 @@ interface ReflectionWorkspaceProps {
 // Canonical Prompt Starters specified in requirements
 const EMOS_PROMPT_STARTERS = [
   {
-    mode: 'assess' as AssessmentMode,
     title: 'Assess Legacy Application',
     text: "We have a business-critical Java 8 and Oracle application with high infrastructure costs and several downstream integrations. Assess it for modernization.",
-    category: "Legacy Application"
   },
   {
-    mode: 'assess' as AssessmentMode,
     title: 'Evaluate Data Platform',
     text: "We have an on-premises enterprise data warehouse with growing cost, scalability constraints and increasing demand for AI/ML workloads. Assess modernization options.",
-    category: "Data Platform"
   },
   {
-    mode: 'options' as AssessmentMode,
     title: 'Compare Modernization Options',
     text: "Help me compare the viable modernization strategies for this workload and explain the trade-offs.",
-    category: "Architecture Review"
   },
   {
-    mode: 'assess' as AssessmentMode,
     title: 'Identify Modernization Risks',
     text: "Identify the evidence gaps, dependencies and risks we should understand before making this modernization decision.",
-    category: "Risk Assessment"
+  },
+];
+
+const FOLLOW_UP_SHORTCUTS = [
+  {
+    label: 'Compare Options',
+    prompt: 'Compare the viable 6R alternatives for this workload and explain their trade-offs using the current evidence.',
+    icon: GitCompare,
+  },
+  {
+    label: 'Executive Summary',
+    prompt: 'Create a concise executive summary of this recommendation, its evidence gaps, risks, and the decision required next.',
+    icon: FileCheck2,
   },
 ];
 
@@ -74,26 +78,37 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
   onRetrySave,
   onOpenPortfolio,
   onOpenDna,
-  onToggleMobileHistory,
   isProcessing,
   saveStatus,
   errorMessage,
   errorKind = null,
 }) => {
   const [draftContent, setDraftContent] = useState('');
-  const [selectedMode, setSelectedMode] = useState<AssessmentMode>('assess');
   const [followUpInput, setFollowUpInput] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isEvidenceExpanded, setIsEvidenceExpanded] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const followUpInputRef = useRef<HTMLInputElement>(null);
+  const previousThreadRef = useRef<{ id: string | null; turnCount: number }>({ id: null, turnCount: 0 });
 
-  // Auto-scroll on new message
+  // Open a selected assessment at its decision summary; scroll only for new activity in the same thread.
   useEffect(() => {
-    if (activeInteraction) {
+    const currentId = activeInteraction?.id || null;
+    const currentTurnCount = activeInteraction?.turns?.length || 0;
+    const previous = previousThreadRef.current;
+
+    if (currentId && previous.id === currentId && (isProcessing || currentTurnCount > previous.turnCount)) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [activeInteraction?.turns?.length, isProcessing]);
+
+    previousThreadRef.current = { id: currentId, turnCount: currentTurnCount };
+  }, [activeInteraction?.id, activeInteraction?.turns?.length, isProcessing]);
+
+  useEffect(() => {
+    setIsEvidenceExpanded(false);
+  }, [activeInteraction?.id]);
 
   // Render only complete, persisted canonical metrics; never infer a second assessment.
   const metrics = useMemo(() => {
@@ -122,7 +137,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
     try {
       await onSaveNew({
         content: contentToSubmit,
-        mode: selectedMode,
+        mode: 'assess',
       });
       setDraftContent('');
     } catch {
@@ -215,16 +230,6 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {onToggleMobileHistory && (
-            <button
-              onClick={onToggleMobileHistory}
-              className="lg:hidden px-2.5 py-1 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-[var(--emos-text-secondary)] text-[11px] font-medium flex items-center gap-1 transition-colors"
-            >
-              <List className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
-              <span>History</span>
-            </button>
-          )}
-
           {saveStatus === 'error' && errorKind !== 'reasoning' && errorKind !== 'guardrail' && activeInteraction && onRetrySave && (
             <button
               id="retry-save-btn"
@@ -245,20 +250,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
           <div className="px-4 sm:px-8 py-3.5 sm:py-4 bg-[var(--emos-bg-secondary)] border-b border-[var(--emos-border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[10px] text-[var(--emos-accent)] font-medium">
-                  <span className="font-bold tracking-wider uppercase text-[var(--emos-accent-text)]">DECIDE</span>
-                  <span className="text-[var(--emos-text-muted)]">•</span>
-                  <span>What should we do with this workload, why, and how trustworthy is the decision?</span>
-                </span>
-                <span className="text-[11px] text-[var(--emos-text-muted)] flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-[var(--emos-text-muted)]" />
-                  {new Date(activeInteraction.createdAt).toLocaleString(undefined, {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </span>
+                <JourneyStage stage="Decide" question="What should we do with this workload, and why?" />
               </div>
               <h2 className="text-lg sm:text-xl font-serif font-semibold tracking-tight text-[var(--emos-text-primary)]">
                 {activeInteraction.title}
@@ -266,17 +258,6 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Journey Indicator */}
-              <div className="hidden xl:flex items-center gap-1 text-[10px] text-[var(--emos-text-muted)] font-mono bg-[var(--emos-bg-tertiary)] px-2 py-1 rounded-lg border border-[var(--emos-border-subtle)] mr-1">
-                <span>DISCOVER</span>
-                <span>→</span>
-                <span>UNDERSTAND</span>
-                <span>→</span>
-                <span className="text-[var(--emos-accent-text)] font-semibold bg-[var(--emos-accent-subtle)] px-1.5 py-0.5 rounded border border-[var(--emos-accent-border)]">DECIDE</span>
-                <span>→</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">TRUST</span>
-              </div>
-
               {onOpenDna && (activeInteraction.workloadId || activeInteraction.workloadName) && (
                 <button
                   id="header-view-dna-btn"
@@ -286,18 +267,6 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                 >
                   <Dna className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
                   <span className="hidden sm:inline">Enterprise DNA</span>
-                </button>
-              )}
-
-              {onOpenPortfolio && (
-                <button
-                  id="header-portfolio-btn"
-                  onClick={onOpenPortfolio}
-                  className="px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] hover:border-[var(--emos-border-strong)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px]"
-                  title="Return to Sample Enterprise Portfolio"
-                >
-                  <Layers className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
-                  <span className="hidden sm:inline">Portfolio</span>
                 </button>
               )}
 
@@ -389,9 +358,16 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
             {/* User Modernization Scope / Evidence */}
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--emos-text-muted)] font-semibold">
-                  Modernization Scope & Evidence
-                </span>
+                <button
+                  id="toggle-workload-evidence-btn"
+                  type="button"
+                  onClick={() => setIsEvidenceExpanded((expanded) => !expanded)}
+                  aria-expanded={isEvidenceExpanded}
+                  className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--emos-text-muted)] transition-colors hover:text-[var(--emos-text-primary)] cursor-pointer"
+                >
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isEvidenceExpanded ? 'rotate-180' : ''}`} aria-hidden="true" />
+                  <span>{isEvidenceExpanded ? 'Hide' : 'Show'} Workload Evidence</span>
+                </button>
                 <div className="h-[1px] flex-1 bg-[var(--emos-border-subtle)]" />
                 <button
                   onClick={() => copyToClipboard(activeInteraction.content, 'user-initial')}
@@ -401,11 +377,13 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                   {copiedId === 'user-initial' ? <Check className="w-3.5 h-3.5 text-[var(--emos-accent)]" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
-              <div className="p-4 sm:p-5 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)]">
-                <p className="text-sm sm:text-base leading-relaxed text-[var(--emos-text-primary)] whitespace-pre-wrap font-sans">
-                  {activeInteraction.content}
-                </p>
-              </div>
+              {isEvidenceExpanded && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)]">
+                  <p className="text-sm sm:text-base leading-relaxed text-[var(--emos-text-primary)] whitespace-pre-wrap font-sans">
+                    {activeInteraction.content}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Initial Gemini Modernization Assessment */}
@@ -500,9 +478,28 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
 
           {/* Follow-up Question Composer */}
           <footer className="p-4 sm:p-6 border-t border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] shrink-0">
+            <div className="mx-auto mb-2.5 flex w-full max-w-3xl flex-wrap items-center gap-2" aria-label="Suggested decision follow-ups">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--emos-text-muted)]">Next:</span>
+              {FOLLOW_UP_SHORTCUTS.map(({ label, prompt, icon: Icon }) => (
+                <button
+                  key={label}
+                  type="button"
+                  disabled={isProcessing}
+                  onClick={() => {
+                    setFollowUpInput(prompt);
+                    followUpInputRef.current?.focus();
+                  }}
+                  className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] px-2.5 py-1 text-[11px] font-medium text-[var(--emos-text-secondary)] transition-colors hover:border-[var(--emos-accent-border)] hover:text-[var(--emos-accent-text)] disabled:opacity-50 cursor-pointer"
+                >
+                  <Icon className="h-3.5 w-3.5 text-[var(--emos-accent)]" aria-hidden="true" />
+                  {label}
+                </button>
+              ))}
+            </div>
             <form onSubmit={handleFollowUpSubmit} className="max-w-3xl mx-auto w-full relative">
               <input
                 id="followup-input"
+                ref={followUpInputRef}
                 type="text"
                 placeholder="Provide additional modernization evidence or ask about this decision..."
                 value={followUpInput}
@@ -529,6 +526,10 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
         /* New Assessment Composer View */
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center">
           <div className="w-full max-w-3xl space-y-6 sm:space-y-8 my-auto py-4 sm:py-6">
+            <div className="flex justify-center">
+              <JourneyStage stage="Decide" question="What should we do with this workload, and why?" />
+            </div>
+
             {/* Header */}
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[11px] text-[var(--emos-accent)] font-medium mb-1">
@@ -541,49 +542,6 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
               <p className="text-xs sm:text-sm text-[var(--emos-text-secondary)] max-w-xl mx-auto leading-relaxed">
                 Turn fragmented enterprise modernization evidence into explainable, evidence-aware decisions. Assess workloads across canonical 6R dispositions grounded in deterministic Enterprise DNA evidence completeness.
               </p>
-            </div>
-
-            {/* Assessment Mode Selector */}
-            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 p-1.5 bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] rounded-2xl max-w-lg mx-auto">
-              <button
-                id="mode-assess-btn"
-                type="button"
-                onClick={() => setSelectedMode('assess')}
-                className={`py-2 px-2 sm:px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[38px] ${
-                  selectedMode === 'assess'
-                    ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
-                    : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
-                <span>Assess</span>
-              </button>
-              <button
-                id="mode-options-btn"
-                type="button"
-                onClick={() => setSelectedMode('options')}
-                className={`py-2 px-2 sm:px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[38px] ${
-                  selectedMode === 'options'
-                    ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
-                    : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
-                }`}
-              >
-                <GitCompare className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
-                <span className="truncate">Options</span>
-              </button>
-              <button
-                id="mode-decision-btn"
-                type="button"
-                onClick={() => setSelectedMode('decision')}
-                className={`py-2 px-2 sm:px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[38px] ${
-                  selectedMode === 'decision'
-                    ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-xs'
-                    : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
-                }`}
-              >
-                <FileCheck2 className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
-                <span className="truncate">Decision</span>
-              </button>
             </div>
 
             {/* Sample Portfolio Callout Banner */}
@@ -626,7 +584,6 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                     key={idx}
                     type="button"
                     onClick={() => {
-                      setSelectedMode(item.mode);
                       setDraftContent(item.text);
                       textareaRef.current?.focus();
                     }}
@@ -682,7 +639,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                     ) : (
                       <>
                         <Sparkles className="w-4 h-4 text-black" />
-                        <span>Assess with Gemini</span>
+                        <span>Generate 6R Assessment</span>
                       </>
                     )}
                   </button>

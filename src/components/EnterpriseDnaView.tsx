@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import type { EnterpriseWorkload, DnaField, DnaEvidenceStatus } from '../types';
 import { calculateDnaCompleteness } from '../data/samplePortfolio';
+import { JourneyStage } from './JourneyStage';
 
 interface EnterpriseDnaViewProps {
   workload: EnterpriseWorkload;
@@ -92,7 +93,7 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
     <div id="enterprise-dna-view" className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-5xl mx-auto w-full transition-colors">
       {/* Navigation & Header */}
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             id="back-to-portfolio-btn"
             onClick={onBackToPortfolio}
@@ -102,26 +103,9 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
             <span>Back to Enterprise Portfolio</span>
           </button>
 
-          {/* Subtle Journey Indicator with UNDERSTAND highlighted */}
-          <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-[var(--emos-text-muted)] font-mono bg-[var(--emos-bg-tertiary)] px-2.5 py-1 rounded-lg border border-[var(--emos-border-subtle)]">
-            <span>DISCOVER</span>
-            <span>→</span>
-            <span className="text-[var(--emos-accent-text)] font-semibold bg-[var(--emos-accent-subtle)] px-1.5 py-0.5 rounded border border-[var(--emos-accent-border)]">UNDERSTAND</span>
-            <span>→</span>
-            <span>ASSESS</span>
-            <span>→</span>
-            <span>DECIDE</span>
-            <span>→</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">TRUST</span>
-          </div>
         </div>
 
-        {/* Visual Communicator: UNDERSTAND */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[11px] text-[var(--emos-accent)] font-medium">
-          <span className="font-bold tracking-wider uppercase text-[var(--emos-accent-text)]">UNDERSTAND</span>
-          <span className="text-[var(--emos-text-muted)]">•</span>
-          <span>What do we know about this workload, and what evidence is missing?</span>
-        </div>
+        <JourneyStage stage="Understand" question="What do we know about this workload, and what evidence is missing?" />
 
         {/* Workload Hero Banner */}
         <div className="p-5 sm:p-6 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6 shadow-xs">

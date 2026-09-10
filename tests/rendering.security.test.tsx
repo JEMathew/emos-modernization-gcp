@@ -70,7 +70,6 @@ describe('safe assessment rendering', () => {
       onRetrySave={async () => undefined}
       onOpenPortfolio={() => undefined}
       onOpenDna={() => undefined}
-      onToggleMobileHistory={() => undefined}
       isProcessing={false}
       saveStatus="saved"
       errorMessage={null}
