@@ -1,21 +1,23 @@
 # EMOS — Enterprise Modernization Operating System
 
-> **Ideathon Release: Decision Intelligence**  
-> **Turn fragmented enterprise modernization evidence into explainable, evidence-aware decisions.**  
-> **Continuous modernization: intelligence → governed action → measurable outcomes.**
+> **Ideathon Release: Evidence, Decision and Planning Foundation**
+>
+> **One operating system for the entire enterprise modernization journey.**
+>
+> **Available today: governed evidence → 6R decision → implementation-ready plan.**
 
-EMOS is an AI-native Enterprise Modernization Operating System designed to make enterprise modernization continuous.
+EMOS is a vendor-neutral operating system for enterprise modernization, designed to govern the entire journey—from the business initiative that triggers modernization, through portfolio evidence and the 6R decision, into sequencing, delivery and proof that the promised outcome was achieved.
 
-The current Ideathon release implements the **Decision Intelligence** foundation of EMOS: Portfolio Discovery, Enterprise DNA, evidence-aware assessment, canonical 6R disposition, explainability, trust readiness, risk identification, and recommended next actions.
+Beta v1.0 delivers the evidence, decision and planning foundation today using deterministic scoring, governed Gemini analysis and synthetic reference data. Its governance architecture is designed to remain model-agnostic as EMOS expands toward execution governance and outcome measurement.
 
-The broader EMOS vision extends an approved modernization disposition through governance, prioritization, planning, disposition-specific execution, validation, benefit realization, and continuous learning.
+The broader EMOS vision extends an approved modernization disposition through governance, prioritization, delivery, validation, benefit realization and continuous learning. See the [canonical messaging source](claude/messaging-source.md) for the shared capability and vision language.
 
 Enterprise modernization teams routinely make multi-million dollar application and data-platform decisions using information fragmented across legacy inventories, architectural tribal knowledge, partial dependency maps, operational cost signals, compliance constraints, and subjective expert judgment.
 
 **EMOS Decision Intelligence** addresses this critical bottleneck. Rather than attempting to build the entire modernization operating system in one challenge, this release proves a secure, production-deployed vertical slice of EMOS focused on modernization Decision Intelligence. It structures legacy workload evidence into a rigorous **Enterprise DNA**, calculates deterministic evidence completeness, and leverages **Google Gemini** to produce explainable, vendor-neutral modernization assessments governed by the canonical **6R framework**.
 
 ### The Modernization Principle
-> **“The modernization disposition is not the end of the EMOS journey. It is the routing decision that determines which governed modernization journey should execute next.”**
+> **“The modernization disposition is not the end of the EMOS journey. It is the routing decision that determines which governed modernization path should follow.”**
 
 The current Decision Intelligence capability determines *what* should happen based on evidence. Future EMOS capabilities will govern, plan, orchestrate, validate, and measure *what happens after* that decision.
 

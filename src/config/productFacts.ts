@@ -1,5 +1,5 @@
 export const EMOS_FACTS = {
-  founderExperience: '16+',
+  founderExperience: '15+',
   governedApplications: '5,000+',
   evidenceAttributes: 18,
   evidenceDimensions: 6,

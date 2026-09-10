@@ -104,7 +104,7 @@ export default function App() {
       return;
     }
 
-    document.title = 'EMOS — Enterprise Modernization Operating System';
+    document.title = 'EMOS | Enterprise Modernization and 6R Planning';
   }, [currentPath]);
 
   const navigateTo = (path: string) => {

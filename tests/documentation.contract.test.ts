@@ -12,6 +12,7 @@ describe('Ideathon evidence documentation', () => {
     expect(readme).toContain('docs/IDEATHON_DELIVERABLES.md');
     expect(readme).toContain('docs/AI_STUDIO_SECURITY_CONSTITUTION.md');
     expect(readme).toContain('docs/EVIDENCE_INDEX.md');
+    expect(readme).toContain('claude/messaging-source.md');
   });
 
   it('covers every required security and product boundary in the AI Studio constitution', () => {
@@ -49,5 +50,28 @@ describe('Ideathon evidence documentation', () => {
 
     expect(evidenceIndex).not.toContain('42 passing');
     expect(evidenceIndex).toContain('dated results are recorded');
+  });
+
+  it('keeps the canonical messaging source resolved and capability-honest', () => {
+    const messaging = readRepositoryFile('claude/messaging-source.md');
+    const normalized = messaging.replace(/\s+/g, ' ');
+
+    expect(messaging).toContain('Founder experience: **15+ years**');
+    expect(normalized).toContain('Beta v1.0 delivers the evidence, decision and planning foundation today');
+    expect(normalized).toContain('designed to remain model-agnostic');
+    expect(normalized).toContain('The current beta does not execute migrations');
+    expect(messaging).not.toContain('[RESOLVE');
+    expect(messaging).not.toContain('What none of them produces');
+  });
+
+  it('publishes one search description and accurate entity metadata', () => {
+    const index = readRepositoryFile('index.html');
+
+    expect(index.match(/<meta name="description"/g)).toHaveLength(1);
+    expect(index).toContain('<link rel="canonical" href="https://emos-modernization.ai.studio/" />');
+    expect(index).toContain('"@type": "Organization"');
+    expect(index).toContain('"@type": "WebApplication"');
+    expect(index).toContain('"isAccessibleForFree": true');
+    expect(index).not.toContain('6R Execution Platform');
   });
 });
