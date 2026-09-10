@@ -166,6 +166,14 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(onNavigate).toHaveBeenCalledWith('/terms');
   });
 
+  it('does not render a decorative scroll-progress line above the landing header', () => {
+    const { container } = renderWithTheme(
+      <LandingPage onOpenWalkthrough={vi.fn()} onNavigate={vi.fn()} />,
+    );
+
+    expect(container.querySelector('.fixed.inset-x-0.top-0.h-0\\.5')).not.toBeInTheDocument();
+  });
+
   it('renders public /privacy route directly in App without requiring Google Sign-In', () => {
     window.history.pushState({}, '', '/privacy');
     render(<App />);
