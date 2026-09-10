@@ -17,16 +17,15 @@ Target length: 3–4 minutes.
 - Avoid exposing keys, browser account lists, email notifications, or unrelated tabs.
 - End with the public URL, repository, CI status, and `#AccelerateAIwithCloudRun` submission callout.
 
-## Final-candidate video refresh
+## Video alignment policy
 
-Record the primary submission walkthrough again after the final candidate is deployed. The current introduction says “Today, September sixth, twenty twenty-six,” and its product chrome predates the UI-clarity pass. Use an undated opening such as “In this beta release” so the replacement does not age immediately.
+The primary introduction now uses an undated, full-lifecycle opening and states the
+Beta v1.0 evidence, decision, and planning boundary before moving into the
+validated product narrative. Its captions contain the same opening language.
 
-Prioritize one current 3–4 minute master video. Refresh the supporting clips only when they visibly conflict with the final UI:
-
-- **00 — Beta Introduction:** required; remove the dated opening and capture the final navigation.
-- **F02 — Product Tour:** required; show the visible Product Tour action and the renamed Evaluation Evidence area.
-- **F07 — Assessment History:** required; show the single global New action, the **History** destination, and current category labels.
-- **F16 — Responsive Layouts:** required; show the final narrow header, sign-out behavior, and uncluttered decision view.
-- Other clips: retain if their demonstrated behavior and labels remain accurate; re-record only after a visual-content check.
-
-Do not record before the final deployment and release-gate run, or the footage may drift from the submitted build again.
+Do not re-record a supporting clip merely because surrounding product chrome has
+changed. Refresh a clip only when its demonstrated action, label, or capability
+claim conflicts with the deployed application. In particular, visually check
+F02, F07, and F16 after navigation changes; retain them when their narrated task
+and visible controls remain accurate. This keeps the learning library useful
+without creating avoidable release drift.

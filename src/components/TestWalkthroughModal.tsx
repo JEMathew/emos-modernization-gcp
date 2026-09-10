@@ -29,6 +29,14 @@ interface TestCase {
 const PRODUCT_TOUR_STEPS = [
   {
     step: 1,
+    stage: 'Align',
+    title: 'Define the modernization intent',
+    icon: ShieldCheck,
+    description: 'Connect the program sponsor, business outcome, constraints, and approval expectations before evaluating workloads.',
+    action: 'Open Plan and Mobilize, then set the program context that will govern portfolio decisions and sequencing.',
+  },
+  {
+    step: 2,
     stage: 'Discover',
     title: 'Choose a workload',
     icon: Layers,
@@ -36,7 +44,7 @@ const PRODUCT_TOUR_STEPS = [
     action: 'Open a workload card and scan its stack, dependencies, risk signals, and evidence score.',
   },
   {
-    step: 2,
+    step: 3,
     stage: 'Understand',
     title: 'Inspect Enterprise DNA',
     icon: Sparkles,
@@ -44,15 +52,23 @@ const PRODUCT_TOUR_STEPS = [
     action: 'Select "View Enterprise DNA" and review the verified and missing attributes.',
   },
   {
-    step: 3,
-    stage: 'Decide',
-    title: 'Generate and review a 6R decision',
-    icon: ShieldCheck,
-    description: 'Use structured evidence to produce a governed Retain, Retire, Rehost, Replatform, Refactor, or Repurchase recommendation with alternatives and risks.',
-    action: 'Select "Assess for Modernization," then review disposition, confidence, evidence completeness, readiness, and gaps.',
+    step: 4,
+    stage: 'Assess',
+    title: 'Evaluate the viable 6R options',
+    icon: Sparkles,
+    description: 'Use structured evidence to evaluate Retain, Retire, Rehost, Replatform, Refactor, and Repurchase without inventing missing facts.',
+    action: 'Select "Assess for Modernization," then review evidence completeness, viable alternatives, risks, assumptions, and gaps.',
   },
   {
-    step: 4,
+    step: 5,
+    stage: 'Decide',
+    title: 'Review the governed 6R decision',
+    icon: ShieldCheck,
+    description: 'Review the recommended disposition, rejected alternatives, confidence, deterministic evidence completeness, readiness, and approval gates.',
+    action: 'Open the completed assessment, add evidence when readiness is blocked, and generate the Executive Decision when the record is defensible.',
+  },
+  {
+    step: 6,
     stage: 'Plan',
     title: 'Sequence governed decisions',
     icon: Route,
@@ -60,7 +76,7 @@ const PRODUCT_TOUR_STEPS = [
     action: 'Open Plan, complete the program context, and review the deterministic wave sequence.',
   },
   {
-    step: 5,
+    step: 7,
     stage: 'Mobilize',
     title: 'Prepare accountable mobilization',
     icon: ArrowRight,
@@ -302,7 +318,7 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
               EMOS Product Tour
             </h3>
             <p className="text-xs text-[var(--emos-text-secondary)] mt-0.5">
-              Follow one workload from discovery to mobilization. Trust controls apply throughout.
+              Follow one workload from alignment through mobilization. Trust controls apply throughout.
             </p>
           </div>
           <button
@@ -345,7 +361,7 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
           {activeView === 'tour' ? (
             /* View 1: Product Tour */
             <div className="space-y-5">
-              <div className="grid grid-cols-5 gap-1.5 sm:gap-2" aria-label="Product tour stages">
+              <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-7 sm:gap-2" aria-label="Product tour stages">
                 {PRODUCT_TOUR_STEPS.map((stepItem, index) => {
                   const IconComp = stepItem.icon;
                   const isActive = index === activeTourStep;
