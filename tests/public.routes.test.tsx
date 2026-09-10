@@ -278,7 +278,7 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(document.title).toBe('Privacy Policy — EMOS');
 
     fireEvent.click(screen.getByRole('button', { name: /Return to Home/i }));
-    expect(document.title).toBe('EMOS — Enterprise Modernization Operating System');
+    expect(document.title).toBe('EMOS | Enterprise Modernization and 6R Planning');
   });
 
   it('renders updated user-facing product copy and excludes absolute or ungrounded claims on the Landing Page', () => {
@@ -297,8 +297,10 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByText(/Beta v1\.0 Publicly Live/i)).toBeInTheDocument();
     expect(screen.getAllByText(/19 Walkthroughs \+ Introduction/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Enterprise Modernization/i).length).toBeGreaterThan(0);
-    expect(screen.getByRole('heading', { name: /Your legacy estate is blocking business initiatives you have already committed to\./i })).toBeInTheDocument();
-    expect(screen.getByText(/EMOS helps leaders decide what to modernize and sequence the work—and is being built to measure whether it delivered the promised business outcome\./i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /One operating system for the entire modernization journey\./i })).toBeInTheDocument();
+    expect(screen.getAllByText(/Full-Lifecycle Product Vision/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Beta v1\.0 delivers the evidence, decision and planning foundation today\./i)).toBeInTheDocument();
+    expect(screen.getByText(/Trust, Security, Governance and Human Accountability Throughout/i)).toBeInTheDocument();
     expect(screen.getByText(/Watch the evidence become a decision\./i)).toBeInTheDocument();
 
     chooseMenuItem('EMOS', /^How It Works$/i);
@@ -315,16 +317,23 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getAllByText(/^Replatform$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Refactor$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Repurchase$/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/What Does EMOS Actually Do Today\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/What Happens After the 6R Decision\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/Does EMOS Execute Migrations\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/Why Call It an Operating System\?/i)).toBeInTheDocument();
 
     chooseMenuItem('About', /^Vision$/i);
-    expect(screen.getByText(/Full Product Vision/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Full Product Vision/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Available in Beta/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Mobilize$/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/^Learn$/i)).toBeInTheDocument();
     expect(screen.getByText(/^Reassess$/i)).toBeInTheDocument();
-    expect(screen.getByText(/A vendor-neutral operating system for enterprise modernization/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /The entire modernization journey—built in defensible stages/i })).toBeInTheDocument();
 
     chooseMenuItem('About', /^Founder$/i);
     expect(screen.getByText(/Built by someone who had this problem/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/16\+ Years/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/15\+ Years/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/16\+ Years/i)).not.toBeInTheDocument();
     expect(screen.getByText(/3\+ Years Building, Shipping and Launching Products into New Markets/i)).toBeInTheDocument();
     expect(screen.getByText(/Modern Data Platforms: Cloud Data Warehouse on GCP and Data Lakehouse on AWS/i)).toBeInTheDocument();
     expect(screen.getByText(/1\+ Year Leading Data Products/i)).toBeInTheDocument();
