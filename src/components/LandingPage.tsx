@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AlertCircle, ArrowRight, BrainCircuit, CheckCircle2, CirclePlay, ExternalLink,
   FileSearch, Gauge, Github, Library, Linkedin, Lock, Mail, Menu, Route,
   ShieldCheck, Sparkles, Target, Users, X,
 } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { signInWithGoogle, getFriendlyAuthErrorMessage } from '../lib/firebase';
 import { LEARNING_VIDEOS, getDriveViewUrl } from '../data/learningVideos';
 import { SAMPLE_PORTFOLIO } from '../data/samplePortfolio';
@@ -133,10 +133,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
   const [activeSection, setActiveSection] = useState<LandingSection>(getInitialLandingSection);
   const [openMenu, setOpenMenu] = useState<'emos' | 'about' | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const journeyRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: journeyRef, offset: ['start start', 'end end'] });
-  const progress = useSpring(scrollYProgress, { stiffness: 100, damping: 25, restDelta: 0.001 });
 
   const handleSignIn = async () => {
     try {
@@ -244,8 +241,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
 
   return (
     <div className="emos-landing min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] selection:bg-[#A88554] selection:text-black font-sans transition-colors">
-      <motion.div aria-hidden="true" className="fixed inset-x-0 top-0 z-50 h-0.5 origin-left bg-gradient-to-r from-[#A88554] via-[#E5C492] to-[#7DD3FC]" style={{ scaleX: progress }} />
-
       <header className="sticky top-0 z-40 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]/88 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[88rem] items-center justify-between px-4 sm:px-6 lg:px-8">
           <a href="/" onClick={(event) => selectSection(event, 'home')} className="flex items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--emos-accent)]">
@@ -280,7 +275,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
         </AnimatePresence>
       </header>
 
-      <main ref={journeyRef} id="top" className="relative overflow-hidden">
+      <main id="top" className="relative overflow-hidden">
         <AnimatePresence initial={false}>
           <motion.div
             key={activeSection}
