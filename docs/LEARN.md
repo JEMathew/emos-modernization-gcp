@@ -17,7 +17,7 @@ For a concise end-to-end view, watch the introduction followed by **F10 → F11 
 
 | Preview | Lesson |
 | :--- | :--- |
-| [<img src="learning/thumbnails/00-beta-introduction.svg" width="260" alt="EMOS Beta Introduction thumbnail">](demo/EMOS-Beta-Introduction.mp4) | **00 · EMOS Beta Introduction**<br>Understand the enterprise problem, the modernization journey, the implemented beta scope, the Google Cloud architecture, and the future roadmap.<br>`Start Here` `Beta v1.0` `4:17`<br>[Watch MP4](demo/EMOS-Beta-Introduction.mp4) · [WebVTT subtitles](demo/EMOS-Beta-Introduction.vtt) · [SRT subtitles](demo/EMOS-Beta-Introduction.srt) |
+| [<img src="learning/thumbnails/00-beta-introduction.svg" width="260" alt="EMOS Beta Introduction thumbnail">](demo/EMOS-Beta-Introduction.mp4) | **00 · EMOS Beta Introduction**<br>See the full enterprise modernization journey, the evidence, decision, and planning foundation delivered in Beta v1.0, and the product vision beyond it.<br>`Start Here` `Beta v1.0` `4:17`<br>[Watch MP4](demo/EMOS-Beta-Introduction.mp4) · [WebVTT subtitles](demo/EMOS-Beta-Introduction.vtt) · [SRT subtitles](demo/EMOS-Beta-Introduction.srt) |
 | [<img src="learning/thumbnails/f01-sign-in.svg" width="260" alt="Sign in and enter the private workspace thumbnail">](https://drive.google.com/drive/folders/1ONwIDuVpKqu3DJzmHgzrtYTeJaOUXqQ1?usp=drive_link) | **F01 · Sign in and enter the private workspace**<br>See the Firebase Google Sign-In entry point and the owner-bound EMOS workspace.<br>`Getting Started` `Authentication` `Beta v1.0`<br>File: `F01-sign-in-enter-the-private-workspace.mp4` |
 | [<img src="learning/thumbnails/f02-product-tour.svg" width="260" alt="Guided EMOS product tour thumbnail">](https://drive.google.com/drive/folders/1ONwIDuVpKqu3DJzmHgzrtYTeJaOUXqQ1?usp=drive_link) | **F02 · Take the guided product tour**<br>Orient yourself to the beta experience and the major product areas.<br>`Getting Started` `Product Tour` `Beta v1.0`<br>File: `F02-take-the-guided-product-tour.mp4` |
 
@@ -66,4 +66,3 @@ For a concise end-to-end view, watch the introduction followed by **F10 → F11 
 ## Beta scope note
 
 The videos document capabilities available in EMOS Beta v1.0. Automated live CMDB discovery, organization-wide RBAC, disposition-specific execution agents, autonomous validation, benefit-realization tracking, and marketplace distribution remain future scope unless explicitly identified otherwise.
-

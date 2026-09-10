@@ -67,7 +67,7 @@ export const LEARNING_VIDEOS: LearningVideo[] = [
     sequence: '00',
     title: 'EMOS Beta Introduction',
     description:
-      'Understand the enterprise problem, the modernization journey, the implemented beta scope, the Google Cloud architecture, and the future roadmap.',
+      'See the full enterprise modernization journey, the evidence, decision, and planning foundation delivered in Beta v1.0, and the product vision beyond it.',
     category: 'Start Here',
     tags: ['Introduction'],
     fileName: 'EMOS-Beta-Introduction.mp4',

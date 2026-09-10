@@ -74,4 +74,16 @@ describe('Ideathon evidence documentation', () => {
     expect(index).toContain('"isAccessibleForFree": true');
     expect(index).not.toContain('6R Execution Platform');
   });
+
+  it('keeps the introduction undated and aligned with the canonical beta boundary', () => {
+    const srt = readRepositoryFile('docs/demo/EMOS-Beta-Introduction.srt');
+    const vtt = readRepositoryFile('docs/demo/EMOS-Beta-Introduction.vtt');
+
+    for (const captions of [srt, vtt]) {
+      expect(captions).toContain('designed to govern the entire');
+      expect(captions).toContain('Beta v1.0 delivers the evidence, decision, and planning foundation today.');
+      expect(captions).not.toContain('Today, September');
+      expect(captions).not.toContain('decision-intelligence foundation for continuous');
+    }
+  });
 });

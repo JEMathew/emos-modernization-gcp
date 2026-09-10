@@ -455,11 +455,11 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByRole('button', { name: /Evaluation Evidence/i })).toBeInTheDocument();
 
     // Default view: one focused step rather than a text-heavy list.
-    expect(screen.getByText(/Choose a workload/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Inspect Enterprise DNA/i)).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Next step/i }));
-    expect(screen.getByText(/Inspect Enterprise DNA/i)).toBeInTheDocument();
+    expect(screen.getByText(/Define the modernization intent/i)).toBeInTheDocument();
     expect(screen.queryByText(/Choose a workload/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Next step/i }));
+    expect(screen.getByText(/Choose a workload/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Define the modernization intent/i)).not.toBeInTheDocument();
 
     // Switch to evaluation-only evidence.
     fireEvent.click(screen.getByRole('button', { name: /Evaluation Evidence/i }));
