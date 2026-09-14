@@ -54,7 +54,7 @@ Give an evaluator a short, evidence-backed path from each challenge requirement 
 - [x] AI Studio configuration was applied, saved, reopened and matched to the canonical source on 14 September 2026.
 - [x] The deployed Cloud Run `secretKeyRef` and challenge label were verified without viewing the secret value.
 - [x] Dedicated runtime `secretAccessor` evidence was verified safely on 14 September 2026.
-- [ ] Remove the unused default compute account's redundant secret-level accessor grant.
+- [x] The unused default compute account's redundant secret-level accessor grant was removed on 14 September 2026.
 - [ ] GitHub Actions release gate is green for the exact commit.
 - [ ] The published URL resolves to the exact verified commit.
 - [x] Completion report is added to `work_results/`.

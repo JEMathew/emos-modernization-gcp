@@ -41,8 +41,9 @@ describe('Ideathon evidence documentation', () => {
       expect(deliverables).toContain(requirement);
     }
 
-    expect(deliverables).toContain('deployed `secretKeyRef` and runtime IAM externally verified');
-    expect(deliverables).toContain('least-privilege cleanup pending');
+    expect(deliverables).toContain('Implemented and externally verified on 14 September 2026');
+    expect(deliverables).toContain('including least-privilege cleanup');
+    expect(deliverables).toContain('redundant secret-level grant to the default compute account was removed');
     expect(deliverables).toContain('Durable sanitized Custom Instructions screenshot retained');
     expect(deliverables).toContain('dev-tutorial=cloud-run-ai-challenge');
   });

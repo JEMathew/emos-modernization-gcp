@@ -21,7 +21,7 @@ Do not treat one state as proof of another.
 | Firebase authentication | Implemented and locally tested | Google Sign-In; protected APIs verify the Firebase ID token; popup and mobile redirect paths are supported | `src/lib/firebase.ts`, `src/lib/gemini.ts`, `server.ts`, `src/App.tsx` | `tests/auth.android.test.ts`, `tests/api.chat.contract.test.ts`, `tests/public.routes.test.tsx` |
 | Multi-turn Gemini interaction | Implemented and locally tested | Follow-up turns preserve bounded conversation context, call Gemini through the authenticated server and persist the updated thread | `src/components/Dashboard.tsx`, `src/lib/gemini.ts`, `server.ts` | API contract, schema and rendering suites |
 | Isolated Cloud Firestore storage | Implemented; rules suite awaits CI rerun for this commit | User profiles, assessment threads, imported workloads and program alignment use owner-scoped paths and deny unmatched access | `firestore.rules`, `src/lib/firebase.ts` | `tests/firestore.rules.test.ts`; GitHub Actions release gate |
-| Google Cloud Secret Manager | Application boundary, deployed `secretKeyRef` and runtime IAM externally verified on 14 September 2026; least-privilege cleanup pending | Browser code receives no Gemini key; server reads `GEMINI_API_KEY` from the runtime; Cloud Run injects it from Secret Manager | `server.ts`, `README.md` | Service `gemini-reflection-journal` maps `GEMINI_API_KEY` to `emos-gemini-api-key`; the dedicated runtime has `Secret Manager Secret Accessor`, but the unused default compute account also has that secret-level role and should be removed |
+| Google Cloud Secret Manager | Implemented and externally verified on 14 September 2026, including least-privilege cleanup | Browser code receives no Gemini key; server reads `GEMINI_API_KEY` from the runtime; Cloud Run injects it from Secret Manager | `server.ts`, `README.md` | Service `gemini-reflection-journal` maps `GEMINI_API_KEY` to `emos-gemini-api-key`; the dedicated EMOS runtime retains `Secret Manager Secret Accessor`, and the redundant secret-level grant to the default compute account was removed |
 | Original feature enhancement | Implemented and locally tested | Enterprise DNA, deterministic completeness, canonical 6R reasoning, vendor neutrality, critical-gap readiness, evidence plans, wave planning and executive artifacts | `src/lib/readiness.ts`, `src/lib/guardrails.ts`, `src/lib/wavePlanner.ts`, `src/components/PublicSandboxPage.tsx` | Readiness, guardrail, wave-planning and public-route suites |
 
 ## Two-minute judge path
@@ -51,7 +51,7 @@ Complete this section only after the exact candidate commit is published.
 - [x] Record the live service: `gemini-reflection-journal` in project `codev-0326`, region `asia-southeast1`, serving `https://emos-modernization.ai.studio/`; verified healthy on 14 September 2026.
 - [x] Verify the Cloud Run environment entry shows `GEMINI_API_KEY` uses `valueFrom.secretKeyRef` with secret `emos-gemini-api-key`; verified from the deployed service YAML on 14 September 2026 without viewing the value.
 - [x] Verify the dedicated runtime service account has `roles/secretmanager.secretAccessor`; confirmed at the secret level on 14 September 2026.
-- [ ] Remove the unnecessary secret-level `Secret Manager Secret Accessor` grant from the default compute service account; the Cloud Run revision uses the dedicated EMOS runtime account instead.
+- [x] Remove the unnecessary secret-level `Secret Manager Secret Accessor` grant from the default compute service account; completed and refreshed in the permissions view on 14 September 2026.
 - [x] Confirm `/api/health` does not return the key or other secret material; verified 14 September 2026.
 
 ### Firebase and CI
@@ -77,7 +77,7 @@ Complete this section only after the exact candidate commit is published.
 - Production dependency audit: 0 vulnerabilities on 10 September 2026.
 - Firestore rules: test suite is committed and release-gated in GitHub Actions; the current Mac lacks the Java runtime needed to rerun it locally.
 - Public repository: verified reachable on 14 September 2026. The landing-page clarity changes require their own green CI run before publication.
-- Deployment: live Cloud Run service, campaign label, Secret Manager `secretKeyRef` and dedicated runtime access are externally verified on 14 September 2026. The exact new deployed commit and removal of the extra default-compute secret grant remain pending.
+- Deployment: live Cloud Run service, campaign label, Secret Manager `secretKeyRef`, dedicated runtime access and least-privilege cleanup are externally verified on 14 September 2026. The exact new deployed commit remains pending.
 
 ## Original-feature explanation
 

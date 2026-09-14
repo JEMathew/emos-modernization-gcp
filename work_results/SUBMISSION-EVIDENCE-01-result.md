@@ -4,7 +4,7 @@
 
 The Ideathon evidence pack maps every challenge requirement to product behavior, source and verification evidence. During the 14 September 2026 release audit, the EMOS Google AI Studio Custom Instructions field was found empty; the canonical security constitution was then applied, saved, reopened and confirmed to match the checked-in 4,654-character source exactly.
 
-The same audit verified the active Cloud Run service, required campaign label, deployed Secret Manager reference and the dedicated runtime account's secret-level accessor role without viewing the secret value. It also found a redundant secret-level accessor grant on the unused default compute account; removal, the new deployed commit, CI and live per-user isolation checks remain explicitly pending.
+The same audit verified the active Cloud Run service, required campaign label, deployed Secret Manager reference and the dedicated runtime account's secret-level accessor role without viewing the secret value. It also found and removed a redundant secret-level accessor grant from the unused default compute account. The new deployed commit, CI and live per-user isolation checks remain explicitly pending.
 
 ## Files changed
 
@@ -51,7 +51,7 @@ An initial documentation-contract run exposed two overly literal assertions. The
 ## Known issues and pending external evidence
 
 - A durable, sanitized Google AI Studio screenshot that visibly includes the EMOS workspace name still needs to be retained for the submission artifact.
-- The unused default compute account's redundant secret-level accessor grant should be removed; the active Cloud Run revision already uses the dedicated EMOS runtime account.
+- The unused default compute account's redundant secret-level accessor grant was removed on 14 September 2026; the active Cloud Run revision continues to use the dedicated EMOS runtime account.
 - GitHub Actions, the Firestore emulator suite and the exact deployed commit must be verified after push.
 - Live Google Sign-In, owner-scoped persistence and the post-auth return path must be smoke-tested on the published candidate.
 - The production bundle still emits Vite's existing large-chunk warning; it does not fail the build.
