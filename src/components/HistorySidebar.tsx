@@ -213,83 +213,95 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
           filteredInteractions.map((item) => {
             const isSelected = item.id === selectedId;
             const isConfirming = confirmDeleteId === item.id;
+            const assessmentName = item.workloadName || item.title || 'Untitled Assessment';
+            const assessmentSummary = [item.recommended6R, item.decisionReadiness, getCategoryLabel(item.category)]
+              .filter(Boolean)
+              .join(', ');
 
             return (
-              <div
+              <article
                 key={item.id}
-                id={`history-item-${item.id}`}
-                onClick={() => {
-                  onSelect(item.id);
-                  if (onCloseMobile) onCloseMobile();
-                }}
-                className={`group relative p-3 rounded-xl cursor-pointer transition-all border text-left ${
+                className={`group relative rounded-xl transition-all border text-left ${
                   isSelected
                     ? 'bg-[var(--emos-surface-elevated)] border-[var(--emos-border-strong)] shadow-sm'
                     : 'bg-[var(--emos-surface)] border-[var(--emos-border-subtle)] hover:bg-[var(--emos-surface-hover)] hover:border-[var(--emos-border-strong)]'
                 }`}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="shrink-0">{getModeIcon(item.mode)}</span>
-                    <h4 className={`text-sm font-medium truncate ${isSelected ? 'text-[var(--emos-text-primary)] font-semibold' : 'text-[var(--emos-text-primary)] group-hover:text-[var(--emos-accent)]'}`}>
-                      {item.workloadName || item.title || 'Untitled Assessment'}
-                    </h4>
-                  </div>
-                  <span className="text-[11px] text-[var(--emos-text-muted)] shrink-0">
-                    {formatDate(item.createdAt)}
-                  </span>
-                </div>
-
-                <p className="text-[11px] text-[var(--emos-text-secondary)] line-clamp-2 mt-1.5 font-normal leading-relaxed">
-                  {item.content}
-                </p>
-
-                <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-[var(--emos-border-subtle)] text-[10px]">
-                  <div className="flex items-center gap-1.5 truncate max-w-[200px] flex-wrap">
-                    {item.recommended6R && (
-                      <span className="px-1.5 py-0.5 rounded bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] font-semibold uppercase tracking-wider text-[9px]">
-                        {item.recommended6R}
-                      </span>
-                    )}
-                    {item.decisionReadiness && (
-                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                        item.decisionReadiness === 'READY'
-                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                          : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                      }`}>
-                        {item.decisionReadiness}
-                      </span>
-                    )}
-                    <span className="px-2 py-0.5 rounded-md bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] font-medium truncate">
-                      {getCategoryLabel(item.category)}
+                <button
+                  id={`history-item-${item.id}`}
+                  type="button"
+                  aria-pressed={isSelected}
+                  aria-label={`Open assessment: ${assessmentName} — ${assessmentSummary}`}
+                  onClick={() => {
+                    onSelect(item.id);
+                    if (onCloseMobile) onCloseMobile();
+                  }}
+                  className="block w-full cursor-pointer rounded-xl p-3 text-left"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className="shrink-0">{getModeIcon(item.mode)}</span>
+                      <h4 className={`truncate text-sm font-medium ${isSelected ? 'font-semibold text-[var(--emos-text-primary)]' : 'text-[var(--emos-text-primary)] group-hover:text-[var(--emos-accent)]'}`}>
+                        {assessmentName}
+                      </h4>
+                    </div>
+                    <span className="shrink-0 text-[11px] text-[var(--emos-text-muted)]">
+                      {formatDate(item.createdAt)}
                     </span>
                   </div>
 
-                  {item.turns && item.turns.length > 0 && (
-                    <span className="text-[var(--emos-text-muted)]">
-                      {item.turns.length} {item.turns.length === 1 ? 'turn' : 'turns'}
-                    </span>
-                  )}
+                  <p className="mt-1.5 line-clamp-2 text-[11px] font-normal leading-relaxed text-[var(--emos-text-secondary)]">
+                    {item.content}
+                  </p>
 
-                  {/* Delete Button / Confirmation */}
-                  <div className="opacity-80 group-hover:opacity-100 transition-opacity">
+                  <div className={`mt-2.5 flex items-center justify-between border-t border-[var(--emos-border-subtle)] pt-2 text-[10px] ${isConfirming ? 'pr-24' : 'pr-7'}`}>
+                    <div className="flex max-w-[200px] flex-wrap items-center gap-1.5 truncate">
+                      {item.recommended6R && (
+                        <span className="rounded border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[var(--emos-accent-text)]">
+                          {item.recommended6R}
+                        </span>
+                      )}
+                      {item.decisionReadiness && (
+                        <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                          item.decisionReadiness === 'READY'
+                            ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                            : 'border border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300'
+                        }`}>
+                          {item.decisionReadiness}
+                        </span>
+                      )}
+                      <span className="truncate rounded-md border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-tertiary)] px-2 py-0.5 font-medium text-[var(--emos-accent-text)]">
+                        {getCategoryLabel(item.category)}
+                      </span>
+                    </div>
+
+                    {item.turns && item.turns.length > 0 && (
+                      <span className="text-[var(--emos-text-muted)]">
+                        {item.turns.length} {item.turns.length === 1 ? 'turn' : 'turns'}
+                      </span>
+                    )}
+                  </div>
+                </button>
+
+                <div className="absolute bottom-2.5 right-2.5 opacity-80 transition-opacity group-hover:opacity-100">
                     {isConfirming ? (
-                      <div
-                        className="flex items-center gap-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <div className="flex items-center gap-1">
                         <button
+                          type="button"
                           onClick={() => {
                             onDelete(item.id);
                             setConfirmDeleteId(null);
                           }}
+                          aria-label={`Confirm deletion of ${assessmentName}`}
                           className="px-2 py-0.5 rounded bg-rose-600 text-white font-medium hover:bg-rose-700 transition-colors cursor-pointer text-[10px]"
                           title="Confirm Delete"
                         >
                           Delete
                         </button>
                         <button
+                          type="button"
                           onClick={() => setConfirmDeleteId(null)}
+                          aria-label={`Cancel deletion of ${assessmentName}`}
                           className="px-2 py-0.5 rounded bg-[var(--emos-surface-hover)] border border-[var(--emos-border-subtle)] text-[var(--emos-text-secondary)] transition-colors cursor-pointer text-[10px]"
                         >
                           Cancel
@@ -297,20 +309,18 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
                       </div>
                     ) : (
                       <button
+                        type="button"
                         id={`delete-btn-${item.id}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setConfirmDeleteId(item.id);
-                        }}
+                        onClick={() => setConfirmDeleteId(item.id)}
+                        aria-label={`Delete ${assessmentName}`}
                         className="p-1 text-[var(--emos-text-muted)] hover:text-rose-500 rounded transition-colors cursor-pointer"
                         title="Delete this assessment"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                       </button>
                     )}
-                  </div>
                 </div>
-              </div>
+              </article>
             );
           })
         )}

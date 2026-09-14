@@ -40,7 +40,7 @@
     --emos-surface-active: #242424;
     --emos-text-primary: #FFFFFF;
     --emos-text-secondary: #A3A3A3;
-    --emos-text-muted: #666666;
+    --emos-text-muted: #7A7A7A;
     --emos-border-subtle: #222222;
     --emos-border-strong: #333333;
     --emos-accent: #A88554;
@@ -64,6 +64,11 @@
 
   html {
     scroll-behavior: smooth;
+  }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--emos-accent);
+    outline-offset: 3px;
   }
 
   .font-serif {

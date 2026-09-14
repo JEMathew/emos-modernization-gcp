@@ -26,7 +26,7 @@ Do not treat one state as proof of another.
 
 ## Two-minute judge path
 
-1. **0:00–0:15 — Establish the product.** Open the [live application](https://emos-modernization.ai.studio/) and select **Explore Without Sign-In**.
+1. **0:00–0:15 — Establish the product.** Open the [live application](https://emos-modernization.ai.studio/) and select **Try the Public Sandbox**.
 2. **0:15–0:45 — Demonstrate the original mechanism.** In **Evidence**, select **Define Target Strategy**. Observe 78% completeness and confirm that the decision remains `NEEDS EVIDENCE` because critical dependency and downtime evidence is unresolved.
 3. **0:45–1:00 — Close the gate correctly.** Select **Close Critical Gaps**, then **Decision Gate**. Observe 89% and `READY`, explicitly qualified as ready for human review rather than automatically approved.
 4. **1:00–1:20 — Show the user artifact.** Download the Executive Decision Brief or Evidence Plan. The latter carries unresolved gaps into owner, source and due-date columns.

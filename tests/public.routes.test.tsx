@@ -298,10 +298,14 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     };
 
     // Required user-facing copy
-    const productTourButton = screen.getByRole('button', { name: /^Product Tour$/i });
+    const productTourButton = screen.getByRole('button', { name: /^Watch Product Tour$/i });
     expect(productTourButton).toBeInTheDocument();
-    expect(productTourButton).toHaveClass('border', 'bg-[var(--emos-surface)]');
-    expect(screen.getByRole('link', { name: /Explore Without Sign-In/i })).toHaveAttribute('href', '/sandbox');
+    expect(productTourButton).toHaveClass('min-h-[44px]');
+    expect(productTourButton).not.toHaveClass('border', 'shadow-sm');
+    expect(screen.getByRole('link', { name: /Try the Public Sandbox/i })).toHaveAttribute('href', '/sandbox');
+    expect(screen.getByRole('button', { name: /Sign In to Use Your Portfolio/i })).toHaveAttribute('aria-describedby', 'portfolio-signin-privacy-note');
+    expect(screen.getByText(/account-isolated EMOS workspace/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Review data handling/i })).toHaveAttribute('href', '/privacy');
     expect(screen.getAllByText(/19 Walkthroughs \+ Introduction/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Enterprise Modernization/i).length).toBeGreaterThan(0);
     expect(screen.getByRole('heading', { name: 'AI-Native Modernization, Governed by Evidence—From First Signal to Proven Outcome.' })).toBeInTheDocument();
@@ -383,7 +387,7 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
 
     // The single product-tour entry point triggers the walkthrough.
     fireEvent.click(screen.getByRole('link', { name: /EMOS Enterprise Modernization Operating System/i }));
-    fireEvent.click(screen.getByRole('button', { name: /^Product Tour$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Watch Product Tour$/i }));
     expect(onOpenWalkthrough).toHaveBeenCalledTimes(1);
   });
 
@@ -418,6 +422,7 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
   });
 
   it('presents legacy assessment categories with current user-facing labels', () => {
+    const onSelect = vi.fn();
     renderWithTheme(
       <HistorySidebar
         interactions={[
@@ -433,7 +438,7 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
           },
         ]}
         selectedId={null}
-        onSelect={vi.fn()}
+        onSelect={onSelect}
         onDelete={vi.fn()}
         isLoading={false}
       />
@@ -444,6 +449,12 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.queryByText(/^Legacy Application$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/^Problem Solving$/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^New Assessment$/i })).not.toBeInTheDocument();
+
+    const assessmentButton = document.getElementById('history-item-application-1');
+    expect(assessmentButton?.tagName).toBe('BUTTON');
+    fireEvent.click(assessmentButton!);
+    expect(onSelect).toHaveBeenCalledWith('application-1');
+    expect(screen.getByRole('button', { name: /Delete Legacy Core/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getAllByRole('button', { name: /^Architecture Review$/i })[0]);
     expect(screen.getByText('Earlier Review')).toBeInTheDocument();
