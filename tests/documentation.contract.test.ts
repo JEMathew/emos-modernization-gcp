@@ -27,7 +27,7 @@ describe('Ideathon evidence documentation', () => {
     expect(constitution).toContain('no unresolved critical evidence gaps');
   });
 
-  it('maps every challenge requirement and keeps external proof explicitly pending', () => {
+  it('maps every challenge requirement and distinguishes verified from pending external proof', () => {
     const deliverables = readRepositoryFile('docs/IDEATHON_DELIVERABLES.md');
 
     for (const requirement of [
@@ -41,8 +41,11 @@ describe('Ideathon evidence documentation', () => {
       expect(deliverables).toContain(requirement);
     }
 
-    expect(deliverables).toContain('deployed binding evidence pending');
-    expect(deliverables).toContain('Sanitized Custom Instructions screenshot captured.');
+    expect(deliverables).toContain('Implemented and externally verified on 14 September 2026');
+    expect(deliverables).toContain('including least-privilege cleanup');
+    expect(deliverables).toContain('redundant secret-level grant to the default compute account was removed');
+    expect(deliverables).toContain('Durable sanitized Custom Instructions screenshot retained');
+    expect(deliverables).toContain('dev-tutorial=cloud-run-ai-challenge');
   });
 
   it('does not preserve the stale permanent test-count claim', () => {
@@ -57,7 +60,10 @@ describe('Ideathon evidence documentation', () => {
     const normalized = messaging.replace(/\s+/g, ' ');
 
     expect(messaging).toContain('Founder experience: **15+ years**');
+    expect(normalized).toContain('AI-Native Modernization, Governed by Evidence—From First Signal to Proven Outcome.');
+    expect(normalized).toContain('EMOS is designed to govern the full enterprise modernization lifecycle—from business alignment and estate discovery through evidence-based decisions and planning, into governed execution, validation, transition to live operations, measured benefits, learning and reassessment.');
     expect(normalized).toContain('Beta v1.0 delivers the evidence, decision and planning foundation today');
+    expect(normalized).toContain('The authoritative lifecycle contains fifteen stages.');
     expect(normalized).toContain('designed to remain model-agnostic');
     expect(normalized).toContain('The current beta does not execute migrations');
     expect(messaging).not.toContain('[RESOLVE');
@@ -72,6 +78,8 @@ describe('Ideathon evidence documentation', () => {
     expect(index).toContain('"@type": "Organization"');
     expect(index).toContain('"@type": "WebApplication"');
     expect(index).toContain('"isAccessibleForFree": true');
+    expect(index).toContain('EMOS | AI-Native Enterprise Modernization');
+    expect(index).toContain('AI-Native Modernization, Governed by Evidence—From First Signal to Proven Outcome.');
     expect(index).not.toContain('6R Execution Platform');
   });
 

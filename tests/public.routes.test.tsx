@@ -302,12 +302,16 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(productTourButton).toBeInTheDocument();
     expect(productTourButton).toHaveClass('border', 'bg-[var(--emos-surface)]');
     expect(screen.getByRole('link', { name: /Explore Without Sign-In/i })).toHaveAttribute('href', '/sandbox');
-    expect(screen.getByText(/Beta v1\.0 Publicly Live/i)).toBeInTheDocument();
     expect(screen.getAllByText(/19 Walkthroughs \+ Introduction/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Enterprise Modernization/i).length).toBeGreaterThan(0);
-    expect(screen.getByRole('heading', { name: /One operating system for the entire modernization journey\./i })).toBeInTheDocument();
-    expect(screen.getAllByText(/Full-Lifecycle Product Vision/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Beta v1\.0 delivers the evidence, decision and planning foundation today\./i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'AI-Native Modernization, Governed by Evidence—From First Signal to Proven Outcome.' })).toBeInTheDocument();
+    expect(screen.getAllByText(/^Product Vision$/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Beta v1\.0 Publicly Live/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Available Today$/i)).not.toBeInTheDocument();
+    expect(screen.getAllByText(/Beta v1\.0 delivers the evidence, decision and planning foundation today\./i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/15 lifecycle stages \+ Mobilize handoff/i).length).toBeGreaterThan(0);
+    expect(screen.getByText('One Lifecycle. Three Honest Delivery States.')).toBeInTheDocument();
+    expect(screen.getAllByText(/^SHIPPED$/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Trust, Security, Governance and Human Accountability Throughout/i)).toBeInTheDocument();
     expect(screen.getByText(/Watch the evidence become a decision\./i)).toBeInTheDocument();
 
@@ -331,7 +335,8 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByText(/Why Call It an Operating System\?/i)).toBeInTheDocument();
 
     chooseMenuItem('About', /^Vision$/i);
-    expect(screen.getAllByText(/Full Product Vision/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Product Vision$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/transition to live operations/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Available in Beta/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Mobilize$/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/^Learn$/i)).toBeInTheDocument();

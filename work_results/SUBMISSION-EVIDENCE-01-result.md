@@ -2,9 +2,9 @@
 
 ## Outcome
 
-The pre-deployment Ideathon evidence pack is complete and ready for preview. Every challenge requirement now maps to product behavior, source and verification evidence. The canonical security constitution was also applied and visually verified in the EMOS Google AI Studio workspace on 9 September 2026.
+The Ideathon evidence pack maps every challenge requirement to product behavior, source and verification evidence. During the 14 September 2026 release audit, the EMOS Google AI Studio Custom Instructions field was found empty; the canonical security constitution was then applied, saved, reopened and confirmed to match the checked-in 4,654-character source exactly.
 
-This packet does not claim that pending deployment configuration has been externally verified.
+The same audit verified the active Cloud Run service, required campaign label, deployed Secret Manager reference and the dedicated runtime account's secret-level accessor role without viewing the secret value. It also found and removed a redundant secret-level accessor grant from the unused default compute account. The new deployed commit, CI and live per-user isolation checks remain explicitly pending.
 
 ## Files changed
 
@@ -45,12 +45,13 @@ An initial documentation-contract run exposed two overly literal assertions. The
 - [x] A two-minute judge path covers the core requirements and the original EMOS feature.
 - [x] Stale permanent test-count claims are removed and protected by a documentation contract.
 - [x] Missing external evidence is labelled pending.
-- [x] Google AI Studio Custom Instructions were applied and visually verified without exposing credentials.
+- [x] Google AI Studio Custom Instructions were applied, saved and reopened without exposing credentials.
+- [x] The deployed Cloud Run `secretKeyRef` and `dev-tutorial=cloud-run-ai-challenge` label were externally verified.
 
 ## Known issues and pending external evidence
 
-- A sanitized Google AI Studio Custom Instructions screenshot still needs to be captured for the submission artifact.
-- Cloud Run `secretKeyRef` and runtime service-account `secretAccessor` evidence must be captured after the candidate is deployed; no secret value may appear.
+- A durable, sanitized Google AI Studio screenshot that visibly includes the EMOS workspace name still needs to be retained for the submission artifact.
+- The unused default compute account's redundant secret-level accessor grant was removed on 14 September 2026; the active Cloud Run revision continues to use the dedicated EMOS runtime account.
 - GitHub Actions, the Firestore emulator suite and the exact deployed commit must be verified after push.
 - Live Google Sign-In, owner-scoped persistence and the post-auth return path must be smoke-tested on the published candidate.
 - The production bundle still emits Vite's existing large-chunk warning; it does not fail the build.
@@ -66,4 +67,4 @@ An initial documentation-contract run exposed two overly literal assertions. The
 
 ## Release decision
 
-**Ready for user preview; not yet approved for commit, push, merge or deployment.**
+**Approved by the user for commit, push and production deployment on 14 September 2026; release verification is in progress.**

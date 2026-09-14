@@ -8,7 +8,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { signInWithGoogle, getFriendlyAuthErrorMessage } from '../lib/firebase';
 import { LEARNING_VIDEOS, getDriveViewUrl } from '../data/learningVideos';
 import { SAMPLE_PORTFOLIO } from '../data/samplePortfolio';
-import { EMOS_FACTS, LANDING_NAVIGATION } from '../config/productFacts';
+import { CAPABILITY_HORIZON, EMOS_FACTS, EMOS_POSITIONING, LANDING_NAVIGATION } from '../config/productFacts';
 import { evaluateEvidenceReadiness } from '../lib/readiness';
 import { downloadSampleDecisionBrief } from '../lib/sampleDecisionBrief';
 import { ThemeSelector } from './ThemeSelector';
@@ -52,27 +52,6 @@ const EVIDENCE_DIMENSIONS = [
   ['Target State', '3', 'Platform · Architecture · Downtime'],
 ];
 
-const ROADMAP_PHASES = [
-  {
-    label: 'Available in Beta',
-    status: 'LIVE',
-    stages: ['Align', 'Discover', 'Understand', 'Assess', 'Decide', 'Plan', 'Mobilize'],
-    detail: 'Connect business intent to portfolio evidence, calculate completeness, recommend a governed 6R disposition and produce an implementation-ready plan.',
-  },
-  {
-    label: 'Building Next',
-    status: 'NEXT',
-    stages: ['Govern', 'Prioritize', 'Define Target State'],
-    detail: 'Deepen approvals, auditability, portfolio prioritization and target-state controls for enterprise modernization programs.',
-  },
-  {
-    label: 'Full Product Vision',
-    status: 'VISION',
-    stages: ['Execute', 'Validate', 'Transition', 'Measure Benefits', 'Learn', 'Reassess'],
-    detail: 'Govern delivery with partners, reconcile realized value with the approved case and use outcomes to improve the next decision.',
-  },
-];
-
 const SCENARIO_WORKLOAD = SAMPLE_PORTFOLIO[0];
 const SCENARIO_READINESS = evaluateEvidenceReadiness(SCENARIO_WORKLOAD.dna);
 
@@ -87,9 +66,15 @@ const FEATURED_VIDEO_TITLES: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  LIVE: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+  SHIPPED: 'border-emerald-500/35 bg-emerald-500/12 text-emerald-700 dark:text-emerald-300',
   NEXT: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300',
   VISION: 'border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+};
+
+const PHASE_CARD_STYLES: Record<string, string> = {
+  SHIPPED: 'border-emerald-500/35 bg-[var(--emos-surface)] shadow-lg shadow-emerald-950/5',
+  NEXT: 'border-amber-500/25 bg-[var(--emos-surface)]/90',
+  VISION: 'border-dashed border-sky-500/30 bg-[var(--emos-surface)]/65',
 };
 
 function GoogleIcon() {
@@ -288,12 +273,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
           <div className="pointer-events-none absolute inset-0 landing-grid opacity-50" aria-hidden="true" />
           <div className="relative mx-auto grid max-w-[88rem] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12 lg:px-8 lg:py-16">
             <Reveal>
-              <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] px-3.5 py-1.5 text-xs font-semibold text-[var(--emos-accent-text)]">
-                <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>
-                Beta v1.0 Publicly Live · Full-Lifecycle Product Vision
+              <h1 id="landing-title" className="max-w-4xl font-serif text-4xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-[3.65rem] xl:text-[4.2rem]">{EMOS_POSITIONING.hero}</h1>
+              <div className="mt-7 max-w-2xl border-l-2 border-[var(--emos-accent)] pl-4 sm:pl-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--emos-accent-text)]">{EMOS_POSITIONING.visionLabel}</p>
+                <p className="mt-2 text-base leading-7 text-[var(--emos-text-secondary)] sm:text-lg sm:leading-8">{EMOS_POSITIONING.productVision} <strong className="font-semibold text-[var(--emos-text-primary)]">{EMOS_POSITIONING.betaScope}</strong></p>
               </div>
-              <h1 id="landing-title" className="max-w-4xl font-serif text-4xl font-semibold leading-[1.04] tracking-tight sm:text-6xl lg:text-[3.65rem] xl:text-[4.1rem]">One Operating System for the Entire Modernization Journey.</h1>
-              <p className="mt-7 max-w-2xl text-base leading-8 text-[var(--emos-text-secondary)] sm:text-lg">EMOS is a vendor-neutral operating system designed to govern enterprise modernization end to end—from the initiative that triggers it, through portfolio evidence and the 6R decision, into sequencing, delivery and proof that the promised outcome was achieved. <strong className="font-semibold text-[var(--emos-text-primary)]">Beta v1.0 delivers the evidence, decision and planning foundation today.</strong></p>
               {authError && <div className="mt-6 flex max-w-xl items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs text-rose-700 dark:text-rose-300"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><span>{authError}</span></div>}
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <a href="/sandbox" onClick={(event) => navigate(event, '/sandbox')} className="group inline-flex min-h-[50px] items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-6 text-sm font-semibold text-black shadow-lg transition-all hover:-translate-y-0.5 sm:text-base"><Sparkles className="h-5 w-5" />Explore Without Sign-In<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a>
@@ -332,8 +316,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
             </Reveal>
           </div>
           <div className="relative mx-auto max-w-[88rem] px-4 pb-12 sm:px-6 lg:px-8 lg:pb-16" aria-label="EMOS capability horizon">
+            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--emos-accent-text)]">Capability Horizon</p><h2 className="mt-1 font-serif text-2xl font-semibold">{EMOS_POSITIONING.capabilityHeading}</h2></div><p className="text-xs text-[var(--emos-text-muted)]">{EMOS_POSITIONING.lifecycleLabel}</p></div>
             <div className="grid gap-3 lg:grid-cols-3">
-              {ROADMAP_PHASES.map(({ label, status, stages }) => <div key={`hero-${label}`} className="rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)]/90 p-4 backdrop-blur"><div className="flex items-center justify-between gap-3"><p className="font-serif text-base font-semibold">{label}</p><span className={['rounded-full border px-2 py-1 font-mono text-[9px] font-bold tracking-wider', STATUS_STYLES[status]].join(' ')}>{status}</span></div><p className="mt-3 text-xs leading-5 text-[var(--emos-text-secondary)]">{stages.join(' · ')}</p></div>)}
+              {CAPABILITY_HORIZON.map(({ label, status, stages }) => <div key={`hero-${label}`} className={['rounded-2xl border p-4 backdrop-blur transition-transform hover:-translate-y-0.5', PHASE_CARD_STYLES[status]].join(' ')}><div className="flex items-center justify-between gap-3"><p className="font-serif text-base font-semibold">{label}</p><span className={['rounded-full border px-2 py-1 font-mono text-[9px] font-bold tracking-wider', STATUS_STYLES[status]].join(' ')}>{status}</span></div><p className="mt-3 text-xs leading-5 text-[var(--emos-text-secondary)]">{stages.join(' · ')}</p></div>)}
             </div>
             <div className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] px-4 py-2.5 text-center text-xs font-semibold text-emerald-700 dark:text-emerald-300">Trust, Security, Governance and Human Accountability Throughout</div>
           </div>
@@ -377,8 +362,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
                 <div className="mt-5 grid gap-3 lg:grid-cols-2">
                   {[
                     ['What Does EMOS Actually Do Today?', 'EMOS structures portfolio evidence across eighteen attributes, calculates completeness deterministically, produces an explainable 6R recommendation with alternatives and risks, and turns approved decisions into sequenced, implementation-ready plans.'],
-                    ['What Happens After the 6R Decision?', 'Beta v1.0 supports planning and mobilization. EMOS is being built toward execution governance, validation, transition, benefits measurement and continuous reassessment.'],
-                    ['Does EMOS Execute Migrations?', 'No. The current beta does not execute migrations. It produces governed decisions and implementation-ready plans; delivery governance and outcome measurement remain the product vision.'],
+                    ['What Happens After the 6R Decision?', EMOS_POSITIONING.afterDecision],
+                    ['Does EMOS Execute Migrations?', EMOS_POSITIONING.executionBoundary],
                     ['Why Call It an Operating System?', 'Because evidence, decisions, plans, delivery controls and realized outcomes belong to one governed lifecycle. EMOS is being built in stages so each capability remains defensible before the next one depends on it.'],
                   ].map(([question, answer]) => <details key={question} className="group rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold"><span>{question}</span><span aria-hidden="true" className="text-[var(--emos-accent)] transition-transform group-open:rotate-45">+</span></summary><p className="mt-4 border-t border-[var(--emos-border-subtle)] pt-4 text-sm leading-6 text-[var(--emos-text-secondary)]">{answer}</p></details>)}
                 </div>
@@ -424,11 +409,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
         {activeSection === 'vision' && <section id="vision" className="landing-scene">
           <div className="mx-auto max-w-[88rem] px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
             <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-              <Reveal><StageMarker number="05" label="Company and Product Vision" /><h2 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl">The Entire Modernization Journey—Built in Defensible Stages</h2></Reveal>
-              <Reveal delay={0.08}><p className="text-base leading-8 text-[var(--emos-text-secondary)]">EMOS is designed to govern the journey from the business initiative that triggers modernization, through portfolio evidence and the 6R decision, into sequencing, delivery and proof that the promised outcome was achieved. The beta establishes the evidence, decision and planning foundation; execution governance and outcome measurement are the product vision.</p></Reveal>
+              <Reveal><StageMarker number="04" label={EMOS_POSITIONING.visionLabel} /><h2 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl">The Entire Modernization Journey—Built in Defensible Stages</h2><p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--emos-accent-text)]">{EMOS_POSITIONING.lifecycleLabel}</p></Reveal>
+              <Reveal delay={0.08}><p className="text-base leading-8 text-[var(--emos-text-secondary)]">{EMOS_POSITIONING.productVision} <strong className="font-semibold text-[var(--emos-text-primary)]">{EMOS_POSITIONING.betaScope}</strong></p></Reveal>
             </div>
             <div className="mt-9 grid gap-4 lg:grid-cols-3">
-              {ROADMAP_PHASES.map(({ label, status, stages, detail }, index) => <Reveal key={label} delay={index * 0.08}><motion.article whileHover={reduceMotion ? undefined : { y: -5 }} className="h-full rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5 sm:p-6"><div className="flex items-center justify-between gap-3"><h3 className="font-serif text-xl font-semibold">{label}</h3><span className={['rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold tracking-wider', STATUS_STYLES[status]].join(' ')}>{status}</span></div><div className="mt-5 flex flex-wrap gap-2">{stages.map((stage) => <span key={stage} className="rounded-full border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] px-2.5 py-1.5 text-xs">{stage}</span>)}</div><p className="mt-5 text-sm leading-6 text-[var(--emos-text-secondary)]">{detail}</p></motion.article></Reveal>)}
+              {CAPABILITY_HORIZON.map(({ label, status, stages, detail }, index) => <Reveal key={label} delay={index * 0.08}><motion.article whileHover={reduceMotion ? undefined : { y: -5 }} className={['h-full rounded-2xl border p-5 sm:p-6', PHASE_CARD_STYLES[status]].join(' ')}><div className="flex items-center justify-between gap-3"><h3 className="font-serif text-xl font-semibold">{label}</h3><span className={['rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold tracking-wider', STATUS_STYLES[status]].join(' ')}>{status}</span></div><div className="mt-5 flex flex-wrap gap-2">{stages.map((stage) => <span key={stage} className="rounded-full border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] px-2.5 py-1.5 text-xs">{stage}</span>)}</div><p className="mt-5 text-sm leading-6 text-[var(--emos-text-secondary)]">{detail}</p></motion.article></Reveal>)}
             </div>
             <Reveal className="mt-5"><details className="group rounded-2xl border border-[var(--emos-border-strong)] bg-[var(--emos-bg-secondary)] p-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold"><span>Honest Scope · What EMOS Does Not Do Yet</span><span className="text-[var(--emos-accent)] transition-transform group-open:rotate-45">+</span></summary><div className="mt-4 grid gap-3 border-t border-[var(--emos-border-subtle)] pt-4 text-sm text-[var(--emos-text-secondary)] sm:grid-cols-2">{['It does not automatically discover your entire estate.', 'It does not execute migrations.', 'It does not yet reconcile planned outcomes with realized value.', 'It has no customers yet and is recruiting its first design partners.'].map((item) => <div key={item} className="flex items-start gap-2"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--emos-accent)]" />{item}</div>)}</div></details></Reveal>
           </div>
@@ -436,7 +421,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
 
         {activeSection === 'founder' && <section id="founder" className="landing-scene landing-founder bg-[var(--emos-bg-secondary)]">
           <div className="mx-auto grid max-w-[88rem] gap-8 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:px-8">
-            <Reveal><StageMarker number="06" label="Founder" /><div className="rounded-3xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-6 shadow-xl"><div className="flex items-center justify-between"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#876637] to-[#E5C492] font-serif text-2xl font-semibold text-black">JM</div><a href="https://www.linkedin.com/in/jincenmathew/" target="_blank" rel="noreferrer" aria-label="Connect With Jincen E Mathew on LinkedIn" title="Connect With Jincen E Mathew on LinkedIn" className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#0A66C2]/30 bg-[#0A66C2]/10 text-[#0A66C2] transition-all hover:-translate-y-0.5 hover:bg-[#0A66C2] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A66C2]"><Linkedin className="h-5 w-5" aria-hidden="true" /></a></div><h2 className="mt-5 font-serif text-3xl font-semibold">Jincen E Mathew</h2><p className="mt-1 text-sm leading-6 text-[var(--emos-text-muted)]">Founder · Bengaluru, India · {EMOS_FACTS.founderExperience} Years Building, Shipping, Launching and Taking Enterprise Products to Market</p><dl className="mt-5 grid gap-4 border-t border-[var(--emos-border-subtle)] pt-5 sm:grid-cols-2 lg:grid-cols-1">{[
+            <Reveal><StageMarker number="05" label="Founder" /><div className="rounded-3xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-6 shadow-xl"><div className="flex items-center justify-between"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#876637] to-[#E5C492] font-serif text-2xl font-semibold text-black">JM</div><a href="https://www.linkedin.com/in/jincenmathew/" target="_blank" rel="noreferrer" aria-label="Connect With Jincen E Mathew on LinkedIn" title="Connect With Jincen E Mathew on LinkedIn" className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#0A66C2]/30 bg-[#0A66C2]/10 text-[#0A66C2] transition-all hover:-translate-y-0.5 hover:bg-[#0A66C2] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A66C2]"><Linkedin className="h-5 w-5" aria-hidden="true" /></a></div><h2 className="mt-5 font-serif text-3xl font-semibold">Jincen E Mathew</h2><p className="mt-1 text-sm leading-6 text-[var(--emos-text-muted)]">Founder · Bengaluru, India · {EMOS_FACTS.founderExperience} Years Building, Shipping, Launching and Taking Enterprise Products to Market</p><dl className="mt-5 grid gap-4 border-t border-[var(--emos-border-subtle)] pt-5 sm:grid-cols-2 lg:grid-cols-1">{[
               ['Oracle', '5 Years Leading GTM for Oracle Technology Stack and Engineered Systems'],
               ['Tally', '3+ Years Building, Shipping and Launching Products into New Markets'],
               ['Boeing', '6 Years Building a 0→1 Modernization-Governance Product Across 5,000+ Applications · Modern Data Platforms: Cloud Data Warehouse on GCP and Data Lakehouse on AWS'],
@@ -452,7 +437,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
           <div className="relative mx-auto max-w-[88rem] px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
             <Reveal className="overflow-hidden rounded-[2rem] border border-[var(--emos-accent-border)] bg-[var(--emos-surface)] shadow-2xl">
               <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-                <div className="p-7 sm:p-9 lg:p-10"><StageMarker number="07" label="Design Partner Program" /><h2 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl">Become a Founding Design Partner</h2><p className="mt-5 max-w-2xl text-base leading-8 text-[var(--emos-text-secondary)]">Bring a sanitized, representative portfolio—or model a stuck initiative with synthetic data. In one working session, EMOS produces an evidence-gap assessment and explainable recommendation; you tell me where it fails a real architecture review.</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=jeasom@gmail.com&su=EMOS%20Design%20Partner%20Interest&body=Hi%20Jincen%2C%0A%0AI%27m%20interested%20in%20becoming%20an%20EMOS%20design%20partner.%0A%0AName%3A%0AOrganization%3A%0ARole%3A%0APortfolio%20size%3A%0AModernization%20initiative%3A%0ACurrent%20decision%20process%3A%0AIntended%20business%20outcome%3A%0ABuyer%20or%20budget%20owner%3A%0AData%20or%20security%20restrictions%3A" target="_blank" rel="noreferrer" aria-label="Confirm Design Partner Interest by Email" className="group inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-6 text-sm font-semibold text-black shadow-lg transition-all hover:-translate-y-0.5"><Mail className="h-4 w-4" />Confirm Interest by Email <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a><a href="/sandbox" onClick={(event) => navigate(event, '/sandbox')} className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-bg-secondary)] px-5 text-sm font-semibold"><Sparkles className="h-4 w-4" />Evaluate Without Sign-In</a></div><p className="mt-4 text-sm leading-6 text-[var(--emos-text-muted)]">There is no charge to explore the public beta or sandbox. Commercial pricing has not been set. Prefer another email client? Write to <a className="font-semibold text-[var(--emos-accent-text)] underline underline-offset-4" href="mailto:jeasom@gmail.com?subject=EMOS%20Design%20Partner%20Interest">jeasom@gmail.com</a>.</p></div>
+                <div className="p-7 sm:p-9 lg:p-10"><StageMarker number="06" label="Design Partner Program" /><h2 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl">Become a Founding Design Partner</h2><p className="mt-5 max-w-2xl text-base leading-8 text-[var(--emos-text-secondary)]">Bring a sanitized, representative portfolio—or model a stuck initiative with synthetic data. In one working session, EMOS produces an evidence-gap assessment and explainable recommendation; you tell me where it fails a real architecture review.</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=jeasom@gmail.com&su=EMOS%20Design%20Partner%20Interest&body=Hi%20Jincen%2C%0A%0AI%27m%20interested%20in%20becoming%20an%20EMOS%20design%20partner.%0A%0AName%3A%0AOrganization%3A%0ARole%3A%0APortfolio%20size%3A%0AModernization%20initiative%3A%0ACurrent%20decision%20process%3A%0AIntended%20business%20outcome%3A%0ABuyer%20or%20budget%20owner%3A%0AData%20or%20security%20restrictions%3A" target="_blank" rel="noreferrer" aria-label="Confirm Design Partner Interest by Email" className="group inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-6 text-sm font-semibold text-black shadow-lg transition-all hover:-translate-y-0.5"><Mail className="h-4 w-4" />Confirm Interest by Email <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a><a href="/sandbox" onClick={(event) => navigate(event, '/sandbox')} className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-bg-secondary)] px-5 text-sm font-semibold"><Sparkles className="h-4 w-4" />Evaluate Without Sign-In</a></div><p className="mt-4 text-sm leading-6 text-[var(--emos-text-muted)]">There is no charge to explore the public beta or sandbox. Commercial pricing has not been set. Prefer another email client? Write to <a className="font-semibold text-[var(--emos-accent-text)] underline underline-offset-4" href="mailto:jeasom@gmail.com?subject=EMOS%20Design%20Partner%20Interest">jeasom@gmail.com</a>.</p></div>
                 <div className="border-t border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] p-7 sm:p-10 lg:border-l lg:border-t-0 lg:p-12"><div className="flex items-center gap-3"><Users className="h-6 w-6 text-[var(--emos-accent)]" /><p className="font-serif text-2xl font-semibold">I Am Looking for Three.</p></div><ul className="mt-8 space-y-4">{['A Tailored Evidence-Gap and Modernization Assessment', 'Direct Influence Over the Product Roadmap', 'Early Access to New Capabilities', 'Founding-Customer Terms When EMOS Becomes Commercial'].map((benefit) => <li key={benefit} className="flex items-start gap-3 text-sm leading-6 text-[var(--emos-text-secondary)]"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--emos-accent)]" />{benefit}</li>)}</ul><div className="mt-8 rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5"><p className="text-xs font-semibold text-[var(--emos-accent-text)]">The Evidence I Need in Return</p><p className="mt-2 text-sm leading-6 text-[var(--emos-text-secondary)]">Where the recommendation is wrong, what evidence it missed and whether the output would support a real buying decision.</p></div></div>
               </div>
             </Reveal>
@@ -464,7 +449,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
 
       <footer className="border-t border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] px-4 py-8 text-xs text-[var(--emos-text-muted)] sm:px-6">
         <div className="mx-auto flex max-w-[88rem] flex-col items-center justify-between gap-5 sm:flex-row">
-          <div className="flex items-center gap-2 text-center sm:text-left"><span className="font-serif font-semibold text-[var(--emos-text-primary)]">EMOS</span><span>·</span><span>Enterprise Modernization Operating System</span><span className="hidden md:inline">· Beta v1.0</span></div>
+          <div className="flex items-center gap-2 text-center sm:text-left"><span className="font-serif font-semibold text-[var(--emos-text-primary)]">EMOS</span><span>·</span><span>Enterprise Modernization Operating System</span></div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             <a id="footer-learn-link" href="/learn" onClick={(event) => navigate(event, '/learn')} className="font-medium text-[var(--emos-text-secondary)] hover:underline">Learning Center</a>
             <a href="/sandbox" onClick={(event) => navigate(event, '/sandbox')} className="font-medium text-[var(--emos-text-secondary)] hover:underline">Public Sandbox</a>
