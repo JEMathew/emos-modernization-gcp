@@ -572,16 +572,18 @@ firebase deploy --only firestore:rules
 
 ## Secret Management (Google Cloud Secret Manager)
 
-Store your Gemini API key in Google Cloud Secret Manager and grant access to the Cloud Run runtime service account:
+The active production service is `gemini-reflection-journal` in project `codev-0326` and region `asia-southeast1`. It exposes the server-only environment variable `GEMINI_API_KEY` through a Secret Manager reference to `emos-gemini-api-key`; the key value is never committed or returned to the browser.
+
+For a new environment, store the Gemini API key in Google Cloud Secret Manager and grant access only to the Cloud Run runtime service account:
 
 ```bash
 # 1. Create and populate the secret
-gcloud secrets create GEMINI_API_KEY --replication-policy="automatic"
-echo -n "YOUR_GEMINI_API_KEY" | gcloud secrets versions add GEMINI_API_KEY --data-file=-
+gcloud secrets create emos-gemini-api-key --replication-policy="automatic"
+echo -n "YOUR_GEMINI_API_KEY" | gcloud secrets versions add emos-gemini-api-key --data-file=-
 
 # 2. Grant the Cloud Run service account access to read the secret
-gcloud secrets add-iam-policy-binding GEMINI_API_KEY \
-  --member="serviceAccount:YOUR_PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+gcloud secrets add-iam-policy-binding emos-gemini-api-key \
+  --member="serviceAccount:YOUR_RUNTIME_SERVICE_ACCOUNT" \
   --role="roles/secretmanager.secretAccessor"
 ```
 
@@ -596,13 +598,13 @@ gcloud secrets add-iam-policy-binding GEMINI_API_KEY \
 Deploy directly from source to Cloud Run:
 
 ```bash
-gcloud run deploy emos-modernization \
+gcloud run deploy gemini-reflection-journal \
   --source . \
   --platform managed \
   --region <REGION> \
   --allow-unauthenticated \
   --port 3000 \
-  --set-secrets="GEMINI_API_KEY=GEMINI_API_KEY:latest"
+  --set-secrets="GEMINI_API_KEY=emos-gemini-api-key:latest"
 ```
 
 *(To match the active challenge deployment, replace `<REGION>` with `asia-southeast1`).*
@@ -612,7 +614,7 @@ gcloud run deploy emos-modernization \
 Apply the mandatory verification resource label for automated challenge compliance:
 
 ```bash
-gcloud run services update emos-modernization \
+gcloud run services update gemini-reflection-journal \
   --update-labels=dev-tutorial=cloud-run-ai-challenge \
   --region=<REGION>
 ```

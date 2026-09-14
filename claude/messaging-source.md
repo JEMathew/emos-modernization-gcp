@@ -4,7 +4,7 @@
 Product Tour, deck, README, demo script and application—draws from this document.
 Do not compose new positioning ad hoc; edit here and propagate.*
 
-Last updated 10 September 2026.
+Last updated 14 September 2026.
 
 ---
 
@@ -32,19 +32,32 @@ Never mix the two in one sentence without an explicit **Available in Beta**,
 > v1.0 delivers the evidence, decision and planning foundation today using
 > deterministic scoring, governed Gemini analysis and synthetic reference data.
 > Its governance architecture is designed to remain model-agnostic as EMOS
-> expands toward execution governance and outcome measurement.
+> expands toward governed execution and outcome measurement.
 
-## 2. Canonical Statement — Short
+## 2. Canonical Product Vision — Locked
 
-> EMOS is designed to govern the entire enterprise modernization journey. Beta
-> v1.0 delivers the evidence, 6R decision and planning foundation today;
-> governed execution and outcome measurement are the product vision.
+> EMOS is designed to govern the full enterprise modernization lifecycle—from
+> business alignment and estate discovery through evidence-based decisions and
+> planning, into governed execution, validation, transition to live operations,
+> measured benefits, learning and reassessment.
 
-## 3. Compressed — One Line
+Do not paraphrase this sentence on public product surfaces. Quote it verbatim and
+pair it with the shipped-scope sentence below.
 
-> The operating system for the entire enterprise modernization journey.
+## 3. Canonical Shipped Scope — Locked
 
-## 4. What It Is and Who It Is For
+> Beta v1.0 delivers the evidence, decision and planning foundation today.
+
+## 4. Hero — Locked
+
+> AI-Native Modernization, Governed by Evidence—From First Signal to Proven
+> Outcome.
+
+The hero must be immediately supported by the product-vision and shipped-
+scope statements so "AI-native" and "proven outcome" are not mistaken for
+unshipped execution or outcome-measurement claims.
+
+## 5. What It Is and Who It Is For
 
 > EMOS is a vendor-neutral decision and governance layer for enterprise
 > modernization. It is for enterprise architects and modernization leads who
@@ -53,30 +66,38 @@ Never mix the two in one sentence without an explicit **Available in Beta**,
 
 ---
 
-## 5. Hero Block
+## 6. Hero Block
 
-**Eyebrow:** Beta v1.0 Publicly Live · Full-Lifecycle Product Vision
+**Headline:** AI-Native Modernization, Governed by Evidence—From First Signal to
+Proven Outcome.
 
-**Headline:** One Operating System for the Entire Modernization Journey.
+Do not place status badges above the headline. The Product Vision paragraph
+directly below it provides the scope distinction.
 
-**Subhead:** EMOS is a vendor-neutral operating system designed to govern
-enterprise modernization end to end—from the initiative that triggers it,
-through portfolio evidence and the 6R decision, into sequencing, delivery and
-proof that the promised outcome was achieved. **Beta v1.0 delivers the evidence,
-decision and planning foundation today.**
+**Product vision paragraph:** EMOS is designed to govern the full enterprise
+modernization lifecycle—from business alignment and estate discovery through
+evidence-based decisions and planning, into governed execution, validation,
+transition to live operations, measured benefits, learning and reassessment.
+**Beta v1.0 delivers the evidence, decision and planning foundation today.**
 
 **Card:** Evidence Before Action
 
 **Capability horizon:**
+
+> One Lifecycle. Three Honest Delivery States.
 
 - **Available in Beta:** Align · Discover · Understand · Assess · Decide · Plan · Mobilize
 - **Building Next:** Govern · Prioritize · Define Target State
 - **Product Vision:** Execute · Validate · Transition · Measure Benefits · Learn · Reassess
 - **Cross-cutting:** Trust · Security · Governance · Human Accountability
 
+The authoritative lifecycle contains fifteen stages. **Mobilize** is the current
+beta's governed handoff from planning and is displayed in addition to those
+fifteen lifecycle stages.
+
 ---
 
-## 6. Agentic Register
+## 7. Agentic Register
 
 *Use for agentic-AI audiences, hackathons and investors. Same facts, different
 emphasis.*
@@ -99,7 +120,7 @@ multiple model providers” or any equivalent shipped-capability claim.
 
 ---
 
-## 7. Two-Axis Neutrality
+## 8. Two-Axis Neutrality
 
 > EMOS is vendor-neutral in its current 6R reasoning: Retain and Retire remain
 > first-class options, and target-platform recommendations must follow the
@@ -111,7 +132,7 @@ multiple model providers” or any equivalent shipped-capability claim.
 
 ---
 
-## 8. Standard Answers
+## 9. Standard Answers
 
 **What Does EMOS Actually Do Today?**
 
@@ -123,14 +144,14 @@ multiple model providers” or any equivalent shipped-capability claim.
 **What Happens After the 6R Decision?**
 
 > Beta v1.0 supports planning and mobilization. EMOS is being built toward
-> execution governance, validation, transition, benefits measurement and
-> continuous reassessment.
+> governed execution, validation, transition to live operations, benefits
+> measurement and continuous reassessment.
 
 **Does EMOS Execute Migrations?**
 
 > No. The current beta does not execute migrations. It produces governed
-> decisions and implementation-ready plans; delivery governance and outcome
-> measurement remain the product vision.
+> decisions and implementation-ready plans; governed execution, transition to
+> live operations and outcome measurement remain the product vision.
 
 **Why Call It an Operating System?**
 
@@ -151,7 +172,7 @@ allow evidence to establish differentiation.
 
 ---
 
-## 9. Canonical Facts
+## 10. Canonical Facts
 
 Render from one constants definition. These values are authoritative everywhere.
 
@@ -174,7 +195,7 @@ Render from one constants definition. These values are authoritative everywhere.
 
 ---
 
-## 10. Search, Answer and Language Controls
+## 11. Search, Answer and Language Controls
 
 The positioning layer explains the category. A separate discovery layer uses the
 language customers already search for: **application rationalization, 6R

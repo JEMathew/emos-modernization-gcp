@@ -8,7 +8,7 @@
 | Name | Make every Ideathon requirement directly verifiable |
 | Program / feature | Personal Gemini Journal Ideathon submission evidence |
 | Owner | Jincen E Mathew |
-| Status | Ready for preview |
+| Status | Release verification in progress |
 | Dependency | EVAL-UX-02 readiness and trust follow-through |
 
 ## Objective and business value
@@ -29,7 +29,7 @@ Give an evaluator a short, evidence-backed path from each challenge requirement 
 - No fabricated screenshot or claim that a Google AI Studio setting has been applied before it is visibly verified.
 - No secret value, ID token, credential, private portfolio or unrestricted cloud configuration output.
 - No new landing-page sections or challenge-specific marketing inside the buyer journey.
-- No deployment, merge or publication before preview approval.
+- No deployment before the candidate passes its release gates.
 - No claim of formal penetration testing, certification or real-world decision accuracy.
 
 ## Acceptance criteria
@@ -51,8 +51,10 @@ Give an evaluator a short, evidence-backed path from each challenge requirement 
 ## Definition of done
 
 - [x] Pre-deployment evidence pack is complete and ready for review.
-- [ ] AI Studio configuration evidence is captured safely.
-- [ ] Secret Manager deployment evidence is captured safely.
+- [x] AI Studio configuration was applied, saved, reopened and matched to the canonical source on 14 September 2026.
+- [x] The deployed Cloud Run `secretKeyRef` and challenge label were verified without viewing the secret value.
+- [x] Dedicated runtime `secretAccessor` evidence was verified safely on 14 September 2026.
+- [ ] Remove the unused default compute account's redundant secret-level accessor grant.
 - [ ] GitHub Actions release gate is green for the exact commit.
 - [ ] The published URL resolves to the exact verified commit.
 - [x] Completion report is added to `work_results/`.
