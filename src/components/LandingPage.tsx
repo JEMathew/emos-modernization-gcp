@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  AlertCircle, ArrowRight, BrainCircuit, CheckCircle2, CirclePlay, ExternalLink,
+  AlertCircle, ArrowRight, CheckCircle2, CirclePlay, ExternalLink,
   FileSearch, Gauge, Github, Library, Linkedin, Lock, Mail, Menu, Route,
   ShieldCheck, Sparkles, Target, Users, X,
 } from 'lucide-react';
@@ -12,6 +12,7 @@ import { CAPABILITY_HORIZON, EMOS_FACTS, EMOS_POSITIONING, LANDING_NAVIGATION } 
 import { evaluateEvidenceReadiness } from '../lib/readiness';
 import { downloadSampleDecisionBrief } from '../lib/sampleDecisionBrief';
 import { ThemeSelector } from './ThemeSelector';
+import { EmosHeroVisual, EmosProductVisuals } from './EmosVisuals';
 
 interface LandingPageProps {
   onOpenWalkthrough: () => void;
@@ -293,26 +294,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
 
             <Reveal delay={0.16} className="relative">
               <div className="landing-orbit absolute -inset-10 rounded-full border border-[var(--emos-accent-border)] opacity-40" aria-hidden="true" />
-              <aside className="relative overflow-hidden rounded-[2rem] border border-[var(--emos-border-strong)] bg-[var(--emos-surface)]/95 p-3 shadow-2xl shadow-black/15 backdrop-blur" aria-label="Animated modernization evidence flow">
-                <div className="rounded-[1.45rem] border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] p-5 sm:p-6">
-                  <div className="flex items-center justify-between">
-                    <div><p className="text-xs font-semibold text-[var(--emos-accent-text)]">Live Decision Brief</p><h2 className="mt-1 font-serif text-2xl font-semibold">Evidence Before Action</h2></div>
-                    <motion.div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] text-[var(--emos-accent)]" initial={reduceMotion ? false : { scale: 0.85, rotate: -8 }} animate={reduceMotion ? undefined : { scale: [0.85, 1.08, 1], rotate: [-8, 3, 0] }} transition={{ duration: 1.2, delay: 0.4 }}><BrainCircuit className="h-5 w-5" /></motion.div>
-                  </div>
-                  <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-                    <div className="space-y-2">
-                      {['Java 8', 'Oracle', '7 Integrations'].map((item, index) => <motion.div key={item} className="rounded-xl border border-rose-500/20 bg-rose-500/[0.06] px-3 py-2.5 text-xs font-medium" initial={reduceMotion ? false : { opacity: 0, x: -20 }} animate={reduceMotion ? undefined : { opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.45 + index * 0.16 }}><span className="mr-2 text-rose-500">●</span>{item}</motion.div>)}
-                    </div>
-                    <div className="relative hidden h-28 w-20 items-center justify-center sm:flex" aria-hidden="true"><div className="absolute h-px w-full bg-[var(--emos-border-strong)]" /><motion.div className="absolute h-2.5 w-2.5 rounded-full bg-[#E5C492] shadow-[0_0_18px_#E5C492]" initial={reduceMotion ? false : { x: -32, opacity: 0 }} animate={reduceMotion ? undefined : { x: [-32, 0, 32], opacity: [0, 1, 0.3] }} transition={{ duration: 1.6, delay: 0.9 }} /></div>
-                    <motion.div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.08] p-4" initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }} animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }} transition={{ duration: 0.6, delay: 1.2 }}>
-                      <div className="flex items-end justify-between"><span className="text-xs text-[var(--emos-text-muted)]">Completeness</span><span className="font-mono text-3xl font-semibold text-amber-600 dark:text-amber-300">61%</span></div>
-                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--emos-bg-tertiary)]"><motion.div className="h-full rounded-full bg-gradient-to-r from-[#A88554] to-amber-400" initial={{ width: reduceMotion ? '61%' : '0%' }} animate={{ width: '61%' }} transition={{ duration: 1.1, delay: 1.25 }} /></div>
-                      <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold tracking-wider text-amber-700 dark:text-amber-300"><AlertCircle className="h-3 w-3" />NEEDS EVIDENCE</div>
-                    </motion.div>
-                  </div>
-                  <div className="mt-5 border-t border-[var(--emos-border-subtle)] pt-4"><p className="text-[11px] text-[var(--emos-text-muted)]">Blocked By</p><div className="mt-2 flex flex-wrap gap-2">{['TCO Baseline', 'Target Architecture', 'Downtime Tolerance'].map((gap) => <span key={gap} className="rounded-full border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] px-2.5 py-1 text-[10px]">{gap}</span>)}</div></div>
-                </div>
-              </aside>
+              <EmosHeroVisual />
             </Reveal>
           </div>
           <div className="relative mx-auto max-w-[88rem] px-4 pb-12 sm:px-6 lg:px-8 lg:pb-16" aria-label="EMOS capability horizon">
@@ -390,6 +372,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
             </div>
           </div>
         </section>}
+
+        {activeSection === 'scenario' && <div className="mx-auto max-w-[88rem] px-4 pb-14 sm:px-6 lg:px-8"><EmosProductVisuals /></div>}
 
         {activeSection === 'home' && <section className="landing-scene landing-video border-t border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]">
           <div className="mx-auto max-w-[88rem] px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
