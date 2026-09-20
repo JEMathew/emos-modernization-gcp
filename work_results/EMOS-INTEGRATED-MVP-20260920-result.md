@@ -26,12 +26,12 @@ The server registers one EMOS Orchestrator and five bounded specialists: Intake 
 | Keyboard/focus/accessibility | PASS (automated candidate) / PARTIAL (formal audit) | Keyboard theme controls, dialog focus/error behavior and labelled navigation; no formal AT audit |
 | Intake/parser/persistence | PASS (unit/component) / PARTIAL (file-chooser confirmation) | Bounds, invalid rows, normalization, atomic/idempotent contracts; governance and Target State records reopened in production; local file selection remained browser-policy blocked |
 | Authentication | PASS | Automated contracts plus authenticated production route matrix and persisted-record reopen |
-| Firestore ownership rules | PASS (CI) / PARTIAL (two-account live proof) | Java 21 emulator suite passed in CI run `35530543112`; production owner records reopened; optional second-account live proof remains |
+| Firestore ownership rules | PASS (CI + live two-account proof) | Java 21 emulator suite passed in CI run `35530543112`; Account A reopened the saved synthetic multi-turn record; Account B's owner control passed while direct Account A read/update probes were denied with HTTP 403 |
 | API and AI guardrails | PASS (automated) | Auth, schemas, prompt injection, redaction, empty/malformed output and safe rendering tests |
 | Production build | PASS | Vite and server bundle; known main-chunk warning |
 | Browser golden path | PASS (synthetic) | Coded screens reviewed through Target State; no Firebase/AI calls in fixture |
 | Higgsfield fidelity | PASS | Four real production sandbox captures were assembled in Higgsedit; no fictional UI was generated |
-| Hackathon requirements | PASS for implemented product / PARTIAL for owner submission evidence | Core requirements and unique enhancement are production-smoked; Studio screenshot, social/write-up and official form remain |
+| Hackathon requirements | PASS for implemented product and technical evidence / OWNER SUBMISSION REMAINS | Core requirements and the unique modernization enhancement are production-smoked; AI Studio configuration evidence and two-account isolation proof are recorded. Social/write-up publication and official form submission remain owner actions |
 | Live-service smoke | PASS | Public and authenticated custom-domain matrices passed through Define Target State |
 | Git/GCP deployment | PASS | Commit `ed9afe2`, tag `emos-production-media-v2-20260921`, CI `35530543112`, revision `gemini-reflection-journal-media-ed9afe2` |
 | Rollback verification | READY, NOT USED | `gemini-reflection-journal-cache-b7915d4` recorded at 100% before release; all smoke gates passed |
@@ -79,4 +79,10 @@ Commit `605d75646de194a40a0c7fb5127b7d3ea27aea01` (immutable tag `emos-beta-v2-m
 | Rollback | READY / NOT USED — `gemini-reflection-journal-media-ed9afe2` recorded before promotion; `gemini-reflection-journal-cache-b7915d4` retained |
 | Remaining limitation | The local Java runtime is absent, so emulator execution is CI-backed for this machine; formal WCAG/AT audit and the longer narrated demo remain later scope |
 
-Residuals: the production file chooser was not driven because browser policy blocked local file selection; parser, limits and UI gates remain automated-test-backed. Official submission still needs the owner-supplied AI Studio screenshot, optional second-account live isolation proof, social/write-up link and form submission.
+### Hackathon evidence closure
+
+The owner-supplied sanitized AI Studio evidence shows the EMOS workspace and a configured Custom instructions surface. The accompanying 17,257-byte export covers threat modelling, secure input/output handling, Firebase authentication, owner-bound Firestore access, Secret Manager, AI guardrails and release verification. It differs from the audited repository constitution and contains duplicated generic sections; this is disclosed, and the repository constitution remains the release-policy baseline.
+
+The production two-account proof used synthetic data only. Account A reopened an existing assessment with two saved follow-up exchanges. Account B's History contained no A-owned records and the known A assessment link was unavailable. A direct production Firestore diagnostic authenticated as Account B passed its own-record create/read control and received HTTP 403 for Account A read and update attempts. The original unchanged-record comparison falsely failed because raw JSON object ordering varied; three later reads had the same content and update time, and the update time predated the probe. The complete, non-all-green audit trail is retained in `work_results/EMOS-LIVE-ISOLATION-EVIDENCE-20260921.md`.
+
+Residuals: the production file chooser was not driven because browser policy blocked local file selection; parser, limits and UI gates remain automated-test-backed. Official submission still needs the owner's social/write-up link and form submission.
