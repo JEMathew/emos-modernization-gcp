@@ -58,6 +58,7 @@ The product caption states that these are live public-sandbox captures using syn
 | Firestore rules | Active ruleset `84847c06-eb45-422d-87b9-2d8545fa3623`; source SHA-256 `75d9b4f20d991ae18d83001a7de245e19bcabfe62a681e517eca897a156b77ff` |
 | Prior healthy rollback | `gemini-reflection-journal-cache-b7915d4`, recorded at 100% traffic |
 | Production | `gemini-reflection-journal-media-ed9afe2`, Ready, 100% traffic at `https://emos-modernization.ai.studio` |
+| Commit metadata | Service label corrected to full `ed9afe275b918e613c770afb127c56febf9cc03d`; metadata-only revision `gemini-reflection-journal-00038-xdx` uses the identical container image and receives 0% traffic |
 | Public smoke | PASS for landing, sandbox, learning, trust, stable MVP routes, health, auth boundary and v2 media |
 | Authenticated smoke | PASS for route matrix, saved assessment/follow-up history, named `MORE EVIDENCE` record, Plan/Mobilize and Target State reopen |
 | Rollback action | Not invoked; no release gate failed |

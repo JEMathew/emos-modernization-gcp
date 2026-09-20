@@ -33,6 +33,7 @@ This index maps current product claims to implementation and verification eviden
 
 - Source commit/tag: `ed9afe275b918e613c770afb127c56febf9cc03d` / `emos-production-media-v2-20260921`.
 - Cloud Run: `gemini-reflection-journal-media-ed9afe2` in `codev-0326`, `asia-southeast1`, healthy at 100% traffic.
+- Cloud Run service label `commit-sha` is the full deployed commit. Metadata-only revision `gemini-reflection-journal-00038-xdx` uses the same image digest and receives 0% traffic.
 - Rollback target recorded before release: `gemini-reflection-journal-cache-b7915d4` at 100% traffic.
 - Public verification: landing, sandbox, learning, trust, every stable MVP route, `/api/health`, unauthenticated `/api/chat` rejection, and both v2 media assets passed.
 - Authenticated verification: all protected routes through Define Target State mounted; assessment/follow-up history, `MORE EVIDENCE` governance and the `EMOS Release Verification` Target State draft reopened.
