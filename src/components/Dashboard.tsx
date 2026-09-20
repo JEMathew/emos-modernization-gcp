@@ -8,6 +8,7 @@ import { EnterpriseDnaView } from './EnterpriseDnaView';
 import { ImportPortfolioModal } from './ImportPortfolioModal';
 import { TestWalkthroughModal } from './TestWalkthroughModal';
 import { PortfolioPlanView } from './PortfolioPlanView';
+import { ModernizationLifecycle } from './ModernizationLifecycle';
 import type { Interaction, AssessmentMode, ChatMessage, EnterpriseWorkload, ProgramAlignment } from '../types';
 import { SAMPLE_PORTFOLIO, formatWorkloadDnaForAssessment } from '../data/samplePortfolio';
 import {
@@ -412,6 +413,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           setIsMobileHistoryOpen(false);
         }}
         onOpenWalkthrough={() => setIsWalkthroughOpen(true)}
+      />
+
+      <ModernizationLifecycle
+        currentStage={currentView === 'portfolio' ? 'Discover' : currentView === 'dna' ? 'Understand' : currentView === 'plan' ? 'Plan' : 'Decide'}
+        onSelectStage={(stage) => {
+          if (stage.name === 'Discover') setCurrentView('portfolio');
+          else if (stage.name === 'Understand') setCurrentView('dna');
+          else if (stage.name === 'Assess' || stage.name === 'Decide') setCurrentView('workspace');
+          else if (stage.name === 'Align' || stage.name === 'Plan' || stage.name === 'Mobilize') setCurrentView('plan');
+          setIsMobileHistoryOpen(false);
+        }}
       />
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden max-w-7xl w-full mx-auto border-x border-[var(--emos-border-subtle)] relative">
