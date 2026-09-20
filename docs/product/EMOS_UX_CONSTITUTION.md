@@ -207,3 +207,11 @@ CSV and flat JSON are bounded to 5 MB (5 MiB internally), 200 workloads and 40 c
 Mapping cards and paginated record cards replace a horizontally scrolling mapping table. Visible keyboard focus, an accessible error summary, labelled controls, native dialog semantics and explicit focus wrapping support narrow/mobile layouts. Light, Dark and System reuse the established theme system.
 
 Back within an open intake session retains mapping and reviewed data; changing a mapping requires a new preview. Uploaded values never enter URLs/history. Refresh/close intentionally discards the unsaved draft and retry identity. Successful handoff retains `portfolio=imported`; persisted source/validation details are disclosed separately from workload evidence. Client-side validation and a successful synthetic demo are not proof of production isolation.
+
+### Packet 2.5 visual-alignment boundary — 20 September 2026
+
+The authenticated workspace now uses the approved application pattern: a persistent desktop left rail, a compact mobile header with bottom navigation, a stable context bar, and a five-phase lifecycle band. The change is presentation-only. It does not create new workflow availability, approvals, evidence, model calls, connectors, capacity claims, or migration behavior.
+
+The dark navy, cyan journey accent and restrained gold primary action are implemented as theme-aware tokens rather than copied pixels. Existing Light, Dark and System behavior remains authoritative. The coded data, navigation manifest, accessible labels and responsive rules remain the product source of truth when a Higgsfield frame differs. At 390 px the product uses one content column and the import experience remains card-based with no horizontal page overflow; desktop surfaces use the extra width without changing information architecture.
+
+The three retained Higgsfield generations are visual references. No new generation was purchased for this checkpoint. Their text and metrics are not evidence, and their acceptance checklists remain subject to product-owner review. Later website and demo work must capture the stable coded product and must not imply that Planned stages are available.

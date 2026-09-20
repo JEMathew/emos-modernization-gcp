@@ -100,3 +100,9 @@ Superseded terminology: the 20 September 2026 packet plan uses `Available`, `Bui
 ## Packet 1 implementation decision — 20 September 2026
 
 The product owner authorized the functional foundation packet without another image-generation round. Existing frames remain references; their unchecked visual-acceptance lists are not silently marked approved. No new visual asset was generated or modified in this packet. Explicit Higgsfield work remains required in packets 8 (website and visual system) and 9 (demo media); real product captures must illustrate actual functionality.
+
+## Packet 2.5 implementation decision — 20 September 2026
+
+The existing three generations were reused to align the coded product shell. No Higgsfield generation, edit, credit, or asset replacement occurred. The implementation adopts the left-rail hierarchy, quiet dark surfaces, cyan lifecycle emphasis and restrained gold primary action while preserving the established IA, accessible React controls, real route state and Light / Dark / System themes.
+
+Local visual review passed for Command Center, Portfolio, Enterprise DNA and intake mapping in desktop dark mode, Command Center in desktop light mode, and the intake mapping flow at 390 px without horizontal overflow. This is implementation-candidate evidence, not silent product-owner acceptance of every generated frame. Website and demo refresh remain deferred until the product workflow and copy are stable enough to capture truthfully.

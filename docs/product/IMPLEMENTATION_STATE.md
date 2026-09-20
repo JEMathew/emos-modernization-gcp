@@ -1,19 +1,28 @@
 # EMOS implementation handoff
 
-Updated: 20 September 2026. Packets 1 and 2 implemented locally; production release remains gated. Latest: Packet 2 — Safe intake and discovery.
+Updated: 20 September 2026. Packets 1, 2 and the 2.5 visual-alignment checkpoint are implemented locally; production release remains gated. Latest: Packet 2.5 — visual alignment.
 
 ## Repository and checkpoint
 
 - Repository: `JEMathew/emos-modernization-gcp`
 - Checkout: `/Users/jincenmathew/Documents/Codex/2026-09-19/referenced-chatgpt-conversation-this-is-an/work/emos-production-assets`
 - Branch: `codex/emos-visual-assets`
-- Previous commit / rollback baseline: `973f2405f0d9ed48cabaec685054708f84bb1974`, checkpoint `emos-packet-1-foundation-20260920`.
-- New packet commit: local checkpoint `emos-packet-2-safe-intake-20260920`. Resolve its exact SHA with `git rev-parse emos-packet-2-safe-intake-20260920`; do not move this checkpoint. The final completion message records the resolved SHA.
-- Commit subject: `feat: add safe portfolio intake and discovery`
+- Previous commit / rollback baseline: `ec0bbf50d3ba22fe4b7931bf61519f09c8c63b49`, checkpoint `emos-packet-2-safe-intake-20260920`.
+- New checkpoint: `emos-packet-2-5-visual-alignment-20260920`. Resolve its exact SHA after commit with `git rev-parse emos-packet-2-5-visual-alignment-20260920`; do not move this checkpoint.
+- Commit subject: `feat: align EMOS product UI with approved visual direction`
 - Production: not pushed or deployed. No Cloud Run revision or traffic changed in this packet.
 - Code rollback: revert the packet commit after reviewing the working tree; do not hard-reset user changes. A future deployment also requires a recorded prior healthy Cloud Run revision and database/config compatibility review. A code commit alone is not a production rollback rehearsal.
 
 ## Completed
+
+### Packet 2.5 — Visual alignment
+
+- Replaced the wide desktop tab bar with a persistent application rail while retaining the same Overview, Portfolio, Decisions, Plan and History IA.
+- Added a compact mobile header and fixed bottom navigation; primary actions, theme choice and sign-out retain minimum 44 px targets.
+- Stabilized portfolio context beneath the header/rail, expanded the working canvas to 1600 px and kept the five-phase lifecycle visible before workspace content.
+- Applied theme-aware dark navy, cyan journey-state and gold primary-action tokens without changing workflow truth, routes or availability.
+- Reviewed Command Center, Portfolio, Enterprise DNA and intake mapping in desktop dark mode, Command Center in light mode, and intake at 390 px with no page-level horizontal overflow.
+- Reused existing Higgsfield references. No generated asset, approved production asset hash, model call, data contract or server boundary changed.
 
 ### Packet 2 — Safe intake and discovery
 
@@ -84,7 +93,7 @@ All five sub-capabilities are implemented; none is advertised as a separately au
 
 See [Packet 2 result](../../work_results/SAFE-INTAKE-DISCOVERY-02-result.md), [Packet 1 result](../../work_results/PRODUCT-FOUNDATION-01-result.md) and [scorecard](HACKATHON_RELEASE_SCORECARD.md) for dated evidence and release gates.
 
-- `npm run lint`, 202 unit/API/UI tests across 18 files, and production build pass on the final Packet 2 source.
+- `npm run lint`, 202 unit/API/UI tests across 18 files, and production build pass on the Packet 2.5 source.
 - Browser review uses an isolated local synthetic adapter, with no Firebase writes or real AI calls. It does not prove live sign-in or production persistence.
 - Firestore emulator could not start: Java runtime missing. Existing CI provisions Java 21 and must pass on the candidate commit before release.
 - Build reports an approximately 1.65 MB minified main bundle (430 KB gzip); code splitting/performance work remains. The bounded parser timing test is not an enterprise-scale performance result.
@@ -95,7 +104,7 @@ See [Packet 2 result](../../work_results/SAFE-INTAKE-DISCOVERY-02-result.md), [P
 - Saved context survives navigation; unsaved drafts are local component state, not durable records.
 - The existing sample dataset uses Customer Analytics, Enterprise Data Warehouse and Document Management. The proposed Northstar / Legacy Order Management visual narrative is not yet the live sample data model. Reconcile it intentionally during packets 3/8; do not fabricate consistency.
 - Some legacy/public marketing copy retains Beta language. Packet 8 owns that refresh; this packet standardizes lifecycle availability.
-- No new media generated. No asset changes; Higgsfield is required in packets 8/9 per the accepted plan.
+- No new media generated and approved asset hashes remain unchanged. Existing Higgsfield references guided Packet 2.5; final website and demo media remain after workflow stabilization.
 
 ## Next work packet — 3: Enterprise DNA and evidence (not started)
 

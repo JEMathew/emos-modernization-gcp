@@ -11,9 +11,9 @@ interface JourneyStageProps {
 export const JourneyStage: React.FC<JourneyStageProps> = ({ stage, question, className = '' }) => (
   <div
     aria-label={`Current journey stage: ${stage}`}
-    className={`inline-flex max-w-full items-center gap-2 rounded-full border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] px-3 py-1 text-[11px] font-medium text-[var(--emos-accent)] ${className}`}
+    className={`inline-flex max-w-full items-center gap-2 rounded-full border border-[var(--emos-journey-border)] bg-[var(--emos-journey-subtle)] px-3 py-1 text-[11px] font-medium text-[var(--emos-journey-text)] ${className}`}
   >
-    <span className="shrink-0 font-bold uppercase tracking-wider text-[var(--emos-accent-text)]">
+    <span className="shrink-0 font-bold uppercase tracking-wider text-[var(--emos-journey-text)]">
       {stage}
     </span>
     <span className="text-[var(--emos-text-muted)]" aria-hidden="true">•</span>

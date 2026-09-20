@@ -434,7 +434,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     : route.workloadId && workloadReadiness ? `${workloadReadiness.completeness}% · ${workloadReadiness.decisionReadiness === 'READY' ? 'Ready for human review' : 'Needs evidence'}` : 'Select a workload to inspect evidence';
 
   return (
-    <div className="emos-app min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] font-sans">
+    <div className="emos-app min-h-screen bg-[var(--emos-bg)] pb-16 font-sans text-[var(--emos-text-primary)] lg:pb-0 lg:pl-56">
       <a href="#workspace-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-2 focus:z-50 focus:rounded-lg focus:bg-[var(--emos-surface)] focus:p-3">Skip to workspace</a>
       <Navbar
         user={user}
@@ -449,7 +449,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         onNewAssessment={() => navigate('workspace', { stage: 'Assess', workloadId: null })}
         onOpenWalkthrough={() => setIsWalkthroughOpen(true)}
       />
-      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="sticky top-16 z-20 flex min-h-16 flex-col gap-2 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] px-4 py-2 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:top-0">
         <nav aria-label="Workspace breadcrumb" className="flex min-w-0 flex-wrap items-center gap-2 text-xs">
           <button className="min-h-11 font-semibold text-[var(--emos-accent-text)]" onClick={() => navigate('overview')}>Command Center</button>
           {currentView !== 'overview' && <><span aria-hidden="true">/</span><button className="min-h-11" onClick={() => navigate('portfolio')}>Portfolio</button></>}
@@ -465,7 +465,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         </label>
       </div>
       <ModernizationLifecycle currentStage={route.stage} onSelectStage={stage => selectStage(stage.name as WorkspaceStage)} />
-      <main ref={mainRef} id="workspace-content" tabIndex={-1} className="mx-auto min-w-0 max-w-7xl outline-none">
+      <main ref={mainRef} id="workspace-content" tabIndex={-1} className="mx-auto min-w-0 max-w-[1600px] outline-none">
         {dataFailed && <section role="alert" className="m-4 space-y-2 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-5">
           <h1 className="text-lg font-semibold">Your workspace could not be loaded</h1>
           {Object.entries(dataErrors).map(([key, message]) => <p key={key} className="text-sm">{message}</p>)}

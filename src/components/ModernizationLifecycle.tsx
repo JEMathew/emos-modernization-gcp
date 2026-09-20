@@ -43,7 +43,7 @@ export const ModernizationLifecycle: React.FC<ModernizationLifecycleProps> = ({
       aria-label="Enterprise modernization lifecycle"
       className="border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]"
     >
-      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+      <div className="mx-auto max-w-[1600px] px-4 py-3 sm:px-6">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
           <div className="flex shrink-0 items-center justify-between gap-4 xl:w-48">
             <div>
@@ -70,7 +70,7 @@ export const ModernizationLifecycle: React.FC<ModernizationLifecycleProps> = ({
                 <div
                   key={phase.number}
                   className={`min-w-0 rounded-lg border px-2.5 py-2 ${containsCurrent
-                    ? 'border-[var(--emos-accent)] bg-[var(--emos-accent-subtle)] ring-1 ring-[var(--emos-accent-border)]'
+                    ? 'border-[var(--emos-journey-border)] bg-[var(--emos-journey-subtle)] ring-1 ring-[var(--emos-journey-border)]'
                     : unavailable
                     ? 'border-[var(--emos-border-subtle)] bg-[var(--emos-bg-tertiary)]'
                     : 'border-[var(--emos-border-subtle)] bg-[var(--emos-surface)]'
@@ -110,7 +110,7 @@ export const ModernizationLifecycle: React.FC<ModernizationLifecycleProps> = ({
               <span className="text-[10px] text-[var(--emos-text-muted)]">Unavailable stages remain visible to show the complete operating model.</span>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
               {MODERNIZATION_PHASES.map((phase) => (
                 <div key={phase.number} className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-3">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--emos-text-muted)]">{phase.number} — {phase.name}</p>
@@ -138,7 +138,7 @@ export const ModernizationLifecycle: React.FC<ModernizationLifecycleProps> = ({
                         </>
                       );
                       const className = `block w-full rounded-lg border p-2.5 transition-colors ${isCurrent
-                        ? 'border-[var(--emos-accent)] bg-[var(--emos-accent-subtle)] ring-1 ring-[var(--emos-accent-border)]'
+                        ? 'border-[var(--emos-journey-border)] bg-[var(--emos-journey-subtle)] ring-1 ring-[var(--emos-journey-border)]'
                         : isAvailable
                         ? 'border-[var(--emos-border-subtle)] bg-[var(--emos-surface-elevated)] hover:border-[var(--emos-border-strong)]'
                         : 'border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] grayscale'

@@ -30,7 +30,7 @@ export function CommandCenter({ workloads, interactions, alignment, isLoading, i
   };
 
   return (
-    <section className="mx-auto w-full max-w-6xl space-y-6 p-4 sm:p-7" aria-labelledby="command-center-title">
+    <section className="mx-auto w-full max-w-[1440px] space-y-6 p-4 sm:p-7" aria-labelledby="command-center-title">
       <header className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wider text-[var(--emos-accent-text)]">Portfolio overview</p>
         <h1 id="command-center-title" className="text-2xl font-semibold sm:text-3xl">Command Center</h1>
@@ -43,7 +43,8 @@ export function CommandCenter({ workloads, interactions, alignment, isLoading, i
             ['Need evidence', needsEvidence.length],
             ['Workloads assessed', assessedIds.size],
             ['Evidence ready for review', workloads.length - needsEvidence.length],
-          ].map(([label, value]) => <div key={label} className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-4">
+          ].map(([label, value], index) => <div key={label} className="relative overflow-hidden rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-4">
+            <span className={`absolute inset-y-0 left-0 w-1 ${index === 1 ? 'bg-amber-500' : index === 3 ? 'bg-emerald-500' : 'bg-[var(--emos-journey)]'}`} aria-hidden="true" />
             <p className="text-xs text-[var(--emos-text-secondary)]">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p>
           </div>)}
         </div>

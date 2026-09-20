@@ -87,7 +87,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
   };
 
   return (
-    <div id="sample-portfolio-view" className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-5xl mx-auto w-full transition-colors">
+    <div id="sample-portfolio-view" className="mx-auto w-full max-w-[1440px] flex-1 space-y-6 overflow-y-auto p-4 transition-colors sm:space-y-8 sm:p-8">
       {/* Top Banner & Title */}
       <div className="space-y-4">
         <JourneyStage stage="Discover" question="What workloads are in scope for modernization?" />

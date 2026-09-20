@@ -110,9 +110,12 @@ describe('standardized authenticated journey', () => {
       .map((id) => container.querySelector(`#${id}`)?.textContent?.replace(/\s+/g, '')))
       .toEqual(['Overview', 'Portfolio', 'Decisions', 'Plan', 'History3']);
 
-    const newAssessment = screen.getByRole('button', { name: /New Assessment/i });
-    expect(newAssessment).toHaveClass('min-h-11', 'text-xs');
-    expect(newAssessment).not.toHaveClass('sm:text-sm', 'sm:min-h-[38px]');
+    const newAssessment = screen.getAllByRole('button', { name: /New Assessment/i });
+    expect(newAssessment).toHaveLength(2);
+    for (const control of newAssessment) {
+      expect(control).toHaveClass('min-h-11', 'text-xs');
+      expect(control).not.toHaveClass('sm:text-sm', 'sm:min-h-[38px]');
+    }
   });
 
   it('shows one compact current-stage marker on each core product surface', () => {

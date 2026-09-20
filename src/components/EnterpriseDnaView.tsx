@@ -90,7 +90,7 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
   };
 
   return (
-    <div id="enterprise-dna-view" className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-5xl mx-auto w-full transition-colors">
+    <div id="enterprise-dna-view" className="mx-auto w-full max-w-[1440px] flex-1 space-y-6 overflow-y-auto p-4 transition-colors sm:space-y-8 sm:p-8">
       {/* Navigation & Header */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">

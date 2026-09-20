@@ -54,6 +54,7 @@ try {
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(`http://127.0.0.1:${port}/app`);
       await page.getByRole('heading', { name: 'Command Center', exact: true }).waitFor();
+      const nav = page.getByRole('navigation', { name: width < 1024 ? 'Mobile workspace navigation' : 'Workspace navigation', exact: true });
       const checkWidth = async label => {
         const dimensions = await page.evaluate(() => ({ document: document.documentElement.scrollWidth, viewport: innerWidth }));
         assert.ok(dimensions.document <= dimensions.viewport, `${width}/${theme}/${label}: horizontal overflow ${JSON.stringify(dimensions)}`);
@@ -61,6 +62,24 @@ try {
       };
       await checkWidth('overview');
       if (width === 1440 || width === 390) await page.screenshot({ path: resolve(output, `overview-${width}-${theme}.png`), fullPage: true });
+      if (width === 1440) {
+        await nav.getByRole('button', { name: 'Portfolio', exact: true }).click();
+        await page.getByRole('heading', { name: 'Enterprise Modernization Portfolio', exact: true }).waitFor();
+        await checkWidth('portfolio');
+        await page.screenshot({ path: resolve(output, `portfolio-${width}-${theme}.png`), fullPage: true });
+        await page.getByRole('button', { name: 'Import CSV / JSON', exact: true }).click();
+        await page.getByLabel('Inventory file').setInputFiles(resolve(root, 'tests/fixtures/intake-review.csv'));
+        await page.getByRole('heading', { name: 'Map source columns', exact: true }).waitFor();
+        await checkWidth('intake mapping');
+        await page.screenshot({ path: resolve(output, `intake-map-${width}-${theme}.png`), fullPage: true });
+        await page.getByRole('button', { name: 'Close import', exact: true }).click();
+        await page.getByRole('button', { name: 'View Enterprise DNA', exact: true }).first().click();
+        await page.getByRole('heading', { name: /Enterprise DNA$/ }).waitFor();
+        await checkWidth('DNA capture');
+        await page.screenshot({ path: resolve(output, `dna-${width}-${theme}.png`), fullPage: true });
+        await nav.getByRole('button', { name: 'Overview', exact: true }).click();
+        await page.getByRole('heading', { name: 'Command Center', exact: true }).waitFor();
+      }
       const lifecycleToggle = page.getByRole('button', { name: width < 1280 ? 'View all' : 'View entire lifecycle', exact: true });
       await lifecycleToggle.click();
       await checkWidth('expanded lifecycle');
@@ -69,7 +88,6 @@ try {
       await checkWidth('DNA');
       await page.reload();
       await page.getByRole('heading', { name: /Enterprise DNA$/ }).waitFor();
-      const nav = page.getByRole('navigation', { name: width < 1024 ? 'Mobile workspace navigation' : 'Workspace navigation', exact: true });
       await nav.getByRole('button', { name: 'Overview' }).click();
       await page.goBack();
       await page.getByRole('heading', { name: /Enterprise DNA$/ }).waitFor();
