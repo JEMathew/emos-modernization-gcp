@@ -71,5 +71,10 @@ audio to the silent landing loop.
 | Playback / accessibility | Local `<video controls>` in the Learning Center, metadata preload only, browser controls and fullscreen; the burned captions remain available wherever the MP4 is played. |
 | Retained rollback assets | The silent landing loop (`emos-product-demo-v2-performance.mp4`), its original v2 source, the prior four-minute demo, and its sidecar VTT/SRT remain unchanged. |
 
-The current production revision and promotion evidence for this new asset are
-recorded in the release evidence documents after the candidate gate completes.
+### Narrated walkthrough release evidence
+
+- Source/tag/CI: `579b0ae25893d90be69dae6b3ffccc3021088756` / `emos-beta-v2-narrated-demo-20260921` / [run `35540767630`](https://github.com/JEMathew/emos-modernization-gcp/actions/runs/35540767630), all passing.
+- Candidate: `gemini-reflection-journal-00057-doz` was deployed at zero traffic and verified at `https://emos-demo-v2---gemini-reflection-journal-wntaz56nxa-as.a.run.app`.
+- Promotion: `gemini-reflection-journal-00057-doz` is now serving 100% traffic at `https://emos-modernization.ai.studio`.
+- Live proof: `/`, `/learn`, `/sandbox`, `/trust` and `/app` returned `200`; the versioned MP4 returned `200`, `video/mp4`, byte-range support and its expected 4,024,724-byte content length; unauthenticated `POST /api/chat` returned `401`.
+- Rollback record: `gemini-reflection-journal-media-perf-605d756` was retained at 100% before promotion and remains available at 0%; `gemini-reflection-journal-media-ed9afe2` and `gemini-reflection-journal-cache-b7915d4` also remain retained.

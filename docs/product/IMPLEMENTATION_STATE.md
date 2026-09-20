@@ -7,11 +7,11 @@ Updated: 21 September 2026. This file records the production MVP; it does not im
 - Repository: `JEMathew/emos-modernization-gcp`
 - Branch: `codex/emos-visual-assets`
 - Visual-alignment baseline: `47d9809058b782f3d578a52426df507d6ccaa696`, immutable tag `emos-packet-2-5-visual-alignment-20260920`.
-- Integrated candidate tag: `emos-integrated-mvp-20260920`. Production media tag: `emos-production-media-v2-20260921`. Do not move either tag. Beta v2 landing-performance tag: `emos-beta-v2-media-performance-20260921` at `605d75646de194a40a0c7fb5127b7d3ea27aea01`; do not move it.
-- Deployed source: `605d75646de194a40a0c7fb5127b7d3ea27aea01`; CI run `35534159098`; Cloud Run revision `gemini-reflection-journal-media-perf-605d756` at 100% traffic.
+- Integrated candidate tag: `emos-integrated-mvp-20260920`. Production media tag: `emos-production-media-v2-20260921`. Do not move either tag. Beta v2 landing-performance tag: `emos-beta-v2-media-performance-20260921` at `605d75646de194a40a0c7fb5127b7d3ea27aea01`; narrated-demo tag: `emos-beta-v2-narrated-demo-20260921` at `579b0ae25893d90be69dae6b3ffccc3021088756`. Do not move these tags.
+- Deployed narrated-demo source: `579b0ae25893d90be69dae6b3ffccc3021088756`; CI run `35540767630`; Cloud Run revision `gemini-reflection-journal-00057-doz` at 100% traffic. The inherited service `commit-sha` label still names the earlier media-performance commit; the served versioned MP4 hash is the source-content verification for this media-only deployment.
 - Production target: `gemini-reflection-journal`, project `codev-0326`, region `asia-southeast1`, custom domain `https://emos-modernization.ai.studio`.
 - Code rollback: revert the integrated commit or redeploy the immutable visual-alignment baseline after reviewing data/rules compatibility. Never hard-reset a working tree containing user changes.
-- Cloud rollback: `gemini-reflection-journal-media-ed9afe2` was recorded at 100% traffic before this release and remains the immediate traffic-restore target. `gemini-reflection-journal-cache-b7915d4` remains retained as the earlier cache-safe rollback baseline.
+- Cloud rollback: `gemini-reflection-journal-media-perf-605d756` was recorded at 100% traffic before the narrated-demo release and remains the immediate traffic-restore target. `gemini-reflection-journal-media-ed9afe2` and `gemini-reflection-journal-cache-b7915d4` remain retained earlier rollback baselines.
 
 ## Customer outcome
 
@@ -84,6 +84,7 @@ Known incomplete sub-stages remain labelled `Building next`: policies/constraint
 - PASS — Authenticated production assessment/follow-up/history and governance/Target State persistence smoke; optional second-account live isolation remains additional evidence.
 - PASS — Four approved v1 media hashes remain unchanged; two versioned real-production v2 assets were added and verified.
 - PASS — Beta v2 landing-media performance: poster-first WebP (70,132 bytes), deferred silent 1080p loop (1,985,917 bytes), reduced-motion/Data Saver/2G/mobile static fallbacks, viewport pausing and keyboard Play/Pause passed focused tests, CI and production candidate/live checks.
+- PASS — Beta v2 narrated walkthrough: the separate Learning Center MP4 is 4,024,724 bytes, 1920×1080 / 79.417 seconds, Cillian-narrated and has burned English Montserrat/black-outline captions. CI `35540767630`, zero-traffic candidate and live custom-domain media/header checks passed.
 - BLOCKED LOCALLY / PASS IN CI — the local Firestore emulator cannot start without Java; CI `35534159098` installed Java 21 and passed the complete release-gating suite. No Firestore rules changed in this workstream.
 
 ## Approved media retained
@@ -115,7 +116,7 @@ The Learning Center also hosts `emos-beta-v2-product-demo-narrated-captioned-v1.
 - File intake supports bounded CSV/flat JSON only. XLSX and connector catalog entries remain Planned.
 - Target-state and governance approvals are owner-scoped MVP records; they are not multi-role enterprise workflow enforcement.
 - Firestore rules must always be deployed before any client that requires a new document shape. The current ruleset preceded this production release; the media-only commit changed no rules.
-- Beta v2 landing-media rollback target is `gemini-reflection-journal-media-ed9afe2`. It was not used because candidate and live production checks passed. The earlier `gemini-reflection-journal-cache-b7915d4` remains retained.
+- Beta v2 narrated-demo rollback target is `gemini-reflection-journal-media-perf-605d756`. It was not used because candidate and live production checks passed. The earlier `gemini-reflection-journal-media-ed9afe2` and `gemini-reflection-journal-cache-b7915d4` remain retained.
 
 ## Cross-tool continuation
 

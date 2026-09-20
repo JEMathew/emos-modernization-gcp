@@ -5,7 +5,7 @@ EMOS journey from Command Center through Define Target State. It uses only real
 production captures with synthetic EMOS data and clearly marks Execute through
 Reassess as Planned.
 
-- [Watch the Beta v2 MP4 demo](/assets/emos/emos-beta-v2-product-demo-narrated-captioned-v1.mp4)
+- [Watch the Beta v2 MP4 demo](https://emos-modernization.ai.studio/assets/emos/emos-beta-v2-product-demo-narrated-captioned-v1.mp4)
 - [Authored narration script](emos-beta-v2-narrated-demo-script.json)
 - Duration: 1 minute 19 seconds
 - Audio: Cillian preset voice; captions are burned into the delivery MP4 as

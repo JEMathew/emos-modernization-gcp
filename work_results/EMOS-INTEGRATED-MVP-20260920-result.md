@@ -83,6 +83,19 @@ The Learning Center's `00` entry now uses a local, 79.417-second H.264 1080p pro
 | Rollback | READY / NOT USED — `gemini-reflection-journal-media-ed9afe2` recorded before promotion; `gemini-reflection-journal-cache-b7915d4` retained |
 | Remaining limitation | The local Java runtime is absent, so emulator execution is CI-backed for this machine; formal WCAG/AT audit and the longer narrated demo remain later scope |
 
+## Beta v2 narrated-demo release
+
+| Gate | Result |
+|---|---|
+| Source / immutable tag | `579b0ae25893d90be69dae6b3ffccc3021088756` / `emos-beta-v2-narrated-demo-20260921` |
+| CI | PASS — [GitHub Actions `35540767630`](https://github.com/JEMathew/emos-modernization-gcp/actions/runs/35540767630) |
+| Media | PASS — `emos-beta-v2-product-demo-narrated-captioned-v1.mp4`; 1920×1080 H.264, 79.417 seconds, 4,024,724 bytes, SHA-256 `84132eb9f0d4418ee6bf1d300d7cae3da943dde949c888f13e512f1b16e2a15f` |
+| Narration / captions | PASS — 79.400-second Cillian preset narration; 197 authored/timed words; burned English Montserrat geometric caps with black outline; source-to-caption similarity 0.93; no time-stretching |
+| Candidate | PASS — `gemini-reflection-journal-00057-doz` at zero traffic; Learning Center exposed the local controls player and direct MP4 headers were correct |
+| Production | PASS — `gemini-reflection-journal-00057-doz`, 100% traffic at `https://emos-modernization.ai.studio`; `/`, `/learn`, `/sandbox`, `/trust`, `/app` and the MP4 returned `200`; unauthenticated API boundary returned `401` |
+| Firestore rules | Unchanged; no rules deploy |
+| Rollback | READY / NOT USED — `gemini-reflection-journal-media-perf-605d756` retained; earlier `gemini-reflection-journal-media-ed9afe2` and `gemini-reflection-journal-cache-b7915d4` retained |
+
 ### Hackathon evidence closure
 
 The owner-supplied sanitized AI Studio evidence shows the EMOS workspace and a configured Custom instructions surface. The accompanying 17,257-byte export covers threat modelling, secure input/output handling, Firebase authentication, owner-bound Firestore access, Secret Manager, AI guardrails and release verification. It differs from the audited repository constitution and contains duplicated generic sections; this is disclosed, and the repository constitution remains the release-policy baseline.
