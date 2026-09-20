@@ -269,12 +269,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   // Handler: Import workloads into Firestore
   const handleImportWorkloads = async (newWorkloads: EnterpriseWorkload[]) => {
-    try {
-      await saveImportedWorkloads(user.uid, newWorkloads);
-    } catch (err: any) {
-      console.error("Failed to save imported workloads:", err);
-      throw err;
-    }
+    await saveImportedWorkloads(user.uid, newWorkloads);
+    setImportedWorkloads(previous => [...newWorkloads, ...previous.filter(record => !newWorkloads.some(item => item.id === record.id))]);
   };
 
   // Handler: Delete single imported workload
@@ -520,7 +516,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           </>}
         </>}
       </main>
-      <ImportPortfolioModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} onImportSuccess={handleImportWorkloads} userId={user.uid} />
+      <ImportPortfolioModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} onImportSuccess={handleImportWorkloads} userId={user.uid}
+        existingWorkloadIds={importedWorkloads.map(workload => workload.id)}
+        onContinue={() => navigate('portfolio', { portfolio: 'imported', workloadId: null })} />
       <TestWalkthroughModal isOpen={isWalkthroughOpen} onClose={() => setIsWalkthroughOpen(false)} />
     </div>
   );

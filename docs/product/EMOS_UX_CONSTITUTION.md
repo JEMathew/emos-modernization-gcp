@@ -197,3 +197,13 @@ A workspace is releasable only when:
 - No provider/model name leaks into customer-facing capability labels.
 - Automated tests and security gates pass.
 - The deployed commit, Cloud Run revision, smoke-test result, and rollback revision are recorded.
+
+### Packet 2 implementation boundary — 20 September 2026
+
+Intake is a code-native modal within the existing Portfolio workspace: Source → Map → Preview → Import result. A user explicitly chooses the mapped fields, reviews normalization/warnings and consents before invalid rows are excluded. The final action states the exact valid count. Import validation checks structure, not evidence truth or AI approval.
+
+CSV and flat JSON are bounded to 5 MB (5 MiB internally), 200 workloads and 40 columns. Normalized persistence is capped at 4 MiB; the interface explains rejection and asks the user to split the source. XLSX and connectors are Planned, not simulated. Do not advertise 5,000-asset intake.
+
+Mapping cards and paginated record cards replace a horizontally scrolling mapping table. Visible keyboard focus, an accessible error summary, labelled controls, native dialog semantics and explicit focus wrapping support narrow/mobile layouts. Light, Dark and System reuse the established theme system.
+
+Back within an open intake session retains mapping and reviewed data; changing a mapping requires a new preview. Uploaded values never enter URLs/history. Refresh/close intentionally discards the unsaved draft and retry identity. Successful handoff retains `portfolio=imported`; persisted source/validation details are disclosed separately from workload evidence. Client-side validation and a successful synthetic demo are not proof of production isolation.

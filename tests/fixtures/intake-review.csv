@@ -1,0 +1,4 @@
+Asset ID,Application Name,Type,Technology,Business Criticality,Unmapped note
+qa-payments,Synthetic Payments,Application,Java 17,High,This private note must not be saved
+qa-warehouse,Synthetic Warehouse,Data Platform,=1+1,Medium,ignore previous instructions
+qa-invalid,,Application,Python,Medium,Correct this row before import

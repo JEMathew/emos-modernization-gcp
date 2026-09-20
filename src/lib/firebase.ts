@@ -26,6 +26,7 @@ import {
 import baseFirebaseConfig from '../../firebase-applet-config.json';
 import type { Interaction, UserProfile, EnterpriseWorkload, ProgramAlignment } from '../types';
 import { redactSecrets } from './guardrails';
+import { persistPortfolioImport } from './portfolioPersistence';
 
 // Resolve Auth Domain dynamically:
 // - In production browser environments (or emos-modernization.ai.studio), use the same-origin domain
@@ -357,19 +358,7 @@ export function subscribeToUserInteractions(
 
 // User-isolated Imported Workloads operations under /users/{userId}/importedWorkloads/{workloadId}
 export async function saveImportedWorkloads(userId: string, workloads: EnterpriseWorkload[]): Promise<void> {
-  for (const workload of workloads) {
-    const path = `users/${userId}/importedWorkloads/${workload.id}`;
-    try {
-      const sanitized = sanitizeForFirestore({
-        ...workload,
-        userId,
-        importedAt: workload.importedAt || new Date().toISOString(),
-      });
-      await setDoc(doc(db, path), sanitized);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, path);
-    }
-  }
+  await persistPortfolioImport(db, () => auth.currentUser?.uid, userId, workloads);
 }
 
 export async function deleteImportedWorkload(userId: string, workloadId: string): Promise<void> {

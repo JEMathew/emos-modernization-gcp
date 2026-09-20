@@ -1,571 +1,240 @@
-import type {
-  EnterpriseWorkload,
-  EnterpriseDna,
-  DnaField,
-  RawImportRecord,
-  ImportValidationResult,
-  InvalidImportRow,
-} from '../types';
+import type { EnterpriseWorkload, ImportValidationResult, RawImportRecord } from '../types';
+import { buildWorkloadFromRawRecord, sanitizeInputString } from './workloadNormalizer';
+import { MAX_FIELD_LENGTH, MAX_ID_LENGTH, MAX_NAME_LENGTH, redactSecrets, validateAndFenceUserPrompt } from '../lib/guardrails';
 import { calculateDnaCompleteness } from '../data/samplePortfolio';
-import {
-  sanitizeEvidenceValue,
-  MAX_FIELD_LENGTH,
-  MAX_NAME_LENGTH,
-  MAX_ID_LENGTH,
-} from '../lib/guardrails';
+export { buildWorkloadFromRawRecord, sanitizeInputString } from './workloadNormalizer';
 
-export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
-export const MAX_IMPORT_WORKLOADS = 200;
+export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 export const MAX_FILE_SIZE_LABEL = '5MB';
+export const MAX_IMPORT_WORKLOADS = 200;
+export const MAX_IMPORT_COLUMNS = 40;
+export const MAX_NORMALIZED_BATCH_BYTES = 4 * 1024 * 1024;
 
-function workloadLimitError(count: number): Error {
-  return new Error(
-    `Portfolio contains ${count} workloads. The maximum supported per file is ${MAX_IMPORT_WORKLOADS}. Split the portfolio into smaller files and try again.`
-  );
+const fields = [
+  ['workload_id', 'Workload ID'], ['workload_name', 'Workload name'], ['workload_type', 'Workload type'],
+  ['business_capability', 'Business capability'], ['business_criticality', 'Business criticality'],
+  ['modernization_drivers', 'Modernization drivers'], ['runtime', 'Runtime'], ['database', 'Database'],
+  ['hosting', 'Hosting'], ['technology_lifecycle_risk', 'Technology lifecycle risk'],
+  ['known_dependencies', 'Known dependencies'], ['dependency_details', 'Dependency details'],
+  ['infrastructure_cost', 'Infrastructure cost'], ['licensing_cost', 'Licensing cost'], ['tco_baseline', 'TCO baseline'],
+  ['customer_data', 'Customer data / sensitivity'], ['data_volume_velocity', 'Data volume / velocity'],
+  ['compliance_constraints', 'Compliance constraints'], ['target_cloud_platform', 'Target platform'],
+  ['target_architecture_constraints', 'Target architecture constraints'], ['migration_downtime_tolerance', 'Downtime tolerance'],
+  ['expected_6r', 'Expected 6R (evaluation only)'], ['expected_reason', 'Expected reason (evaluation only)'],
+] as const;
+export type ImportField = typeof fields[number][0];
+export const IMPORT_FIELDS = fields.map(([key, label], index) => ({ key, label, required: index < 3 }));
+export type ColumnMapping = Array<ImportField | ''>;
+export interface PortfolioSource {
+  fileName: string;
+  format: 'csv' | 'json';
+  columns: string[];
+  rows: Array<{ rowNumber: number; values: unknown[]; errors: string[] }>;
+}
+export interface RowPreview {
+  rowNumber: number;
+  fields: Partial<Record<ImportField, string>>;
+  warnings: string[];
+  errors: string[];
+  workload?: EnterpriseWorkload;
+}
+export interface IntakePreview extends ImportValidationResult { rows: RowPreview[]; importId: string }
+
+function limitRows(count: number) {
+  if (count > MAX_IMPORT_WORKLOADS) throw new Error(`Portfolio contains ${count} workloads. The maximum supported per file is ${MAX_IMPORT_WORKLOADS}. Split the file and try again.`);
+}
+const normalizeKey = (key: string) => key.trim().toLowerCase().replace(/[\s-]+/g, '_');
+export const isSafeWorkloadId = (id: string) => /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$/.test(id);
+const aliases: Record<string, ImportField> = {
+  id: 'workload_id', asset_id: 'workload_id', application_id: 'workload_id',
+  name: 'workload_name', application_name: 'workload_name', asset_name: 'workload_name',
+  type: 'workload_type', asset_type: 'workload_type', criticality: 'business_criticality',
+  platform: 'hosting', technology: 'runtime',
+};
+export function suggestColumnMapping(columns: string[]): ColumnMapping {
+  return columns.map(column => {
+    const key = normalizeKey(column);
+    return IMPORT_FIELDS.find(field => field.key === key)?.key ?? aliases[key] ?? '';
+  });
+}
+export function mappingErrors(columns: string[], mapping: ColumnMapping): string[] {
+  const errors: string[] = [];
+  if (mapping.length !== columns.length) errors.push('Map each source column or explicitly choose Do not import.');
+  for (const field of IMPORT_FIELDS) {
+    const count = mapping.filter(value => value === field.key).length;
+    if (field.required && !count) errors.push(`Map the required field: ${field.label}.`);
+    if (count > 1) errors.push(`Map only one source column to ${field.label}.`);
+  }
+  if (mapping.some(value => value && !IMPORT_FIELDS.some(field => field.key === value))) errors.push('An unsupported target field was selected.');
+  return errors;
+}
+function validateColumns(columns: string[]) {
+  if (!columns.length || columns.length > MAX_IMPORT_COLUMNS) throw new Error(`Use between 1 and ${MAX_IMPORT_COLUMNS} source columns.`);
+  const seen = new Set<string>();
+  for (const column of columns) {
+    const key = normalizeKey(column);
+    if (!key || column.length > 100 || /[\x00-\x1f\x7f]/.test(column)) throw new Error('Every source column needs a non-empty name of at most 100 characters without control characters.');
+    if (['__proto__', 'constructor', 'prototype'].includes(key)) throw new Error('Reserved object keys cannot be used as source columns.');
+    if (redactSecrets(column) !== column) throw new Error('A source column appears to contain a credential. Remove it before uploading.');
+    if (seen.has(key)) throw new Error('Duplicate or ambiguous source column names. Rename them before uploading.');
+    seen.add(key);
+  }
 }
 
-/**
- * Defends against CSV / Spreadsheet formula injection and limits text lengths.
- */
-export function sanitizeInputString(val: unknown, maxLength = MAX_FIELD_LENGTH): string {
-  return sanitizeEvidenceValue(val, maxLength);
-}
-
-/**
- * Robust CSV parser that handles quotes, escaped quotes, multiline values, and commas.
- */
-export function parseCsvText(csvText: string): string[][] {
+// Strict bounded CSV state machine. Preserves source text; normalization happens visibly later.
+export function parseCsvText(text: string): string[][] {
   const rows: string[][] = [];
-  let currentRow: string[] = [];
-  let currentCell = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < csvText.length; i++) {
-    const char = csvText[i];
-    const nextChar = csvText[i + 1];
-
-    if (inQuotes) {
-      if (char === '"') {
-        if (nextChar === '"') {
-          // Escaped quote inside quoted cell
-          currentCell += '"';
-          i++;
-        } else {
-          // Closing quote
-          inQuotes = false;
-        }
-      } else {
-        currentCell += char;
-      }
-    } else {
-      if (char === '"') {
-        inQuotes = true;
-      } else if (char === ',') {
-        currentRow.push(currentCell.trim());
-        currentCell = '';
-      } else if (char === '\r') {
-        // Skip CR in CRLF
-        if (nextChar === '\n') {
-          i++;
-        }
-        currentRow.push(currentCell.trim());
-        if (currentRow.some((c) => c.length > 0)) {
-          rows.push(currentRow);
-        }
-        currentRow = [];
-        currentCell = '';
-      } else if (char === '\n') {
-        currentRow.push(currentCell.trim());
-        if (currentRow.some((c) => c.length > 0)) {
-          rows.push(currentRow);
-        }
-        currentRow = [];
-        currentCell = '';
-      } else {
-        currentCell += char;
-      }
-    }
+  let row: string[] = [], cell = '', state: 'start' | 'plain' | 'quoted' | 'closed' = 'start';
+  const endCell = () => {
+    row.push(cell); cell = ''; state = 'start';
+    if (row.length > MAX_IMPORT_COLUMNS) throw new Error(`Maximum ${MAX_IMPORT_COLUMNS} columns supported.`);
+  };
+  const endRow = () => {
+    endCell();
+    if (row.some(value => value.trim())) rows.push(row);
+    row = [];
+    limitRows(Math.max(0, rows.length - 1));
+  };
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (state === 'quoted') {
+      if (char === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+      else if (char === '"') state = 'closed';
+      else cell += char;
+    } else if (char === ',') endCell();
+    else if (char === '\n' || char === '\r') { endRow(); if (char === '\r' && text[i + 1] === '\n') i++; }
+    else if (char === '"' && state === 'start') state = 'quoted';
+    else if (char === '"' || (state === 'closed' && !/[ \t]/.test(char))) throw new Error(`Malformed CSV near record ${rows.length + 1}: check quotes and separators.`);
+    else if (state !== 'closed') { cell += char; state = 'plain'; }
+    if (cell.length > 10000) throw new Error('A source cell exceeds 10,000 characters. Shorten it before uploading.');
   }
-
-  if (currentCell.length > 0 || currentRow.length > 0) {
-    currentRow.push(currentCell.trim());
-    if (currentRow.some((c) => c.length > 0)) {
-      rows.push(currentRow);
-    }
-  }
-
+  if (state === 'quoted') throw new Error('Malformed CSV: an opening quote has no closing quote.');
+  if (cell.length || row.length || state === 'closed') endRow();
   return rows;
 }
-
-/**
- * Normalizes raw key names (e.g. "Workload ID", "workload_id", "WORKLOAD_ID") into canonical schema keys.
- */
-function normalizeKey(key: string): string {
-  return key
-    .toLowerCase()
-    .trim()
-    .replace(/[\s\-_]+/g, '_')
-    .replace(/[^a-z0-9_]/g, '');
+function checkText(text: string) {
+  if (new TextEncoder().encode(text).byteLength > MAX_FILE_SIZE_BYTES) throw new Error('File size exceeds 5MB limit.');
+  if (!text.trim()) throw new Error('The file is empty. Add headers and at least one workload.');
+}
+export function parsePortfolioSource(text: string, fileName: string, format: 'csv' | 'json'): PortfolioSource {
+  checkText(text);
+  if (fileName.length > 250 || redactSecrets(fileName) !== fileName || /[\x00-\x1f\x7f]/.test(fileName)) throw new Error('Use a filename of at most 250 characters without credentials or control characters.');
+  text = text.replace(/^\uFEFF/, '');
+  if (format === 'csv') {
+    const rows = parseCsvText(text);
+    if (rows.length < 2) throw new Error('The CSV file needs a header and at least one data row.');
+    const columns = rows[0];
+    validateColumns(columns);
+    return { fileName, format, columns, rows: rows.slice(1).map((values, index) => ({
+      rowNumber: index + 2, values, errors: values.length === columns.length ? [] : ['Column count does not match the header. Correct the source row and upload again.'],
+    })) };
+  }
+  let parsed: unknown;
+  try { parsed = JSON.parse(text); } catch { throw new Error('Invalid JSON. Check commas, quotes and brackets; use an array of workload objects.'); }
+  // JSON.parse otherwise silently keeps the last duplicate key. Reject that ambiguity.
+  const keySets: Set<string>[] = [];
+  for (const token of text.matchAll(/"(?:\\.|[^"\\])*"|[{}]/g)) {
+    if (token[0] === '{') keySets.push(new Set());
+    else if (token[0] === '}') keySets.pop();
+    else if (/^\s*:/.test(text.slice(token.index! + token[0].length))) {
+      const key = JSON.parse(token[0]) as string;
+      if (keySets.at(-1)?.has(key)) throw new Error('Duplicate JSON object key. Rename duplicate fields before uploading.');
+      keySets.at(-1)?.add(key);
+    }
+  }
+  const envelope = parsed as { workloads?: unknown; data?: unknown } | null;
+  if (!Array.isArray(parsed) && envelope?.workloads && envelope?.data) throw new Error('Use one workloads or data array, not both.');
+  const list = Array.isArray(parsed) ? parsed : envelope?.workloads ?? envelope?.data;
+  if (!Array.isArray(list) || !list.length) throw new Error('JSON must contain a non-empty array of workload objects, directly or under workloads or data.');
+  limitRows(list.length);
+  const columns = [...new Set(list.flatMap(item => item && typeof item === 'object' && !Array.isArray(item) ? Object.keys(item) : []))];
+  validateColumns(columns);
+  return { fileName, format, columns, rows: list.map((item, index) => {
+    const valid = item && typeof item === 'object' && !Array.isArray(item);
+    return { rowNumber: index + 1, values: columns.map(key => valid && Object.hasOwn(item, key) ? item[key] : ''), errors: valid ? [] : ['Each row must be a JSON object.'] };
+  }) };
+}
+export async function readPortfolioSource(file: File): Promise<PortfolioSource> {
+  const extension = file.name.split('.').pop()?.toLowerCase();
+  if (extension !== 'csv' && extension !== 'json') throw new Error('Unsupported file type. Choose a .csv or .json file.');
+  if (file.size > MAX_FILE_SIZE_BYTES) throw new Error('File size exceeds 5MB limit. Split the inventory into smaller files.');
+  const mime = file.type.toLowerCase().split(';')[0];
+  const allowed = extension === 'csv' ? ['text/csv', 'application/csv', 'application/vnd.ms-excel'] : ['application/json', 'text/json'];
+  if (mime && !['text/plain', 'application/octet-stream', ...allowed].includes(mime)) throw new Error('File type and content indication do not match. Export a genuine CSV or JSON file.');
+  return parsePortfolioSource(await file.text(), file.name, extension);
 }
 
-/**
- * Evaluates field content to determine DnaEvidenceStatus ('known' | 'missing' | 'incomplete').
- */
-function evaluateFieldStatus(
-  rawVal: string | undefined,
-  defaultMissingLabel = 'Missing'
-): { status: 'known' | 'missing' | 'incomplete'; value: string; detail?: string } {
-  if (!rawVal) {
-    return { status: 'missing', value: defaultMissingLabel };
-  }
-
-  const trimmed = rawVal.trim();
-  const lower = trimmed.toLowerCase();
-
-  if (
-    lower === '' ||
-    lower === 'missing' ||
-    lower === 'unknown' ||
-    lower === 'n/a' ||
-    lower === 'none' ||
-    lower === 'null' ||
-    lower === 'undefined'
-  ) {
-    return { status: 'missing', value: defaultMissingLabel };
-  }
-
-  if (lower.startsWith('incomplete') || lower.includes('unverified') || lower.includes('partial')) {
-    return {
-      status: 'incomplete',
-      value: 'Incomplete',
-      detail: trimmed.length > 12 ? trimmed : 'Specification unverified or partially supplied',
-    };
-  }
-
-  return {
-    status: 'known',
-    value: sanitizeInputString(trimmed),
-  };
-}
-
-/**
- * Converts a validated raw record into a complete 6-dimension EnterpriseWorkload with DNA.
- */
-export function buildWorkloadFromRawRecord(
-  record: RawImportRecord,
-  userId?: string
-): EnterpriseWorkload {
-  const id = sanitizeInputString(record.workload_id || `wl-${Date.now()}`, MAX_ID_LENGTH);
-  const name = sanitizeInputString(record.workload_name || 'Unnamed Workload', MAX_NAME_LENGTH);
-  const typeStr = sanitizeInputString(record.workload_type || 'Application', 100);
-  const type: 'Application' | 'Data Platform' =
-    typeStr.toLowerCase().includes('data') || typeStr.toLowerCase().includes('platform')
-      ? 'Data Platform'
-      : 'Application';
-
-  // 1. Business DNA (3 fields)
-  const businessCap = evaluateFieldStatus(record.business_capability);
-  const businessCritRaw = (record.business_criticality || 'Medium').trim();
-  const businessCrit: 'High' | 'Medium' | 'Low' =
-    businessCritRaw.toLowerCase() === 'high'
-      ? 'High'
-      : businessCritRaw.toLowerCase() === 'low'
-      ? 'Low'
-      : 'Medium';
-  const modDrivers = evaluateFieldStatus(record.modernization_drivers);
-
-  const business: DnaField[] = [
-    { id: 'b1', label: 'Business Capability', value: businessCap.value, status: businessCap.status, detail: businessCap.detail },
-    { id: 'b2', label: 'Business Criticality', value: businessCrit, status: 'known' },
-    { id: 'b3', label: 'Modernization Drivers', value: modDrivers.value, status: modDrivers.status, detail: modDrivers.detail },
-  ];
-
-  // 2. Technology DNA (4 fields)
-  const runtime = evaluateFieldStatus(record.runtime);
-  const database = evaluateFieldStatus(record.database);
-  const hosting = evaluateFieldStatus(record.hosting);
-  const techRisk = evaluateFieldStatus(record.technology_lifecycle_risk);
-
-  const technology: DnaField[] = [
-    { id: 't1', label: 'Runtime', value: runtime.value, status: runtime.status, detail: runtime.detail },
-    { id: 't2', label: 'Database', value: database.value, status: database.status, detail: database.detail },
-    { id: 't3', label: 'Hosting', value: hosting.value, status: hosting.status, detail: hosting.detail },
-    { id: 't4', label: 'Technology Lifecycle Risk', value: techRisk.value, status: techRisk.status, detail: techRisk.detail },
-  ];
-
-  // 3. Dependency DNA (2 fields)
-  const knownDeps = evaluateFieldStatus(record.known_dependencies);
-  const depDetails = evaluateFieldStatus(record.dependency_details);
-
-  const dependency: DnaField[] = [
-    { id: 'd1', label: 'Known Dependencies', value: knownDeps.value, status: knownDeps.status, detail: knownDeps.detail },
-    { id: 'd2', label: 'Dependency Details', value: depDetails.value, status: depDetails.status, detail: depDetails.detail },
-  ];
-
-  // 4. Economics DNA (3 fields)
-  const infraCost = evaluateFieldStatus(record.infrastructure_cost);
-  const licenseCost = evaluateFieldStatus(record.licensing_cost);
-  const tcoBaseline = evaluateFieldStatus(record.tco_baseline);
-
-  const economics: DnaField[] = [
-    { id: 'e1', label: 'Infrastructure Cost', value: infraCost.value, status: infraCost.status, detail: infraCost.detail },
-    { id: 'e2', label: 'Licensing Cost', value: licenseCost.value, status: licenseCost.status, detail: licenseCost.detail },
-    { id: 'e3', label: 'Detailed TCO Baseline', value: tcoBaseline.value, status: tcoBaseline.status, detail: tcoBaseline.detail },
-  ];
-
-  // 5. Data & Risk DNA (3 fields)
-  const custData = evaluateFieldStatus(record.customer_data);
-  const dataVol = evaluateFieldStatus(record.data_volume_velocity);
-  const compliance = evaluateFieldStatus(record.compliance_constraints);
-
-  const dataAndRisk: DnaField[] = [
-    { id: 'dr1', label: 'Customer Data / Sensitivity', value: custData.value, status: custData.status, detail: custData.detail },
-    { id: 'dr2', label: 'Data Volume & Velocity', value: dataVol.value, status: dataVol.status, detail: dataVol.detail },
-    { id: 'dr3', label: 'Compliance Constraints', value: compliance.value, status: compliance.status, detail: compliance.detail },
-  ];
-
-  // 6. Target-State DNA (3 fields)
-  const targetCloud = evaluateFieldStatus(record.target_cloud_platform);
-  const targetArch = evaluateFieldStatus(record.target_architecture_constraints);
-  const downtimeTol = evaluateFieldStatus(record.migration_downtime_tolerance);
-
-  const targetState: DnaField[] = [
-    { id: 'ts1', label: 'Target Cloud / Platform Strategy', value: targetCloud.value, status: targetCloud.status, detail: targetCloud.detail },
-    { id: 'ts2', label: 'Target Architecture Constraints', value: targetArch.value, status: targetArch.status, detail: targetArch.detail },
-    { id: 'ts3', label: 'Migration Downtime Tolerance', value: downtimeTol.value, status: downtimeTol.status, detail: downtimeTol.detail },
-  ];
-
-  const dna: EnterpriseDna = {
-    business,
-    technology,
-    dependency,
-    economics,
-    dataAndRisk,
-    targetState,
-  };
-
-  const completenessStats = calculateDnaCompleteness(dna);
-
-  // Modernization Signals extraction
-  const signals: string[] = [];
-  if (record.modernization_drivers && record.modernization_drivers !== 'Missing') {
-    record.modernization_drivers
-      .split(/[,;]/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-      .forEach((s) => signals.push(sanitizeInputString(s)));
-  }
-  if (signals.length === 0) {
-    if (infraCost.status === 'known') signals.push(`Infra cost: ${infraCost.value}`);
-    if (licenseCost.status === 'known') signals.push(`Licensing: ${licenseCost.value}`);
-    if (techRisk.status === 'known') signals.push(`Lifecycle risk: ${techRisk.value}`);
-    if (signals.length === 0) signals.push('General modernization assessment required');
-  }
-
-  // Current stack summary
-  let currentStack = 'Custom Architecture';
-  if (runtime.status === 'known' && database.status === 'known') {
-    currentStack = `${runtime.value} + ${database.value}`;
-  } else if (runtime.status === 'known') {
-    currentStack = runtime.value;
-  } else if (database.status === 'known') {
-    currentStack = `Database: ${database.value}`;
-  }
-
-  const workload: EnterpriseWorkload = {
-    id,
-    name,
-    type,
-    businessCapability: businessCap.status === 'known' ? businessCap.value : 'General Enterprise Capability',
-    businessCriticality: businessCrit,
-    currentStack,
-    hosting: hosting.status === 'known' ? hosting.value : 'On-premises / Unspecified',
-    knownDependencies: knownDeps.status === 'known' ? knownDeps.value : 'Unmapped Dependencies',
-    modernizationSignals: signals,
-    evidenceCompleteness: completenessStats.completeness,
-    dna,
-    userId,
-    importedAt: new Date().toISOString(),
-    source: 'imported',
-  };
-
-  // Evaluation metadata (isolated for testing, never sent to Gemini)
-  if (record.expected_6r || record.expected_reason) {
-    workload.evaluationMeta = {
-      expected6r: sanitizeInputString(record.expected_6r),
-      expectedReason: sanitizeInputString(record.expected_reason),
-    };
-  }
-
-  return workload;
-}
-
-/**
- * Validates and parses an uploaded file (CSV or JSON).
- */
-export async function parseAndValidatePortfolioFile(
-  file: File,
-  userId?: string
-): Promise<ImportValidationResult> {
-  const fileName = file.name;
-  const extension = fileName.slice(fileName.lastIndexOf('.')).toLowerCase();
-
-  if (extension !== '.csv' && extension !== '.json') {
-    throw new Error(`Unsupported file type: "${extension}". Only .csv and .json files are supported.`);
-  }
-
-  if (file.size > MAX_FILE_SIZE_BYTES) {
-    throw new Error(
-      `File size exceeds ${MAX_FILE_SIZE_LABEL} limit (${(file.size / (1024 * 1024)).toFixed(2)} MB). Please upload a smaller file.`
-    );
-  }
-
-  const text = await file.text();
-
-  if (extension === '.csv') {
-    return parseCsvPortfolio(text, fileName, userId);
-  } else {
-    return parseJsonPortfolio(text, fileName, userId);
-  }
-}
-
-/**
- * Parses raw CSV content into validated EnterpriseWorkloads.
- */
-export function parseCsvPortfolio(
-  csvText: string,
-  fileName: string,
-  userId?: string
-): ImportValidationResult {
-  const rawRows = parseCsvText(csvText);
-
-  if (rawRows.length < 2) {
-    throw new Error('The CSV file is empty or does not contain data rows beyond the header.');
-  }
-
-  const rawHeaders = rawRows[0];
-  const normalizedHeaders = rawHeaders.map(normalizeKey);
-
-  // Validate required headers
-  const requiredFields = ['workload_id', 'workload_name', 'workload_type'];
-  const missingHeaders = requiredFields.filter((f) => !normalizedHeaders.includes(f));
-
-  if (missingHeaders.length > 0) {
-    throw new Error(
-      `Missing required CSV headers: ${missingHeaders.join(', ')}. Your file must include: workload_id, workload_name, workload_type.`
-    );
-  }
-
-  const validRecords: EnterpriseWorkload[] = [];
-  const invalidRecords: InvalidImportRow[] = [];
-  const warnings: string[] = [];
-  const seenIds = new Set<string>();
-  const detectedWorkloadTypes = new Set<string>();
-  let totalEvidenceGaps = 0;
-
-  const dataRows = rawRows.slice(1);
-  if (dataRows.length > MAX_IMPORT_WORKLOADS) {
-    throw workloadLimitError(dataRows.length);
-  }
-
-  const rowsToProcess = dataRows;
-
-  rowsToProcess.forEach((row, idx) => {
-    const rowNumber = idx + 2; // 1-indexed including header
-    const rowObj: Record<string, string> = {};
-
-    normalizedHeaders.forEach((header, colIdx) => {
-      rowObj[header] = row[colIdx] !== undefined ? row[colIdx] : '';
+export function previewPortfolio(source: PortfolioSource, mapping: ColumnMapping, userId?: string, existingIds: string[] = []): IntakePreview {
+  const errors = mappingErrors(source.columns, mapping);
+  if (errors.length) throw new Error(errors.join(' '));
+  limitRows(source.rows.length);
+  const seen = new Set<string>(), existing = new Set(existingIds.map(id => id.toLowerCase()));
+  const importId = crypto.randomUUID();
+  const columnMapping = JSON.stringify(source.columns.flatMap((column, index) => mapping[index] ? [[column, mapping[index]]] : []));
+  const rows: RowPreview[] = source.rows.map(row => {
+    const fields: Partial<Record<ImportField, string>> = {};
+    const warnings: string[] = [], errors = [...row.errors];
+    mapping.forEach((key, index) => {
+      if (!key) return;
+      const raw = row.values[index] ?? '';
+      const label = IMPORT_FIELDS.find(field => field.key === key)!.label;
+      if (typeof raw === 'number' && !Number.isFinite(raw)) { errors.push(`${label}: numeric value must be finite.`); return; }
+      if (typeof raw === 'object' || (['workload_id', 'workload_name', 'workload_type'].includes(key) && typeof raw !== 'string')) {
+        errors.push(`${label}: use a text value, not a nested object, array or numeric identifier.`); return;
+      }
+      const text = String(raw);
+      const bound = key === 'workload_id' ? MAX_ID_LENGTH : key === 'workload_name' ? MAX_NAME_LENGTH : MAX_FIELD_LENGTH;
+      if (text.length > bound) { errors.push(`${label}: maximum ${bound} characters; shorten the source value.`); return; }
+      const normalized = sanitizeInputString(text, bound + 1);
+      if (normalized.length > bound) { errors.push(`${label}: normalized value exceeds ${bound} characters.`); return; }
+      fields[key] = normalized;
+      if (normalized !== text || typeof raw !== 'string') warnings.push(`${label}: normalized (whitespace/control cleanup, literal formula prefix or credential redaction). Review the displayed value.`);
+      if (validateAndFenceUserPrompt(text).injectionDetected) warnings.push(`${label}: instruction-like text retained as untrusted data. AI assessment may reject it.`);
+      if (/<[^>]+>|javascript:/i.test(text)) warnings.push(`${label}: markup or script-like text is displayed literally; it is never executed.`);
     });
-
-    const id = (rowObj['workload_id'] || '').trim();
-    const name = (rowObj['workload_name'] || '').trim();
-    const type = (rowObj['workload_type'] || '').trim();
-
-    const rowErrors: string[] = [];
-
-    if (!id) {
-      rowErrors.push('Missing workload_id');
-    } else if (seenIds.has(id.toLowerCase())) {
-      rowErrors.push(`Duplicate workload_id "${id}" (must be unique)`);
+    for (const field of IMPORT_FIELDS.filter(field => field.required)) if (!fields[field.key]?.trim()) errors.push(`${field.label}: required value is missing.`);
+    const id = fields.workload_id ?? '';
+    if (id && !isSafeWorkloadId(id)) errors.push('Workload ID: start with a letter or digit; use only letters, digits, dots, underscores and hyphens (maximum 100).');
+    if (id && (seen.has(id.toLowerCase()) || existing.has(id.toLowerCase()))) errors.push('Workload ID: already present in this file or imported portfolio. Use a unique ID; existing records will not be overwritten.');
+    if (id) seen.add(id.toLowerCase());
+    const type = fields.workload_type?.toLowerCase();
+    if (type && !['application', 'data platform'].includes(type)) errors.push('Workload type: use Application or Data Platform.');
+    else if (type) fields.workload_type = type === 'application' ? 'Application' : 'Data Platform';
+    const criticality = fields.business_criticality?.toLowerCase();
+    if (criticality && !['high', 'medium', 'low'].includes(criticality)) errors.push('Business criticality: use High, Medium or Low, or leave blank.');
+    else if (criticality) fields.business_criticality = criticality[0].toUpperCase() + criticality.slice(1);
+    else warnings.push('Business criticality is missing: excluded from evidence completeness; Medium is the provisional planning default.');
+    if ((fields.modernization_drivers ?? '').split(/[,;]/).filter(value => value.trim()).length > 100) errors.push('Modernization drivers: maximum 100 separate signals.');
+    if ((fields.runtime?.length ?? 0) + (fields.database?.length ?? 0) + 3 > 4000) errors.push('Runtime and database: combined stack description exceeds 4,000 characters.');
+    const workload = errors.length ? undefined : buildWorkloadFromRawRecord(fields as RawImportRecord, userId);
+    if (workload?.modernizationSignals.some(signal => signal.length > MAX_FIELD_LENGTH)) {
+      workload.modernizationSignals = workload.modernizationSignals.map(signal => signal.length > MAX_FIELD_LENGTH ? signal.slice(0, MAX_FIELD_LENGTH - 1) + '…' : signal);
+      warnings.push('A derived modernization signal summary was shortened to 2,000 characters. The full mapped value remains in Enterprise DNA.');
     }
-
-    if (!name) {
-      rowErrors.push('Missing workload_name');
-    }
-
-    if (!type) {
-      rowErrors.push('Missing workload_type');
-    }
-
-    if (rowErrors.length > 0) {
-      invalidRecords.push({
-        rowNumber,
-        id: id || undefined,
-        name: name || undefined,
-        errors: rowErrors,
-        status: 'REJECTED',
-      });
-      return;
-    }
-
-    seenIds.add(id.toLowerCase());
-
-    try {
-      const workload = buildWorkloadFromRawRecord(rowObj as unknown as RawImportRecord, userId);
-      validRecords.push(workload);
-      detectedWorkloadTypes.add(workload.type);
-
-      const completeness = calculateDnaCompleteness(workload.dna);
-      totalEvidenceGaps += completeness.missingCount + completeness.incompleteCount;
-    } catch (err: any) {
-      invalidRecords.push({
-        rowNumber,
-        id,
-        name,
-        errors: [err?.message || 'Failed to process record into Enterprise DNA'],
-        status: 'REJECTED',
-      });
-    }
+    if (workload) workload.importMetadata = { importId, fileName: source.fileName, rowNumber: row.rowNumber, columnMapping, validationVersion: 1, warningCount: warnings.length };
+    return { rowNumber: row.rowNumber, fields, warnings, errors, workload };
   });
-
+  const validRecords = rows.flatMap(row => row.workload ? [row.workload] : []);
+  if (new TextEncoder().encode(JSON.stringify(validRecords)).byteLength > MAX_NORMALIZED_BATCH_BYTES) throw new Error('Normalized inventory exceeds the 4MB save budget. Split the source into smaller files.');
+  const ignored = mapping.filter(value => !value).length;
   return {
-    fileName,
-    totalDetected: dataRows.length,
-    validRecords,
-    invalidRecords,
-    warnings,
-    detectedWorkloadTypes: Array.from(detectedWorkloadTypes),
-    totalEvidenceGaps,
-    rowBreakdown: {
-      valid: validRecords.length,
-      warning: warnings.length,
-      rejected: invalidRecords.length,
-    },
+    fileName: source.fileName, importId, totalDetected: rows.length, rows, validRecords,
+    invalidRecords: rows.filter(row => row.errors.length).map(row => ({ rowNumber: row.rowNumber, id: row.fields.workload_id, name: row.fields.workload_name, errors: row.errors, status: 'REJECTED' })),
+    warnings: [...(ignored ? [`${ignored} unmapped column(s) will not be saved or sent to AI.`] : []), ...rows.flatMap(row => row.warnings.map(warning => `Row ${row.rowNumber}: ${warning}`))],
+    detectedWorkloadTypes: [...new Set(validRecords.map(workload => workload.type))],
+    totalEvidenceGaps: validRecords.reduce((total, workload) => { const result = calculateDnaCompleteness(workload.dna); return total + result.missingCount + result.incompleteCount; }, 0),
+    rowBreakdown: { valid: validRecords.length, rejected: rows.filter(row => row.errors.length).length, warning: rows.filter(row => row.warnings.length).length },
   };
 }
-
-/**
- * Parses raw JSON content into validated EnterpriseWorkloads.
- */
-export function parseJsonPortfolio(
-  jsonText: string,
-  fileName: string,
-  userId?: string
-): ImportValidationResult {
-  let parsed: any;
-  try {
-    parsed = JSON.parse(jsonText);
-  } catch (err: any) {
-    throw new Error(`Invalid JSON format: ${err?.message || 'Syntax error'}`);
-  }
-
-  let rawList: any[] = [];
-  if (Array.isArray(parsed)) {
-    rawList = parsed;
-  } else if (parsed && Array.isArray(parsed.workloads)) {
-    rawList = parsed.workloads;
-  } else if (parsed && Array.isArray(parsed.data)) {
-    rawList = parsed.data;
-  } else {
-    throw new Error(
-      'JSON file must be an array of workload objects or contain a "workloads" array property.'
-    );
-  }
-
-  const validRecords: EnterpriseWorkload[] = [];
-  const invalidRecords: InvalidImportRow[] = [];
-  const warnings: string[] = [];
-  const seenIds = new Set<string>();
-  const detectedWorkloadTypes = new Set<string>();
-  let totalEvidenceGaps = 0;
-
-  if (rawList.length > MAX_IMPORT_WORKLOADS) {
-    throw workloadLimitError(rawList.length);
-  }
-
-  const itemsToProcess = rawList;
-
-  itemsToProcess.forEach((item, idx) => {
-    const rowNumber = idx + 1;
-    if (!item || typeof item !== 'object') {
-      invalidRecords.push({
-        rowNumber,
-        errors: ['Item must be a valid JSON object'],
-        status: 'REJECTED',
-      });
-      return;
-    }
-
-    // Normalize keys
-    const rowObj: Record<string, string> = {};
-    Object.keys(item).forEach((k) => {
-      rowObj[normalizeKey(k)] = typeof item[k] === 'string' ? item[k] : String(item[k] ?? '');
-    });
-
-    const id = (rowObj['workload_id'] || '').trim();
-    const name = (rowObj['workload_name'] || '').trim();
-    const type = (rowObj['workload_type'] || '').trim();
-
-    const rowErrors: string[] = [];
-
-    if (!id) {
-      rowErrors.push('Missing workload_id');
-    } else if (seenIds.has(id.toLowerCase())) {
-      rowErrors.push(`Duplicate workload_id "${id}"`);
-    }
-
-    if (!name) {
-      rowErrors.push('Missing workload_name');
-    }
-
-    if (!type) {
-      rowErrors.push('Missing workload_type');
-    }
-
-    if (rowErrors.length > 0) {
-      invalidRecords.push({
-        rowNumber,
-        id: id || undefined,
-        name: name || undefined,
-        errors: rowErrors,
-        status: 'REJECTED',
-      });
-      return;
-    }
-
-    seenIds.add(id.toLowerCase());
-
-    try {
-      const workload = buildWorkloadFromRawRecord(rowObj as unknown as RawImportRecord, userId);
-      validRecords.push(workload);
-      detectedWorkloadTypes.add(workload.type);
-
-      const completeness = calculateDnaCompleteness(workload.dna);
-      totalEvidenceGaps += completeness.missingCount + completeness.incompleteCount;
-    } catch (err: any) {
-      invalidRecords.push({
-        rowNumber,
-        id,
-        name,
-        errors: [err?.message || 'Failed to process record'],
-        status: 'REJECTED',
-      });
-    }
-  });
-
-  return {
-    fileName,
-    totalDetected: rawList.length,
-    validRecords,
-    invalidRecords,
-    warnings,
-    detectedWorkloadTypes: Array.from(detectedWorkloadTypes),
-    totalEvidenceGaps,
-    rowBreakdown: {
-      valid: validRecords.length,
-      warning: warnings.length,
-      rejected: invalidRecords.length,
-    },
-  };
+export const parseCsvPortfolio = (text: string, fileName: string, userId?: string) => {
+  const source = parsePortfolioSource(text, fileName, 'csv');
+  return previewPortfolio(source, suggestColumnMapping(source.columns), userId);
+};
+export const parseJsonPortfolio = (text: string, fileName: string, userId?: string) => {
+  const source = parsePortfolioSource(text, fileName, 'json');
+  return previewPortfolio(source, suggestColumnMapping(source.columns), userId);
+};
+export async function parseAndValidatePortfolioFile(file: File, userId?: string) {
+  const source = await readPortfolioSource(file);
+  return previewPortfolio(source, suggestColumnMapping(source.columns), userId);
 }

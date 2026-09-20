@@ -167,7 +167,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-[var(--emos-text-secondary)] mt-2 leading-relaxed">
-              Import your organization's CSV or JSON inventory with pre-ingestion schema validation, deterministic evidence completeness scoring, and tenant-isolated storage.
+              Map your CSV or JSON columns, review validation results, then save workloads to your signed-in account. Missing evidence remains visible.
             </p>
           </div>
         </div>
@@ -222,6 +222,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search workloads..."
+                aria-label="Search workloads"
                 className="pl-8 pr-3 py-1.5 bg-[var(--emos-input-bg)] border border-[var(--emos-border-subtle)] focus:border-[var(--emos-accent)] rounded-xl text-xs text-[var(--emos-text-primary)] placeholder-[var(--emos-text-muted)] focus:outline-hidden transition-colors w-full sm:w-56 min-h-[34px]"
               />
             </div>
@@ -249,7 +250,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
             {activeTab === 'sample' ? (
               'These candidate workloads represent typical on-premises enterprise systems for ideation and modernization assessment. EMOS does not claim live automated CMDB synchronization or cloud agent discovery.'
             ) : (
-              'Your uploaded workloads are parsed into structured Enterprise DNA and isolated strictly to your authenticated session in Cloud Firestore. Missing attributes become deterministic evidence gaps.'
+              'Your uploaded workloads belong to your signed-in account. Import checks validate their structure; your team still verifies the evidence. Missing attributes remain evidence gaps.'
             )}
           </div>
         </div>
@@ -307,7 +308,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
               <div
                 key={workload.id}
                 id={`portfolio-card-${workload.id}`}
-                className="rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] hover:border-[var(--emos-border-strong)] transition-all flex flex-col justify-between p-4 sm:p-5 group shadow-xs hover:shadow-md relative"
+                className="min-w-0 break-words rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] hover:border-[var(--emos-border-strong)] transition-all flex flex-col justify-between p-4 sm:p-5 group shadow-xs hover:shadow-md relative"
               >
                 <div className="space-y-3.5">
                   {/* Header: Type, Source Badge & Criticality */}
@@ -335,7 +336,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
                             : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                         }`}
                       >
-                        {workload.businessCriticality}
+                        {workload.dna.business.find(field => field.id === 'b2')?.status === 'missing' ? 'Unspecified' : workload.businessCriticality}
                       </span>
 
                       {isImported && onDeleteImportedWorkload && (
@@ -415,6 +416,14 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
                 </div>
 
                 {/* Actions: View Enterprise DNA & Assess */}
+                {isImported && <details className="mt-3 text-xs">
+                  <summary className="min-h-11 cursor-pointer font-medium">Import source and validation</summary>
+                  {workload.importMetadata ? <div className="space-y-2 break-all text-[var(--emos-text-secondary)]">
+                    <p>{workload.importMetadata.fileName} · Row {workload.importMetadata.rowNumber}</p>
+                    <p>Structure validated · {workload.importMetadata.warningCount} warning(s). Evidence requires human verification.</p>
+                    <p>Source columns → EMOS fields</p><p className="whitespace-pre-wrap">{workload.importMetadata.columnMapping}</p>
+                  </div> : <p className="text-[var(--emos-text-secondary)]">Earlier import; source mapping was not recorded.</p>}
+                </details>}
                 <div className="pt-4 mt-3.5 border-t border-[var(--emos-border-subtle)] space-y-2">
                   <button
                     id={`view-dna-btn-${workload.id}`}

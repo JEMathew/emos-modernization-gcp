@@ -86,6 +86,14 @@ export interface EnterpriseWorkload {
   userId?: string;
   importedAt?: string;
   source?: 'sample' | 'imported';
+  importMetadata?: {
+    importId: string;
+    fileName: string;
+    rowNumber: number;
+    columnMapping: string;
+    validationVersion: 1;
+    warningCount: number;
+  };
   evaluationMeta?: {
     expected6r?: string;
     expectedReason?: string;

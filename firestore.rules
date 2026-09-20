@@ -69,7 +69,7 @@ service cloud.firestore {
       return data.keys().hasOnly([
           'id', 'name', 'type', 'businessCapability', 'businessCriticality',
           'currentStack', 'hosting', 'knownDependencies', 'modernizationSignals',
-          'evidenceCompleteness', 'dna', 'userId', 'importedAt', 'source', 'evaluationMeta'
+          'evidenceCompleteness', 'dna', 'userId', 'importedAt', 'source', 'evaluationMeta', 'importMetadata'
         ]) &&
         data.keys().hasAll([
           'id', 'name', 'type', 'businessCapability', 'businessCriticality',
@@ -86,7 +86,20 @@ service cloud.firestore {
         data.knownDependencies is string && data.knownDependencies.size() <= 2000 &&
         data.modernizationSignals is list && data.modernizationSignals.size() <= 100 &&
         data.evidenceCompleteness is number && data.evidenceCompleteness >= 0 && data.evidenceCompleteness <= 100 &&
-        validDna(data.dna) && data.importedAt is string && data.source == 'imported';
+        validDna(data.dna) && data.importedAt is string && data.source == 'imported' &&
+        (!('importMetadata' in data) || validImportMetadata(data.importMetadata));
+    }
+
+    function validImportMetadata(meta) {
+      return meta is map &&
+        meta.keys().hasOnly(['importId', 'fileName', 'rowNumber', 'columnMapping', 'validationVersion', 'warningCount']) &&
+        meta.keys().hasAll(['importId', 'fileName', 'rowNumber', 'columnMapping', 'validationVersion', 'warningCount']) &&
+        meta.importId is string && meta.importId.size() == 36 &&
+        meta.fileName is string && meta.fileName.size() > 0 && meta.fileName.size() <= 250 &&
+        meta.rowNumber is int && meta.rowNumber >= 1 && meta.rowNumber <= 201 &&
+        meta.columnMapping is string && meta.columnMapping.size() <= 12000 &&
+        meta.validationVersion == 1 &&
+        meta.warningCount is int && meta.warningCount >= 0 && meta.warningCount <= 100;
     }
 
     function validDna(dna) {

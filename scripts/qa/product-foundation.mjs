@@ -11,10 +11,12 @@ import assert from 'node:assert/strict';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const output = process.env.QA_OUTPUT_DIR;
 if (!output && !process.env.QA_SERVE_ONLY) throw new Error('Set QA_OUTPUT_DIR to a local evidence directory.');
-const backend = resolve(root, 'tests/fixtures/dashboardBackend.ts');
+const intake = Boolean(process.env.QA_INTAKE);
+const entry = intake ? 'tests/fixtures/intakePreview.tsx' : 'tests/fixtures/dashboardPreview.tsx';
+const backend = resolve(root, intake ? 'tests/fixtures/intakeBackend.ts' : 'tests/fixtures/dashboardBackend.ts');
 const server = await createServer({
   root, configFile: false,
-  optimizeDeps: { entries: ['tests/fixtures/dashboardPreview.tsx'] },
+  optimizeDeps: { entries: [entry] },
   plugins: [{
     name: 'isolated-dashboard-fixture', enforce: 'pre',
     resolveId(source, importer) {
@@ -24,12 +26,12 @@ const server = await createServer({
       server.middlewares.use(async (req, res, next) => {
         if (req.url === '/' || req.url?.startsWith('/app')) {
           res.setHeader('Content-Type', 'text/html');
-          res.end(await server.transformIndexHtml(req.url, '<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Local QA</title></head><body><div id="root"></div><script type="module" src="/tests/fixtures/dashboardPreview.tsx"></script></body></html>'));
+          res.end(await server.transformIndexHtml(req.url, `<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Local QA</title></head><body><div id="root"></div><script type="module" src="/${entry}"></script></body></html>`));
         } else next();
       });
     },
   }, react({ jsxRuntime: 'classic' }), tailwindcss()],
-  server: { host: '127.0.0.1', port: 0 },
+  server: { host: '127.0.0.1', port: Number(process.env.QA_PORT) || 0, watch: { usePolling: true } },
 });
 await server.listen();
 if (process.env.QA_SERVE_ONLY) {

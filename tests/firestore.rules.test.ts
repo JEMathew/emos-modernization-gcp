@@ -5,7 +5,9 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
+import { parseCsvPortfolio } from '../src/utils/portfolioImporter';
+import { persistPortfolioImport } from '../src/lib/portfolioPersistence';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 let testEnv: RulesTestEnvironment;
@@ -164,6 +166,36 @@ describe('Firestore owner isolation and integrity', () => {
     await assertSucceeds(setDoc(doc(alice, 'users/alice/programContext/alignment'), validProgramAlignment('alice')));
     await assertFails(setDoc(doc(alice, 'users/alice/programContext/alignment'), validProgramAlignment('bob')));
     await assertFails(getDoc(doc(alice, 'users/bob/programContext/alignment')));
+  });
+
+  it('validates new import provenance without admitting extra metadata or cross-user access', async () => {
+    const alice = testEnv.authenticatedContext('alice').firestore();
+    const bob = testEnv.authenticatedContext('bob').firestore();
+    const record = { ...validImportedWorkload('alice'), importMetadata: {
+      importId: '00000000-0000-4000-8000-000000000001', fileName: 'inventory.csv',
+      rowNumber: 2, columnMapping: '[["id","workload_id"]]', validationVersion: 1, warningCount: 0,
+    } };
+    const ref = doc(alice, 'users/alice/importedWorkloads/workload-1');
+    await assertSucceeds(setDoc(ref, record));
+    await assertFails(setDoc(ref, { ...record, importMetadata: { ...record.importMetadata, rawFile: 'not allowed' } }));
+    await assertFails(setDoc(ref, { ...record, importMetadata: { ...record.importMetadata, rowNumber: 202 } }));
+    await assertFails(getDoc(doc(bob, 'users/alice/importedWorkloads/workload-1')));
+    await assertFails(deleteDoc(doc(bob, 'users/alice/importedWorkloads/workload-1')));
+  });
+  it('persists and retries a reviewed intake through the real transaction and rules boundary', async () => {
+    const db = testEnv.authenticatedContext('alice').firestore();
+    const records = parseCsvPortfolio('id,name,type\na,Payments,Application\nb,Data,Data Platform', 'inventory.csv', 'alice').validRecords;
+    await persistPortfolioImport(db as any, () => 'alice', 'alice', records);
+    await persistPortfolioImport(db as any, () => 'alice', 'alice', records);
+    expect((await getDocs(collection(db, 'users/alice/importedWorkloads'))).size).toBe(2);
+  });
+  it('atomically rejects an import batch when any record violates ownership rules', async () => {
+    const db = testEnv.authenticatedContext('alice').firestore();
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'users/alice/importedWorkloads/a'), validImportedWorkload('alice', 'a'));
+    batch.set(doc(db, 'users/alice/importedWorkloads/b'), validImportedWorkload('bob', 'b'));
+    await assertFails(batch.commit());
+    expect((await getDoc(doc(db, 'users/alice/importedWorkloads/a'))).exists()).toBe(false);
   });
 
   it('denies unmatched paths', async () => {

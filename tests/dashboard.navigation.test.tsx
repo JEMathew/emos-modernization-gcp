@@ -33,6 +33,8 @@ const display = () => render(<ThemeProvider><Dashboard user={user} /></ThemeProv
 const desktopNav = () => screen.getByRole('navigation', { name: 'Workspace navigation' });
 
 beforeEach(() => {
+  HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
+  HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
   backend.pending = false; backend.fail = ''; backend.imported = []; backend.records = [];
   window.history.replaceState({}, '', '/app');
   localStorage.clear();
@@ -43,6 +45,24 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('authenticated workspace navigation', () => {
+  it('continues from a reviewed import to the imported portfolio and workload URL', async () => {
+    display();
+    fireEvent.click(within(desktopNav()).getByRole('button', { name: 'Portfolio' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Import CSV / JSON' }));
+    const text = 'id,name,type\nimport-route,Imported route example,Application';
+    const file = new File([text], 'route.csv', { type: 'text/csv' });
+    Object.defineProperty(file, 'text', { value: async () => text });
+    fireEvent.change(screen.getByLabelText('Inventory file'), { target: { files: [file] } });
+    await screen.findByRole('heading', { name: 'Map source columns' });
+    fireEvent.click(screen.getByRole('button', { name: 'Preview workloads' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Import 1 workload(s)' }));
+    await screen.findByRole('heading', { name: 'Import complete' });
+    fireEvent.click(screen.getByRole('button', { name: 'Open imported portfolio' }));
+    expect(window.location.pathname + window.location.search).toBe('/app/portfolio?portfolio=imported');
+    expect(screen.getByRole('heading', { name: 'Imported route example' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'View Enterprise DNA' }));
+    expect(window.location.pathname).toBe('/app/workloads/import-route/dna');
+  });
   it('opens Command Center with grounded sample counts and drill-down that survives remount', () => {
     const app = display();
     expect(screen.getByRole('heading', { name: 'Command Center' })).toBeInTheDocument();
