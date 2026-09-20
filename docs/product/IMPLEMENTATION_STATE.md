@@ -99,3 +99,12 @@ The landing page uses the four assets as concept/atmospheric media only. Functio
 - Target-state and governance approvals are owner-scoped MVP records; they are not multi-role enterprise workflow enforcement.
 - Firestore rules must be deployed before the client because old rules do not admit the new governance/target-state documents.
 - Run candidate CI with Java 21, then perform authenticated production smoke tests for sign-in, intake persistence, assessment/follow-up/history, governance and target-state save/reopen. Record the deployed revision and prior rollback revision in the integrated build report.
+
+## Cross-tool continuation
+
+If Codex is unavailable, start with `claude/README.md` and
+`claude/EMOS_RELEASE_HANDOFF.md`. The machine-readable state is
+`claude/emos-handoff.json`, and `claude/EMOS_CONTINUATION_PROMPT.md` is the
+copy-ready continuation prompt. These artifacts preserve the same release gates,
+capability boundaries, security invariants and rollback sequence; using another
+coding agent does not relax them.

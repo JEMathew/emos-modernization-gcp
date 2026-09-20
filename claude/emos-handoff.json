@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-09-20",
+  "repository": "JEMathew/emos-modernization-gcp",
+  "branch": "codex/emos-visual-assets",
+  "functionalCandidateCommit": "bff05ac93546ad1179a89a62f451c7a9c59dd45c",
+  "functionalCandidateTag": "emos-integrated-mvp-20260920",
+  "previousBaselineCommit": "47d9809058b782f3d578a52426df507d6ccaa696",
+  "previousBaselineTag": "emos-packet-2-5-visual-alignment-20260920",
+  "remote": "https://github.com/JEMathew/emos-modernization-gcp.git",
+  "production": {
+    "url": "https://emos-modernization.ai.studio",
+    "service": "gemini-reflection-journal",
+    "project": "codev-0326",
+    "region": "asia-southeast1",
+    "deploymentStatus": "pending",
+    "rollbackRevision": null
+  },
+  "release": {
+    "pushStatus": "pending",
+    "ciStatus": "pending",
+    "firestoreRulesMustPrecedeClient": true,
+    "productionSmokeStatus": "pending",
+    "mediaRefreshStatus": "pending"
+  },
+  "verification": {
+    "lint": "pass",
+    "tests": {
+      "status": "pass",
+      "count": 214,
+      "files": 21
+    },
+    "productionBuild": "pass",
+    "responsiveSyntheticReview": "pass-local",
+    "firestoreEmulator": "blocked-java-absent",
+    "liveAuthenticationPersistence": "partial-production-evidence-required",
+    "liveGemini": "partial-production-evidence-required"
+  },
+  "scope": {
+    "implementedThrough": "Define Target State",
+    "plannedStages": [
+      "Execute",
+      "Validate",
+      "Transition",
+      "Measure Benefits",
+      "Learn",
+      "Reassess"
+    ],
+    "buildingNext": [
+      "Policies and constraints",
+      "Ownership capture",
+      "Initial dependency mapping",
+      "Capacity and resource modelling"
+    ],
+    "knowledgeGraph": "not-implemented"
+  },
+  "approvedMediaSha256": {
+    "emos-landing-hero-v1.png": "e05e206dca5ffb5a6231f4931329f4997c42bca6f5478dcdabd474d8dc0ba08f",
+    "emos-hero-animation-v1.mp4": "5e3886be464442fb4714912205ce19a23913afdfa9a47105c9bde065b39ca8a3",
+    "emos-command-center-dashboard-v1.png": "555fee90bf4b4dd7d6b0c83f9e326c19292eee7ad0439af878d36550cb24061d",
+    "emos-enterprise-dna-v1.png": "68329cbcd2e52498a65585cfc4bd3f47348e912586d757903a43e1ff16b45fff"
+  },
+  "sources": [
+    "claude/EMOS_RELEASE_HANDOFF.md",
+    "docs/product/IMPLEMENTATION_STATE.md",
+    "work_results/EMOS-INTEGRATED-MVP-20260920-result.md",
+    "docs/product/HACKATHON_RELEASE_SCORECARD.md",
+    "docs/EVIDENCE_INDEX.md"
+  ]
+}
