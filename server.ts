@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import { readFile } from "fs/promises";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
@@ -26,6 +27,10 @@ import { routeAssessmentRequest } from "./server/orchestration";
 dotenv.config();
 
 export const app = express();
+// Revision-specific HTML must never be reused across Cloud Run traffic shifts.
+// Hashed client assets can change between revisions; a stale index would point
+// at bundles that the newly selected revision does not contain.
+app.disable("etag");
 
 function resolvePort(): number {
   const portArgIndex = process.argv.indexOf("--port");
@@ -709,10 +714,20 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (_req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
+    const indexHtml = await readFile(path.join(distPath, "index.html"), "utf8");
+    const sendIndex = (_req: express.Request, res: express.Response) => {
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+      res.setHeader("Surrogate-Control", "no-store");
+      res.status(200).type("html").send(indexHtml);
+    };
+
+    // Do not allow express.static to serve index.html with revision-agnostic
+    // Last-Modified metadata. All SPA documents flow through sendIndex.
+    app.get("/index.html", sendIndex);
+    app.use(express.static(distPath, { index: false }));
+    app.get("*", sendIndex);
   }
 
   app.listen(PORT, HOST, () => {
