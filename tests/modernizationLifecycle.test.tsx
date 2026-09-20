@@ -25,9 +25,16 @@ describe('ModernizationLifecycle', () => {
     }
 
     expect(within(lifecycle).getByText(/Unavailable stages remain visible/i)).toBeInTheDocument();
+    expect(within(lifecycle).getAllByText('Available')).toHaveLength(8);
+    expect(within(lifecycle).getAllByText('Building next')).toHaveLength(4);
+    expect(within(lifecycle).getAllByText('Planned')).toHaveLength(7);
+    expect(within(lifecycle).queryByText(/beta|product vision/i)).not.toBeInTheDocument();
     expect(within(lifecycle).getByText(/10\. Execute/i).closest('[aria-disabled="true"]')).toBeInTheDocument();
     expect(within(lifecycle).getByText(/6\. Govern/i).closest('[aria-disabled="true"]')).toBeInTheDocument();
     expect(within(lifecycle).getByText(/3\. Understand/i).closest('[aria-current="step"]')).toBeInTheDocument();
+    for (const unfinished of ['TCO and value analysis', 'Human approval', 'Capacity and resources', 'Approve delivery baseline']) {
+      expect(within(lifecycle).getByText(unfinished).closest('li')).toHaveTextContent('Building next');
+    }
   });
 
   it('only makes available stages navigable', () => {
@@ -36,6 +43,7 @@ describe('ModernizationLifecycle', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /2\. Discover/i }));
     expect(onSelectStage).toHaveBeenCalledWith(expect.objectContaining({ name: 'Discover', delivery: 'available' }));
+    expect(screen.getByRole('button', { name: /View entire lifecycle/i })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByRole('button', { name: /10\. Execute/i })).not.toBeInTheDocument();
   });
 });

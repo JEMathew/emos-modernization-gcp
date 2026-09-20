@@ -160,7 +160,7 @@ export default function App() {
     }
 
     if (currentUser) {
-      return <Dashboard user={currentUser} />;
+      return <Dashboard key={currentUser.uid} user={currentUser} />;
     }
 
     return (

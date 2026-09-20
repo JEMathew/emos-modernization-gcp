@@ -1,0 +1,29 @@
+# EMOS build and hackathon evidence scorecard
+
+Build: Packet 1 — Product foundation. Date: 20 September 2026.
+Candidate reference: `emos-packet-1-foundation-20260920`; parent `3e6e23072d9d8c6e78f74f5896e44c12027f0c1d`.
+
+This is an evidence checklist, not an official weighted judging score or a prediction of winning. Requirements 1–6 trace to the user-supplied Personal Gemini Journal challenge and the repository's [deliverables pack](../IDEATHON_DELIVERABLES.md). Items 7–12 are the requested engineering, product and release criteria. Official event eligibility, dates, weights and submission completion are not verified by this build. Separate Cloud Run campaign requirements in the evidence pack must not be conflated with the Ideathon rules.
+
+PASS means the stated local acceptance boundary is demonstrated. PARTIAL means implementation or historical proof exists but current required evidence remains. FAIL means a verified unmet behavior. NOT AFFECTED is an impact classification, not proof of compliance. No absolute zero-leakage guarantee is made from local mocks or source inspection.
+
+| # | Requirement | Status and evidence | Packet regression risk | Required next evidence / release readiness |
+|---|---|---|---|---|
+| 1 | AI Studio security constitution | PARTIAL — `docs/AI_STUDIO_SECURITY_CONSTITUTION.md`; documentation contract passes; configuration last recorded as verified 14 Sep | None; Studio not changed | Retain sanitized Studio screenshot and reconfirm configured instructions. Submission incomplete. |
+| 2 | Firebase authentication | PASS (local) — `tests/auth.android.test.ts` and `tests/app.workspace-auth.test.tsx`: private route gate, sign-out, account-state reset, mobile/popup contracts | Medium: authenticated shell changed | Live sign-in and redirect smoke on candidate revision still required before release. |
+| 3 | Real multi-turn Gemini interaction | PARTIAL — `tests/api.chat.contract.test.ts` and rendering tests pass with mocked provider; existing server calls and persistence path retained | Medium: workspace routing changed | Run a real authenticated initial assessment, follow-up and history reopen on candidate deployment. |
+| 4 | Per-user Firestore isolation | PARTIAL — owner-scoped source/rules unchanged; `tests/firestore.rules.test.ts` exists, but emulator fails to start because Java is absent | Low in rules; medium in displayed account state (new isolation test passes) | Java 21 emulator run and green CI for candidate required. Do not report suite as passed. |
+| 5 | Secret Manager key handling | PARTIAL — server boundary unchanged; historical 14 Sep configuration evidence in deliverables pack | Low; no secret or deployment change | Verify Secret Manager reference and least-privilege runtime access for exact deployed revision without reading values. |
+| 6 | Original enhancement | PARTIAL — deterministic critical-gap readiness, wave planning and Command Center are implemented; readiness/wave/navigation tests pass, but AI Studio authorship evidence is incomplete | Medium: selected-portfolio summaries added | Preserve AI Studio authorship/evidence for submission; no claim that the new Codex packet was built in AI Studio. |
+| 7 | Working product flow | PASS (packet scope) — 142 tests; browser drill-down, direct-load, refresh, back, Align/Plan/Mobilize and missing-record handling | Medium: navigation is the main change | Full MVP through Target State remains incomplete; production smoke pending. |
+| 8 | GCP deployment evidence | PARTIAL — historical service evidence in `docs/IDEATHON_DELIVERABLES.md`; no publication in this packet | None; deployment unchanged | Record deployed commit, revision, smoke result and prior healthy rollback revision after authorized release. |
+| 9 | Security / prompt-injection boundaries | PASS (tested controls) — 23 guardrail, 16 API contract and 7 safe-rendering tests pass; server, rules and guardrails unchanged | Low server-side; account reset additionally covered | Repeat release tests in CI. These controls reduce risk; they do not prove immunity to all malicious content. |
+| 10 | Responsive, accessible, consistent UX | PARTIAL — keyboard theme tests, focus, selected states and responsive browser review; workflow labels reconciled | Medium: shared navigation and shell | Full accessibility audit and existing long-form workspace/marketing review remain; no WCAG certification claim. |
+| 11 | Demonstrable business value | PASS (synthetic demonstration) — gap-driven next actions and portfolio-specific evidence/assessment counts; test and browser evidence | Low; computed values reuse existing readiness logic | Validate with a design partner; no real cost savings or decision-accuracy claims. |
+| 12 | Reproducible demo / submission | PARTIAL — local fixture, browser review procedure and handoff committed; existing demo pack retained | Medium: old videos show older navigation | Refresh captures/video, complete Studio and production evidence and verify official submission checklist in packet 9. |
+
+Totals: **4 PASS, 8 PARTIAL, 0 FAIL**. No official weights applied. Unchanged controls were inspected and tested where possible; they were not automatically marked PASS.
+
+Release decision: **local implementation accepted; production release not approved by this report**. Outstanding: Firestore emulator/CI, actual authenticated AI and persistence smoke, exact deployment and rollback evidence, Studio screenshot and final submission/demo materials. A verified failure or critical security regression blocks release.
+
+At each packet, update all rows with current evidence dates and candidate reference. Reuse prior evidence only for unchanged boundaries and label its age; rerun impacted checks. Record new, resolved and remaining gaps in the packet result. Higgsfield visual QA is required whenever media changes, with explicit generation/integration in packets 8 and 9.

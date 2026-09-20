@@ -18,7 +18,8 @@ import {
   ArrowRight,
   ChevronDown,
 } from 'lucide-react';
-import type { Interaction, AssessmentMode, Disposition6R, DecisionReadiness } from '../types';
+import type { Interaction, AssessmentMode, Disposition6R, DecisionReadiness, EnterpriseWorkload } from '../types';
+import { formatWorkloadDnaForAssessment } from '../data/samplePortfolio';
 import { JourneyStage } from './JourneyStage';
 
 interface ReflectionWorkspaceProps {
@@ -36,6 +37,8 @@ interface ReflectionWorkspaceProps {
   saveStatus: 'idle' | 'saving' | 'saved' | 'error';
   errorMessage: string | null;
   errorKind?: 'reasoning' | 'persistence' | 'guardrail' | null;
+  stage?: 'Assess' | 'Decide';
+  workload?: EnterpriseWorkload | null;
 }
 
 // Canonical Prompt Starters specified in requirements
@@ -82,11 +85,16 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
   saveStatus,
   errorMessage,
   errorKind = null,
+  stage = 'Decide',
+  workload,
 }) => {
   const [draftContent, setDraftContent] = useState('');
   const [followUpInput, setFollowUpInput] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isEvidenceExpanded, setIsEvidenceExpanded] = useState(false);
+  useEffect(() => {
+    if (!activeInteraction) setDraftContent(workload ? formatWorkloadDnaForAssessment(workload) : '');
+  }, [workload?.id, activeInteraction?.id]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -138,6 +146,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
       await onSaveNew({
         content: contentToSubmit,
         mode: 'assess',
+        ...(workload ? { workloadId: workload.id } : {}),
       });
       setDraftContent('');
     } catch {
@@ -250,7 +259,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
           <div className="px-4 sm:px-8 py-3.5 sm:py-4 bg-[var(--emos-bg-secondary)] border-b border-[var(--emos-border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <JourneyStage stage="Decide" question="What should we do with this workload, and why?" />
+                <JourneyStage stage={stage} question={stage === 'Assess' ? 'What does the evidence support?' : 'What should we do with this workload, and why?'} />
               </div>
               <h2 className="text-lg sm:text-xl font-serif font-semibold tracking-tight text-[var(--emos-text-primary)]">
                 {activeInteraction.title}
@@ -527,7 +536,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center">
           <div className="w-full max-w-3xl space-y-6 sm:space-y-8 my-auto py-4 sm:py-6">
             <div className="flex justify-center">
-              <JourneyStage stage="Decide" question="What should we do with this workload, and why?" />
+              <JourneyStage stage={stage} question={stage === 'Assess' ? 'What does the evidence support?' : 'What should we do with this workload, and why?'} />
             </div>
 
             {/* Header */}

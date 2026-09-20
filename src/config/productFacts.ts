@@ -40,6 +40,14 @@ export const MODERNIZATION_LIFECYCLE = [
 
 export type LifecycleDeliveryState = 'available' | 'next' | 'vision';
 
+// Available stages expose existing workflows; these deeper controls are not shipped yet.
+export const BUILDING_SUB_STAGES = new Set([
+  'Ownership capture', 'Initial dependency mapping', 'Policies and constraints',
+  'TCO and value analysis', 'Human approval', 'Capacity and resources',
+  'Milestones and controls', 'Cost-benefit baseline', 'Confirm delivery charter',
+  'Close readiness gaps', 'Approve delivery baseline',
+]);
+
 export interface LifecycleStageDefinition {
   number: string;
   name: string;

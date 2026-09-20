@@ -6,7 +6,7 @@ Status: approved working baseline for the MVP through Define Target State.
 
 EMOS helps an enterprise move from strategic intent and incomplete estate data to evidence-backed modernization decisions, a governed plan, and an implementation-ready target state.
 
-The current MVP ends at **Define Target State**. It does not claim to execute migrations.
+The planned MVP ends at **Define Target State**. Availability is verified per stage and sub-stage; Define Target State is currently Building next. The product does not claim to execute migrations.
 
 ## Experience principles
 
@@ -14,7 +14,7 @@ The current MVP ends at **Define Target State**. It does not claim to execute mi
 2. **Evidence before recommendation.** Recommendations expose their supporting evidence, gaps, assumptions, economics, and confidence.
 3. **Progressive disclosure.** Portfolio summaries lead to workload detail; workload detail leads to evidence, assessment, decision, plan, and target state.
 4. **One primary action per view.** Secondary actions remain visually subordinate.
-5. **Status is consistent everywhere.** Use only `Needs evidence`, `In review`, `Decision ready`, `Approved`, and `Blocked` unless a domain-specific state is required.
+5. **Status is consistent everywhere.** Workflow states use `Needs evidence`, `In review`, `Decision ready`, `Approved`, and `Blocked` where implemented. Capability availability uses the separate vocabulary `Available`, `Building next`, and `Planned`. An active stage is indicated through selection styling and accessible navigation, not a `Current` availability badge. Never show `Approved` without a human approval record.
 6. **Humans retain decision rights.** AI-assisted output is a draft or recommendation until an authorized user approves it.
 7. **Customer language stays vendor-neutral.** Use `Governed AI assessment` in the product. Google and Gemini evidence belongs in technical architecture, trust, README, and hackathon submission materials.
 8. **No decorative analytics.** Every number or chart must help the user decide, investigate, approve, or plan.
@@ -35,6 +35,7 @@ Mobilize is a governed handoff, not one of the canonical 15 lifecycle stages.
 
 | Workspace | Lifecycle coverage | Canonical route |
 |---|---|---|
+| Command Center | Cross-stage portfolio overview | `/app` |
 | Strategy & Portfolio | Align + Discover | `/app/portfolio` |
 | Enterprise DNA | Understand | `/app/workloads/:id/dna` |
 | Evidence & Economics | Understand + Assess | `/app/workloads/:id/evidence` |
@@ -55,7 +56,7 @@ Every authenticated workspace inherits the same shell:
 - Persistent portfolio context; workload context appears on workload routes.
 - A compact lifecycle indicator showing completed, current, blocked, and upcoming stages.
 - The compact indicator shows all five phases. Expanding it reveals every canonical stage, the Mobilize handoff, and every sub-stage.
-- Unavailable stages are never hidden. They are greyed, non-interactive, and labelled `Building next` or `Product vision` so users can understand the complete operating model without mistaking roadmap scope for released capability.
+- Unavailable stages are never hidden. They use neutral grey surfaces, remain non-interactive, and are labelled `Building next` or `Planned`. Maintain readable contrast. Incomplete sub-stages within available stages are individually labelled `Building next`.
 - A right-aligned primary action that changes with the workspace.
 - Evidence completeness and readiness are visible before a user commits a decision.
 - Notifications, account menu, help, and environment state remain in fixed locations.
@@ -177,6 +178,14 @@ Higgsfield is used to explore and approve the interface system, visual storytell
 - Use real product captures for functional demos. Higgsfield may supply atmospheric hero media, transitions, and future-state storytelling.
 
 ## Release acceptance
+
+### Packet 1 implementation boundary — 20 September 2026
+
+The existing top-navigation IA is retained and extended with Overview / Command Center. A left rail, global search and notifications remain future shell work; they are not simulated. History has its own page instead of occupying every workspace. URL state preserves the selected portfolio, workload, stage and assessment. Local unsaved form drafts are not synchronized across devices or refreshes.
+
+Implemented routes: `/app`, `/app/portfolio`, `/app/workloads/:id/dna`, `/app/workloads/:id/assessment`, `/app/workloads/:id/decision`, `/app/assessment`, `/app/decision`, `/app/plan`, `/app/history`. Use `?stage=align` and `?stage=mobilize` for planning sub-sections. `portfolio=imported`, `workload=<id>` and `assessment=<id>` preserve relevant context. The route matrix above remains the broader MVP design; unimplemented evidence/target-state/prioritization routes must not be advertised as available.
+
+Earlier Higgsfield frames are visual references, not approval of unsupported functionality. The accepted packet plan implements the functional shell now; new Higgsfield media is scheduled for packets 8 and 9 after the workflows and copy stabilize.
 
 A workspace is releasable only when:
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, CircleCheck, Clock3, Eye } from 'lucide-react';
 import {
   MODERNIZATION_PHASES,
+  BUILDING_SUB_STAGES,
   type LifecycleDeliveryState,
   type LifecycleStageDefinition,
 } from '../config/productFacts';
@@ -13,9 +14,9 @@ interface ModernizationLifecycleProps {
 }
 
 const DELIVERY_LABEL: Record<LifecycleDeliveryState, string> = {
-  available: 'Available in beta',
+  available: 'Available',
   next: 'Building next',
-  vision: 'Product vision',
+  vision: 'Planned',
 };
 
 const DELIVERY_STYLE: Record<LifecycleDeliveryState, string> = {
@@ -71,7 +72,7 @@ export const ModernizationLifecycle: React.FC<ModernizationLifecycleProps> = ({
                   className={`min-w-0 rounded-lg border px-2.5 py-2 ${containsCurrent
                     ? 'border-[var(--emos-accent)] bg-[var(--emos-accent-subtle)] ring-1 ring-[var(--emos-accent-border)]'
                     : unavailable
-                    ? 'border-[var(--emos-border-subtle)] bg-[var(--emos-bg-tertiary)] opacity-55'
+                    ? 'border-[var(--emos-border-subtle)] bg-[var(--emos-bg-tertiary)]'
                     : 'border-[var(--emos-border-subtle)] bg-[var(--emos-surface)]'
                   }`}
                 >
@@ -109,7 +110,7 @@ export const ModernizationLifecycle: React.FC<ModernizationLifecycleProps> = ({
               <span className="text-[10px] text-[var(--emos-text-muted)]">Unavailable stages remain visible to show the complete operating model.</span>
             </div>
 
-            <div className="grid gap-3 lg:grid-cols-5">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {MODERNIZATION_PHASES.map((phase) => (
                 <div key={phase.number} className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-3">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--emos-text-muted)]">{phase.number} — {phase.name}</p>
@@ -120,16 +121,19 @@ export const ModernizationLifecycle: React.FC<ModernizationLifecycleProps> = ({
                       const isAvailable = stage.delivery === 'available';
                       const content = (
                         <>
-                          <div className="flex items-start justify-between gap-2">
-                            <span className="text-left text-[11px] font-semibold text-[var(--emos-text-primary)]">
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <span className="text-left text-sm font-semibold text-[var(--emos-text-primary)]">
                               {stage.handoff ? 'Handoff' : stage.number}. {stage.name}
                             </span>
-                            <span className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide ${DELIVERY_STYLE[stage.delivery]}`}>
-                              {stage.delivery === 'available' ? 'Beta' : stage.delivery === 'next' ? 'Next' : 'Vision'}
+                            <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-semibold ${DELIVERY_STYLE[stage.delivery]}`}>
+                              {DELIVERY_LABEL[stage.delivery]}
                             </span>
                           </div>
-                          <ul className="mt-2 space-y-1 text-left text-[9px] leading-4 text-[var(--emos-text-muted)]">
-                            {stage.subStages.map((subStage) => <li key={subStage}>• {subStage}</li>)}
+                          <ul className="mt-2 space-y-1 text-left text-xs leading-5 text-[var(--emos-text-secondary)]">
+                            {stage.subStages.map((subStage) => <li key={subStage}>
+                              <span>{subStage}</span>
+                              {stage.delivery === 'available' && BUILDING_SUB_STAGES.has(subStage) && <span className="ml-1 font-medium text-[var(--emos-text-muted)]"> · Building next</span>}
+                            </li>)}
                           </ul>
                         </>
                       );
@@ -137,11 +141,11 @@ export const ModernizationLifecycle: React.FC<ModernizationLifecycleProps> = ({
                         ? 'border-[var(--emos-accent)] bg-[var(--emos-accent-subtle)] ring-1 ring-[var(--emos-accent-border)]'
                         : isAvailable
                         ? 'border-[var(--emos-border-subtle)] bg-[var(--emos-surface-elevated)] hover:border-[var(--emos-border-strong)]'
-                        : 'cursor-not-allowed border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] opacity-50 grayscale'
+                        : 'border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] grayscale'
                       }`;
 
                       return isAvailable && onSelectStage ? (
-                        <button key={stage.name} type="button" onClick={() => onSelectStage(stage)} aria-current={isCurrent ? 'step' : undefined} className={className}>
+                        <button key={stage.name} type="button" onClick={() => { setExpanded(false); onSelectStage(stage); }} aria-current={isCurrent ? 'step' : undefined} className={className}>
                           {content}
                         </button>
                       ) : (

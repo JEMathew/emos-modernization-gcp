@@ -25,6 +25,8 @@ interface SamplePortfolioViewProps {
   onDeleteImportedWorkload?: (workloadId: string) => Promise<void>;
   onClearImportedPortfolio?: () => Promise<void>;
   isProcessing?: boolean;
+  portfolioSource?: 'sample' | 'imported';
+  onPortfolioSourceChange?: (source: 'sample' | 'imported') => void;
 }
 
 export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
@@ -35,8 +37,12 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
   onDeleteImportedWorkload,
   onClearImportedPortfolio,
   isProcessing = false,
+  portfolioSource,
+  onPortfolioSourceChange,
 }) => {
-  const [activeTab, setActiveTab] = useState<'sample' | 'imported'>('sample');
+  const [localTab, setLocalTab] = useState<'sample' | 'imported'>('sample');
+  const activeTab = portfolioSource ?? localTab;
+  const setActiveTab = (source: 'sample' | 'imported') => { setLocalTab(source); onPortfolioSourceChange?.(source); };
   const [searchQuery, setSearchQuery] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isClearing, setIsClearing] = useState(false);

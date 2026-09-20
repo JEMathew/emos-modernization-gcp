@@ -104,14 +104,14 @@ describe('standardized authenticated journey', () => {
 
     const desktopNav = container.querySelector('nav')!;
     expect(within(desktopNav).getAllByRole('button').map((button) => button.textContent?.replace(/\s+/g, '')))
-      .toEqual(['Portfolio', 'Decisions', 'Plan', 'History3']);
+      .toEqual(['Overview', 'Portfolio', 'Decisions', 'Plan', 'History3']);
 
-    expect(['mobile-nav-portfolio', 'mobile-nav-decision', 'mobile-nav-plan', 'mobile-nav-history']
+    expect(['mobile-nav-overview', 'mobile-nav-portfolio', 'mobile-nav-decision', 'mobile-nav-plan', 'mobile-nav-history']
       .map((id) => container.querySelector(`#${id}`)?.textContent?.replace(/\s+/g, '')))
-      .toEqual(['Portfolio', 'Decisions', 'Plan', 'History3']);
+      .toEqual(['Overview', 'Portfolio', 'Decisions', 'Plan', 'History3']);
 
     const newAssessment = screen.getByRole('button', { name: /New Assessment/i });
-    expect(newAssessment).toHaveClass('min-h-[36px]', 'text-xs');
+    expect(newAssessment).toHaveClass('min-h-11', 'text-xs');
     expect(newAssessment).not.toHaveClass('sm:text-sm', 'sm:min-h-[38px]');
   });
 
@@ -146,11 +146,11 @@ describe('standardized authenticated journey', () => {
         onBack={vi.fn()}
       />,
     ));
-    expect(screen.getByLabelText('Current journey stage: Plan')).toBeInTheDocument();
+    expect(screen.getByLabelText('Current journey stage: Align')).toBeInTheDocument();
     const exportPack = screen.getByRole('button', { name: /Export Executive Pack/i });
     expect(exportPack).toHaveClass('min-h-[36px]', 'text-xs', 'self-start', 'sm:self-auto', 'shrink-0', 'whitespace-nowrap');
     expect(exportPack).not.toHaveClass('min-h-[42px]', 'text-sm');
-    fireEvent.click(screen.getByRole('button', { name: /3\. Mobilize/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Mobilize$/i }));
     expect(screen.getByLabelText('Current journey stage: Mobilize')).toBeInTheDocument();
   });
 

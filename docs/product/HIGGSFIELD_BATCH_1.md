@@ -95,4 +95,8 @@ The shared lifecycle interaction uses two levels:
 1. A persistent compact bar showing the five phases and the current phase.
 2. An expandable panel showing all 15 canonical stages, the Mobilize handoff, every sub-stage, and the delivery state of each stage.
 
-Unavailable stages remain visible but are greyed, non-interactive, and explicitly labelled `Next` or `Vision`. Released stages are labelled `Beta`; the current stage receives the active accent.
+Superseded terminology: the 20 September 2026 packet plan uses `Available`, `Building next`, and `Planned`. The selected stage receives the active accent. Unfinished sub-stages within an available stage must also be identified. These rules override labels embedded in earlier generated concepts.
+
+## Packet 1 implementation decision — 20 September 2026
+
+The product owner authorized the functional foundation packet without another image-generation round. Existing frames remain references; their unchecked visual-acceptance lists are not silently marked approved. No new visual asset was generated or modified in this packet. Explicit Higgsfield work remains required in packets 8 (website and visual system) and 9 (demo media); real product captures must illustrate actual functionality.

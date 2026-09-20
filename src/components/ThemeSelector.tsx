@@ -10,6 +10,11 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ compact = false })
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (isOpen) menuRef.current?.querySelector<HTMLButtonElement>('[aria-checked="true"]')?.focus();
+  }, [isOpen]);
 
   // Close on outside click
   useEffect(() => {
@@ -22,6 +27,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ compact = false })
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsOpen(false);
+        triggerRef.current?.focus();
       }
     };
 
@@ -63,12 +69,14 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ compact = false })
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <button
         id="theme-selector-button"
+        ref={triggerRef}
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        aria-haspopup="true"
+        aria-haspopup="menu"
+        aria-controls={isOpen ? 'theme-selector-dropdown' : undefined}
         aria-expanded={isOpen}
         aria-label={`Appearance: ${theme.charAt(0).toUpperCase() + theme.slice(1)}. Click to change.`}
-        className="p-2 rounded-xl text-[var(--emos-text-muted)] hover:text-[var(--emos-text-primary)] hover:bg-[var(--emos-surface-hover)] border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] transition-colors cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[var(--emos-accent)]"
+        className="min-h-11 min-w-11 p-2 rounded-xl text-[var(--emos-text-muted)] hover:text-[var(--emos-text-primary)] hover:bg-[var(--emos-surface-hover)] border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] transition-colors cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[var(--emos-accent)]"
         title={`Appearance: ${theme.charAt(0).toUpperCase() + theme.slice(1)}`}
       >
         {currentIcon}
@@ -77,7 +85,19 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ compact = false })
       {isOpen && (
         <div
           id="theme-selector-dropdown"
+          ref={menuRef}
           role="menu"
+          onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setIsOpen(false); }}
+          onKeyDown={event => {
+            const buttons = Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]') ?? []);
+            const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+            let next: number | undefined;
+            if (event.key === 'ArrowDown') next = (index + 1) % buttons.length;
+            if (event.key === 'ArrowUp') next = (index + buttons.length - 1) % buttons.length;
+            if (event.key === 'Home') next = 0;
+            if (event.key === 'End') next = buttons.length - 1;
+            if (next !== undefined) { event.preventDefault(); buttons[next]?.focus(); }
+          }}
           aria-orientation="vertical"
           aria-labelledby="theme-selector-button"
           className="absolute right-0 mt-1.5 w-44 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-strong)] shadow-xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100"
@@ -95,13 +115,15 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ compact = false })
                 <button
                   key={option.mode}
                   id={`theme-option-${option.mode}`}
-                  role="menuitem"
+                  role="menuitemradio"
+                  aria-checked={isSelected}
                   type="button"
                   onClick={() => {
                     setTheme(option.mode);
                     setIsOpen(false);
+                    triggerRef.current?.focus();
                   }}
-                  className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                  className={`min-h-11 w-full text-left px-3 py-1.5 text-xs flex items-center justify-between transition-colors cursor-pointer ${
                     isSelected
                       ? 'bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] font-semibold'
                       : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:bg-[var(--emos-surface-hover)]'

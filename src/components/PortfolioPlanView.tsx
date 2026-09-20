@@ -13,13 +13,17 @@ interface PortfolioPlanViewProps {
   alignment: ProgramAlignment;
   onSaveAlignment: (alignment: ProgramAlignment) => Promise<void>;
   onBack: () => void;
+  section?: 'align' | 'waves' | 'mobilize';
+  onSectionChange?: (section: 'align' | 'waves' | 'mobilize') => void;
 }
 
 export const PortfolioPlanView: React.FC<PortfolioPlanViewProps> = ({
-  workloads, interactions, alignment, onSaveAlignment, onBack,
+  workloads, interactions, alignment, onSaveAlignment, onBack, section, onSectionChange,
 }) => {
   const [draft, setDraft] = useState(alignment);
-  const [activeSection, setActiveSection] = useState<'align' | 'waves' | 'mobilize'>('align');
+  const [localSection, setLocalSection] = useState<'align' | 'waves' | 'mobilize'>('align');
+  const activeSection = section ?? localSection;
+  const setActiveSection = (next: typeof activeSection) => { setLocalSection(next); onSectionChange?.(next); };
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   useEffect(() => setDraft(alignment), [alignment]);
 
@@ -55,7 +59,7 @@ export const PortfolioPlanView: React.FC<PortfolioPlanViewProps> = ({
   const inputClass = 'w-full rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-input-bg)] px-3 py-2.5 text-sm text-[var(--emos-text-primary)] placeholder-[var(--emos-text-muted)] outline-hidden focus:border-[var(--emos-accent)]';
 
   return (
-    <main id="portfolio-plan-view" className="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6 max-w-6xl mx-auto w-full">
+    <section id="portfolio-plan-view" className="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6 max-w-6xl mx-auto w-full">
       <header className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="space-y-2">
@@ -63,9 +67,11 @@ export const PortfolioPlanView: React.FC<PortfolioPlanViewProps> = ({
               <ArrowLeft className="w-3.5 h-3.5" /> Back to portfolio
             </button>
             <JourneyStage
-              stage={activeSection === 'mobilize' ? 'Mobilize' : 'Plan'}
+              stage={activeSection === 'mobilize' ? 'Mobilize' : activeSection === 'align' ? 'Align' : 'Plan'}
               question={activeSection === 'mobilize'
                 ? 'What must be ready before delivery begins?'
+                : activeSection === 'align'
+                ? 'Which outcomes and owners guide the program?'
                 : 'How should governed decisions be sequenced and funded?'}
             />
             <h1 className="font-serif text-3xl text-[var(--emos-text-primary)]">Modernization Decision Cockpit</h1>
@@ -97,9 +103,9 @@ export const PortfolioPlanView: React.FC<PortfolioPlanViewProps> = ({
 
         <nav className="grid grid-cols-3 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-tertiary)] p-1" aria-label="Modernization planning sections">
           {[
-            ['align', '1. Align', Target], ['waves', '2. Wave Plan', Layers3], ['mobilize', '3. Mobilize', Users],
+            ['align', 'Align', Target], ['waves', 'Wave Plan', Layers3], ['mobilize', 'Mobilize', Users],
           ].map(([id, label, Icon]) => (
-            <button key={id as string} onClick={() => setActiveSection(id as typeof activeSection)} className={`flex min-h-[40px] items-center justify-center gap-2 rounded-lg px-2 text-xs font-semibold transition cursor-pointer ${activeSection === id ? 'border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] text-[var(--emos-accent-text)] shadow-xs' : 'text-[var(--emos-text-secondary)]'}`}>
+            <button key={id as string} onClick={() => setActiveSection(id as typeof activeSection)} aria-current={activeSection === id ? 'page' : undefined} className={`flex min-h-11 items-center justify-center gap-2 rounded-lg px-2 text-xs font-semibold transition cursor-pointer ${activeSection === id ? 'border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] text-[var(--emos-accent-text)] shadow-xs' : 'text-[var(--emos-text-secondary)]'}`}>
               <Icon className="w-4 h-4" /> {label as string}
             </button>
           ))}
@@ -169,6 +175,6 @@ export const PortfolioPlanView: React.FC<PortfolioPlanViewProps> = ({
           </div>
         </section>
       )}
-    </main>
+    </section>
   );
 };

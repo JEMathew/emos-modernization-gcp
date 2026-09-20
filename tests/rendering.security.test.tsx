@@ -242,10 +242,10 @@ describe('safe assessment rendering', () => {
       onBack={() => undefined}
     />);
     expect(screen.getByText('Modernization Decision Cockpit')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('2. Wave Plan'));
+    fireEvent.click(screen.getByRole('button', { name: 'Wave Plan' }));
     expect(screen.getByText('Deterministic sequencing:')).toBeInTheDocument();
     expect(screen.getAllByText('ASSESSMENT REQUIRED')).toHaveLength(SAMPLE_PORTFOLIO.length);
-    fireEvent.click(screen.getByText('3. Mobilize'));
+    fireEvent.click(screen.getByRole('button', { name: 'Mobilize' }));
     expect(screen.getByText('Wave delivery accountability')).toBeInTheDocument();
   });
 });
