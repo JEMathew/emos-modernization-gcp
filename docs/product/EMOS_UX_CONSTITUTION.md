@@ -68,6 +68,72 @@ Every authenticated workspace inherits the same shell:
 - Prefer flat surfaces and clear hierarchy over glass effects, neon glow, or ornamental gradients.
 - Desktop concepts are 16:9, but every component must have an implementation path for tablet and mobile.
 
+## Adaptive device experience
+
+EMOS serves the same user identity, portfolio, permissions, and journey state across devices. Device class changes the interaction model and information density; it does not create a different kind of user or a separate product.
+
+### Mobile — act and capture
+
+Primary jobs:
+
+- Review alerts, readiness, evidence gaps, and assigned actions.
+- Capture or upload evidence while working with stakeholders.
+- Add comments, confirm ownership, and complete simple approvals.
+- Check portfolio or workload status and continue the next recommended action.
+
+Experience rules:
+
+- Single-column cards, bottom or compact navigation, large touch targets, and full-screen sheets.
+- Tables transform into prioritized workload cards.
+- Dependency maps start as summaries and open into focused drill-down views.
+- Never require horizontal scrolling to complete a primary task.
+
+### Tablet — review and facilitate
+
+Primary jobs:
+
+- Run assessment and architecture workshops.
+- Review Enterprise DNA, evidence, economics, and 6R comparisons with stakeholders.
+- Annotate dependencies, evaluate gaps, and review wave options.
+
+Experience rules:
+
+- One or two content panes depending on orientation.
+- Touch-friendly controls with persistent portfolio and workload context.
+- Landscape mode may show a list-detail or evidence-comparison layout.
+- Dense tables remain simplified; advanced bulk operations move to laptop.
+
+### Laptop and desktop — analyze and govern
+
+Primary jobs:
+
+- Import and manage portfolios in bulk.
+- Perform evidence, economics, assessment, 6R comparison, governance, prioritization, and wave planning.
+- Design target state, inspect dependency graphs, export decision packs, and administer controls.
+
+Experience rules:
+
+- Full application navigation, multi-column workbenches, dense accessible tables, and bulk actions.
+- Side-by-side comparison and persistent contextual panels are allowed when they improve decisions.
+- Keyboard navigation and shortcuts complement pointer input.
+
+### Cross-device continuity
+
+- Preserve the same canonical URLs, selected portfolio/workload, saved evidence, and decision history.
+- Allow a user to begin on one device and continue on another without losing context.
+- Prefer responsive layout and input-capability detection over user-agent-specific forks.
+- Mobile and tablet do not expose unavailable capabilities merely because a larger layout exists elsewhere.
+
+## Appearance preference
+
+The product supports three explicit choices: `Light`, `Dark`, and `System`.
+
+- `System` is the default for a new browser and follows operating-system preference changes.
+- The selected preference is stored locally today so it survives refresh and return visits.
+- Signed-in cross-device synchronization is planned: the preference should be stored on the user profile while retaining local fallback before authentication.
+- Every component, chart, status, generated illustration, focus state, and disabled state must pass contrast and legibility checks in both resolved themes.
+- Theme selection must never change product data, workflow state, or availability.
+
 ## Shared data continuity
 
 All concept frames and implemented screens use the same synthetic portfolio:
