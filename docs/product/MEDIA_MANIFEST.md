@@ -45,4 +45,11 @@ The approved v1 assets remain unchanged:
 - `emos-command-center-dashboard-v1.png` — `555fee90bf4b4dd7d6b0c83f9e326c19292eee7ad0439af878d36550cb24061d`
 - `emos-enterprise-dna-v1.png` — `68329cbcd2e52498a65585cfc4bd3f47348e912586d757903a43e1ff16b45fff`
 
-Production candidate and promotion evidence are appended to this manifest after the release gate completes.
+### Release evidence
+
+- Implementation: `605d75646de194a40a0c7fb5127b7d3ea27aea01`; immutable tag `emos-beta-v2-media-performance-20260921`.
+- CI: GitHub Actions run `35534159098` passed (including the Java 21 Firestore emulator release gate).
+- Candidate: `gemini-reflection-journal-media-perf-605d756`, deployed at zero traffic and verified at `https://emos-visuals---gemini-reflection-journal-wntaz56nxa-as.a.run.app`.
+- Promotion: candidate passed and was promoted to 100% traffic at `https://emos-modernization.ai.studio`.
+- Rollback record: `gemini-reflection-journal-media-ed9afe2` was at 100% traffic before promotion and remains available. `gemini-reflection-journal-cache-b7915d4` is also retained.
+- Live checks: public landing, sandbox, learning, trust, workspace boundary, health, media headers, 401 API boundary and the authenticated Overview/Portfolio/History routes passed. No production console errors or horizontal overflow were observed in the media check.

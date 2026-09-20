@@ -39,3 +39,11 @@ This index maps current product claims to implementation and verification eviden
 - Authenticated verification: all protected routes through Define Target State mounted; assessment/follow-up history, `MORE EVIDENCE` governance and the `EMOS Release Verification` Target State draft reopened.
 - Safe intake: limits, mapping and parser behavior remain automated-test-backed; selecting a local file in the production browser remained a manual confirmation because browser policy blocked the file chooser.
 - Truthful media: `emos-product-hero-production-v2.png` SHA-256 `7fd912ddc82651684e3f9d485a7c805433d9b64c07a20880fdeadca12831e1a6`; `emos-product-demo-v2.mp4` SHA-256 `ea048e4369f792481447543aae410b09568a9df4e2c0cfc458e99bf3558bfbb7`. Both were assembled in Higgsedit from real production sandbox captures and labelled as synthetic-data captures.
+
+## Beta v2 landing-media performance release — 21 September 2026
+
+- Source/tag/CI: `605d75646de194a40a0c7fb5127b7d3ea27aea01` / `emos-beta-v2-media-performance-20260921` / [run `35534159098`](https://github.com/JEMathew/emos-modernization-gcp/actions/runs/35534159098), all passing.
+- Cloud Run: `gemini-reflection-journal-media-perf-605d756`, 100% traffic, `https://emos-modernization.ai.studio`. Prior healthy traffic target: `gemini-reflection-journal-media-ed9afe2`; retained earlier baseline: `gemini-reflection-journal-cache-b7915d4`.
+- Media: the real-capture WebP poster is 70,132 bytes (`2a05f3d6d47f7712b3d12f9bcea866a6527be4ea0f567a7c7ac1b41597a37b9f`); the real-capture silent H.264 loop is 1,985,917 bytes (`7ec315f7fda794da6114386fa8da461fe2f2b0241e51ff7b7a44c764078bace4`). Original v2 PNG/MP4 and all approved v1 hashes remain retained and unchanged.
+- Candidate and live proof: landing, sandbox, learning, trust, `/app`, health, optimized asset headers, 401 API boundary, and authenticated Overview/Portfolio/History route mounts passed. Desktop defers then plays; mobile remains static until user request; no console errors or horizontal overflow were found at 390, 768, or 1440 pixels. Appearance modes Light, Dark and System were reviewed locally.
+- Firestore: `firestore.rules` SHA-256 remains `75d9b4f20d991ae18d83001a7de245e19bcabfe62a681e517eca897a156b77ff`; no rules deploy was performed. The local emulator was blocked by missing Java, while CI passed its Java 21 emulator gate.

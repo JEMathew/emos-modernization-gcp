@@ -7,11 +7,11 @@ Updated: 21 September 2026. This file records the production MVP; it does not im
 - Repository: `JEMathew/emos-modernization-gcp`
 - Branch: `codex/emos-visual-assets`
 - Visual-alignment baseline: `47d9809058b782f3d578a52426df507d6ccaa696`, immutable tag `emos-packet-2-5-visual-alignment-20260920`.
-- Integrated candidate tag: `emos-integrated-mvp-20260920`. Production media tag: `emos-production-media-v2-20260921`. Do not move either tag.
-- Deployed source: `ed9afe275b918e613c770afb127c56febf9cc03d`; CI run `35530543112`; Cloud Run revision `gemini-reflection-journal-media-ed9afe2` at 100% traffic.
+- Integrated candidate tag: `emos-integrated-mvp-20260920`. Production media tag: `emos-production-media-v2-20260921`. Do not move either tag. Beta v2 landing-performance tag: `emos-beta-v2-media-performance-20260921` at `605d75646de194a40a0c7fb5127b7d3ea27aea01`; do not move it.
+- Deployed source: `605d75646de194a40a0c7fb5127b7d3ea27aea01`; CI run `35534159098`; Cloud Run revision `gemini-reflection-journal-media-perf-605d756` at 100% traffic.
 - Production target: `gemini-reflection-journal`, project `codev-0326`, region `asia-southeast1`, custom domain `https://emos-modernization.ai.studio`.
 - Code rollback: revert the integrated commit or redeploy the immutable visual-alignment baseline after reviewing data/rules compatibility. Never hard-reset a working tree containing user changes.
-- Cloud rollback: record the prior healthy Cloud Run revision before deployment and restore traffic to it if smoke verification fails.
+- Cloud rollback: `gemini-reflection-journal-media-ed9afe2` was recorded at 100% traffic before this release and remains the immediate traffic-restore target. `gemini-reflection-journal-cache-b7915d4` remains retained as the earlier cache-safe rollback baseline.
 
 ## Customer outcome
 
@@ -83,6 +83,8 @@ Known incomplete sub-stages remain labelled `Building next`: policies/constraint
 - PASS — Firestore Emulator Suite ran in CI with Java 21; active production ruleset is `84847c06-eb45-422d-87b9-2d8545fa3623`.
 - PASS — Authenticated production assessment/follow-up/history and governance/Target State persistence smoke; optional second-account live isolation remains additional evidence.
 - PASS — Four approved v1 media hashes remain unchanged; two versioned real-production v2 assets were added and verified.
+- PASS — Beta v2 landing-media performance: poster-first WebP (70,132 bytes), deferred silent 1080p loop (1,985,917 bytes), reduced-motion/Data Saver/2G/mobile static fallbacks, viewport pausing and keyboard Play/Pause passed focused tests, CI and production candidate/live checks.
+- BLOCKED LOCALLY / PASS IN CI — the local Firestore emulator cannot start without Java; CI `35534159098` installed Java 21 and passed the complete release-gating suite. No Firestore rules changed in this workstream.
 
 ## Approved media retained
 
@@ -98,13 +100,20 @@ The four v1 files remain retained and unchanged. The landing now uses these addi
 
 The v2 files were assembled in Higgsedit from the real public production sandbox and are labelled as synthetic-data captures. Command Center and Enterprise DNA v1 remain concept previews. Customer-facing product copy is provider-neutral; Google implementation evidence remains in technical documentation.
 
+The landing now additionally uses versioned, compression-only derivatives of those real captures:
+
+- `emos-product-hero-production-v2-performance.webp` — 70,132 bytes; SHA-256 `2a05f3d6d47f7712b3d12f9bcea866a6527be4ea0f567a7c7ac1b41597a37b9f`.
+- `emos-product-demo-v2-performance.mp4` — 1,985,917 bytes; 1920×1080, 30 fps, 16 seconds, silent; SHA-256 `7ec315f7fda794da6114386fa8da461fe2f2b0241e51ff7b7a44c764078bace4`.
+
+See `docs/product/MEDIA_MANIFEST.md` for source provenance, accessibility treatment and retained rollback assets.
+
 ## Known limitations and next action
 
 - No live enterprise connectors, 5,000-asset synchronous capacity claim, organization tenancy/RBAC, autonomous approval, automated migration execution or operational stages 10–15.
 - File intake supports bounded CSV/flat JSON only. XLSX and connector catalog entries remain Planned.
 - Target-state and governance approvals are owner-scoped MVP records; they are not multi-role enterprise workflow enforcement.
 - Firestore rules must always be deployed before any client that requires a new document shape. The current ruleset preceded this production release; the media-only commit changed no rules.
-- Rollback target is `gemini-reflection-journal-cache-b7915d4`. It was not used because the public and authenticated production smoke matrices passed.
+- Beta v2 landing-media rollback target is `gemini-reflection-journal-media-ed9afe2`. It was not used because candidate and live production checks passed. The earlier `gemini-reflection-journal-cache-b7915d4` remains retained.
 
 ## Cross-tool continuation
 

@@ -49,6 +49,10 @@ All four approved v1 assets remain preserved with unchanged hashes. The landing 
 
 The product caption states that these are live public-sandbox captures using synthetic enterprise data. The Command Center and Enterprise DNA v1 visuals remain concept previews.
 
+### Beta v2 landing-media performance update
+
+Commit `605d75646de194a40a0c7fb5127b7d3ea27aea01` (immutable tag `emos-beta-v2-media-performance-20260921`) retains those sources and replaces only the landing delivery derivatives: a 70,132-byte WebP poster and a 1,985,917-byte silent 1920×1080 / 30 fps / 16-second H.264 loop. The video is no longer in the initial render: poster first, 800 ms defer after usable primary content, static treatment for reduced motion and constrained network, static-by-default small mobile, viewport pause, keyboard Play/Pause and error fallback. It introduces no fictional product screens.
+
 ## Release and rollback record
 
 | Gate | Result |
@@ -62,5 +66,17 @@ The product caption states that these are live public-sandbox captures using syn
 | Public smoke | PASS for landing, sandbox, learning, trust, stable MVP routes, health, auth boundary and v2 media |
 | Authenticated smoke | PASS for route matrix, saved assessment/follow-up history, named `MORE EVIDENCE` record, Plan/Mobilize and Target State reopen |
 | Rollback action | Not invoked; no release gate failed |
+
+## Beta v2 landing-media release
+
+| Gate | Result |
+|---|---|
+| Source / immutable tag | `605d75646de194a40a0c7fb5127b7d3ea27aea01` / `emos-beta-v2-media-performance-20260921` |
+| CI | PASS — GitHub Actions `35534159098`, including Java 21 Firestore emulator release gate |
+| Firestore rules | Unchanged; active source SHA remains `75d9b4f20d991ae18d83001a7de245e19bcabfe62a681e517eca897a156b77ff`; no rules deployment |
+| Candidate | PASS — `gemini-reflection-journal-media-perf-605d756` deployed at zero traffic, public routes/media/401 boundary and browser behavior verified |
+| Production | PASS — `gemini-reflection-journal-media-perf-605d756` promoted to 100% at `https://emos-modernization.ai.studio` |
+| Rollback | READY / NOT USED — `gemini-reflection-journal-media-ed9afe2` recorded before promotion; `gemini-reflection-journal-cache-b7915d4` retained |
+| Remaining limitation | The local Java runtime is absent, so emulator execution is CI-backed for this machine; formal WCAG/AT audit and the longer narrated demo remain later scope |
 
 Residuals: the production file chooser was not driven because browser policy blocked local file selection; parser, limits and UI gates remain automated-test-backed. Official submission still needs the owner-supplied AI Studio screenshot, optional second-account live isolation proof, social/write-up link and form submission.
