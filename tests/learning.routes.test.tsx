@@ -12,7 +12,7 @@ import {
 import { ThemeProvider } from '../src/lib/theme';
 
 const expectedTitles = [
-  'EMOS Beta Introduction',
+  'EMOS Beta v2 Product Walkthrough',
   'Sign in and enter the private workspace',
   'Take the guided product tour',
   'Submit a workload for a 6R assessment',
@@ -97,9 +97,8 @@ describe('Public EMOS Learning Center (/learn)', () => {
     ]);
     const videoCards = screen.getAllByTestId(/^video-/);
     expect(videoCards).toHaveLength(20);
-    for (const card of videoCards) {
-      expect(within(card).getByText('Beta v1.0', { exact: true })).toBeInTheDocument();
-    }
+    expect(within(videoCards[0]).getByText('Beta v2.0', { exact: true })).toBeInTheDocument();
+    for (const card of videoCards.slice(1)) expect(within(card).getByText('Beta v1.0', { exact: true })).toBeInTheDocument();
   });
 
   it('keeps every title and video filename aligned with docs/LEARN.md', () => {

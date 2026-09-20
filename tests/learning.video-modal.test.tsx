@@ -13,7 +13,6 @@ import {
 import { ThemeProvider } from '../src/lib/theme';
 
 const EXPECTED_DRIVE_IDS: Record<string, string> = {
-  'EMOS-Beta-Introduction.mp4': '1I5DLsarRnhBbxMUS-GpO5ew7WLZ2Gt6t',
   'F01-sign-in-enter-the-private-workspace.mp4': '1PRAQZP4pQYggRhFAyhWe18A2q55E-0BX',
   'F02-take-the-guided-product-tour.mp4': '1M6IJtGqJ629ovhjdUo_HrxXusIWo_8r3',
   'F03-submit-a-workload-for-a-6r-assessment.mp4': '1ydFW2t4JMMdNjknaqAvZrtWB4tUe92GT',
@@ -73,10 +72,15 @@ describe('EMOS Learning Center embedded video playback', () => {
   });
 
   it('maps every documented filename to its exact verified public Drive file ID', () => {
-    expect(Object.fromEntries(LEARNING_VIDEOS.map((video) => [video.fileName, video.driveFileId]))).toEqual(
+    expect(Object.fromEntries(LEARNING_VIDEOS.slice(1).map((video) => [video.fileName, video.driveFileId]))).toEqual(
       EXPECTED_DRIVE_IDS,
     );
-    expect(new Set(LEARNING_VIDEOS.map((video) => video.driveFileId)).size).toBe(20);
+    expect(new Set(LEARNING_VIDEOS.slice(1).map((video) => video.driveFileId)).size).toBe(19);
+    expect(LEARNING_VIDEOS[0]).toMatchObject({
+      localUrl: '/assets/emos/emos-beta-v2-product-demo-narrated-captioned-v1.mp4',
+      duration: '1:19',
+      releaseLabel: 'Beta v2.0',
+    });
   });
 
   it('loads the selected Drive preview only after the user chooses Play', () => {
@@ -96,6 +100,22 @@ describe('EMOS Learning Center embedded video playback', () => {
     expect(screen.getByRole('link', { name: /Open in Google Drive/i })).toHaveAttribute(
       'href',
       getDriveViewUrl(video.driveFileId),
+    );
+  });
+
+  it('plays the narrated and captioned Beta v2 introduction from the versioned local asset', () => {
+    renderLearningCenter();
+
+    const video = LEARNING_VIDEOS[0];
+    fireEvent.click(screen.getByRole('button', { name: `Play ${video.sequence}: ${video.title} in EMOS` }));
+
+    expect(screen.getByLabelText(`${video.sequence}: ${video.title} video player`)).toHaveAttribute(
+      'src',
+      '/assets/emos/emos-beta-v2-product-demo-narrated-captioned-v1.mp4',
+    );
+    expect(screen.getByRole('link', { name: 'Open video in new tab' })).toHaveAttribute(
+      'href',
+      '/assets/emos/emos-beta-v2-product-demo-narrated-captioned-v1.mp4',
     );
   });
 
@@ -156,6 +176,7 @@ describe('EMOS Learning Center embedded video playback', () => {
     const unavailableVideo: LearningVideo = {
       ...LEARNING_VIDEOS[0],
       driveFileId: undefined,
+      localUrl: undefined,
     };
     renderLearningCenter([unavailableVideo]);
 

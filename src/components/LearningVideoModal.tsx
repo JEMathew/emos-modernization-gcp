@@ -1,8 +1,9 @@
 import React, { useEffect, useId, useRef } from 'react';
 import { Clock3, ExternalLink, Maximize2, X } from 'lucide-react';
 import {
+  getLearningVideoPlaybackUrl,
+  getLearningVideoViewUrl,
   getDrivePreviewUrl,
-  getDriveViewUrl,
   type LearningVideo,
 } from '../data/learningVideos';
 
@@ -29,7 +30,8 @@ export const LearningVideoModal: React.FC<LearningVideoModalProps> = ({
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const previewUrl = getDrivePreviewUrl(video.driveFileId);
-  const driveViewUrl = getDriveViewUrl(video.driveFileId);
+  const localVideoUrl = video.localUrl;
+  const videoViewUrl = getLearningVideoViewUrl(video);
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
@@ -103,7 +105,7 @@ export const LearningVideoModal: React.FC<LearningVideoModalProps> = ({
                 {video.sequence}
               </span>
               <span className="rounded-full border border-white/15 bg-white/5 px-2 py-1">
-                Beta v1.0
+                {video.releaseLabel || 'Beta v1.0'}
               </span>
               {video.duration && (
                 <span className="inline-flex items-center gap-1">
@@ -130,7 +132,17 @@ export const LearningVideoModal: React.FC<LearningVideoModalProps> = ({
 
         <div className="overflow-y-auto">
           <div ref={playerContainerRef} className="aspect-video w-full bg-black">
-            {previewUrl && (
+            {localVideoUrl ? (
+              <video
+                controls
+                preload="metadata"
+                className="h-full w-full"
+                src={getLearningVideoPlaybackUrl(video)}
+                aria-label={`${video.sequence}: ${video.title} video player`}
+              >
+                Your browser does not support the EMOS walkthrough video.
+              </video>
+            ) : previewUrl ? (
               <iframe
                 src={previewUrl}
                 title={`${video.sequence}: ${video.title} video player`}
@@ -139,7 +151,7 @@ export const LearningVideoModal: React.FC<LearningVideoModalProps> = ({
                 allowFullScreen
                 referrerPolicy="strict-origin-when-cross-origin"
               />
-            )}
+            ) : null}
           </div>
 
           <div className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
@@ -153,14 +165,14 @@ export const LearningVideoModal: React.FC<LearningVideoModalProps> = ({
                 <Maximize2 className="h-4 w-4" aria-hidden="true" />
                 Full screen
               </button>
-              {driveViewUrl && (
+              {videoViewUrl && (
                 <a
-                  href={driveViewUrl}
+                  href={videoViewUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-4 text-xs font-bold text-black transition-opacity hover:opacity-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
-                  Open in Google Drive
+                  {localVideoUrl ? 'Open video in new tab' : 'Open in Google Drive'}
                   <ExternalLink className="h-4 w-4" aria-hidden="true" />
                 </a>
               )}

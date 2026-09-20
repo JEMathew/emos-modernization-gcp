@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { signInWithGoogle, getFriendlyAuthErrorMessage } from '../lib/firebase';
-import { LEARNING_VIDEOS, getDriveViewUrl } from '../data/learningVideos';
+import { LEARNING_VIDEOS, getLearningVideoViewUrl } from '../data/learningVideos';
 import { SAMPLE_PORTFOLIO } from '../data/samplePortfolio';
 import { CAPABILITY_HORIZON, EMOS_FACTS, EMOS_POSITIONING, LANDING_NAVIGATION } from '../config/productFacts';
 import { evaluateEvidenceReadiness } from '../lib/readiness';
@@ -61,7 +61,7 @@ const FEATURED_VIDEOS = ['00', 'F08', 'F19']
   .filter((video): video is (typeof LEARNING_VIDEOS)[number] => Boolean(video));
 
 const FEATURED_VIDEO_TITLES: Record<string, string> = {
-  '00': 'EMOS Beta Introduction',
+  '00': 'EMOS Beta v2 Product Walkthrough',
   F08: 'Preserve Cloud-Platform Neutrality',
   F19: 'Plan and Mobilize the Modernization Program',
 };
@@ -383,7 +383,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
             </div>
             <div className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 lg:pb-0">
               {FEATURED_VIDEOS.map((video, index) => {
-                const href = getDriveViewUrl(video.driveFileId) || '/learn';
+                const href = getLearningVideoViewUrl(video) || '/learn';
                 return <Reveal key={video.sequence} delay={index * 0.08} className="w-[82vw] shrink-0 snap-start sm:w-[22rem] lg:w-auto"><motion.a href={href} target={href === '/learn' ? undefined : '_blank'} rel={href === '/learn' ? undefined : 'noreferrer'} whileHover={reduceMotion ? undefined : { y: -6 }} className="group grid h-full overflow-hidden rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] shadow-sm hover:shadow-xl sm:grid-rows-[auto_1fr]"><div className="relative aspect-[16/8] overflow-hidden bg-[var(--emos-bg-tertiary)]"><img src={video.thumbnailUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.025]" /><div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent" /><span className="absolute bottom-3 left-3 flex h-9 w-9 items-center justify-center rounded-full bg-white text-black shadow-xl"><CirclePlay className="h-4 w-4" /></span><span className="absolute bottom-3 right-3 rounded-full bg-black/70 px-2 py-1 font-mono text-[10px] text-white">{video.duration || video.sequence}</span></div><div className="p-4 sm:p-5"><p className="text-xs font-semibold text-[var(--emos-accent-text)]">{video.category}</p><h3 className="mt-1 font-serif text-lg font-semibold leading-snug">{FEATURED_VIDEO_TITLES[video.sequence] || video.title}</h3><span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold">Watch Video <ExternalLink className="h-3.5 w-3.5" /></span></div></motion.a></Reveal>;
               })}
             </div>

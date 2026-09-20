@@ -20,8 +20,10 @@ export interface LearningVideo {
   tags: string[];
   fileName: string;
   driveFileId?: string;
+  localUrl?: string;
   thumbnailUrl: string;
   duration?: string;
+  releaseLabel?: 'Beta v1.0' | 'Beta v2.0';
 }
 
 export const getDrivePreviewUrl = (driveFileId?: string) =>
@@ -33,6 +35,12 @@ export const getDriveViewUrl = (driveFileId?: string) =>
   driveFileId
     ? `https://drive.google.com/file/d/${encodeURIComponent(driveFileId)}/view`
     : undefined;
+
+export const getLearningVideoPlaybackUrl = (video: LearningVideo) =>
+  video.localUrl || getDrivePreviewUrl(video.driveFileId);
+
+export const getLearningVideoViewUrl = (video: LearningVideo) =>
+  video.localUrl || getDriveViewUrl(video.driveFileId);
 
 const THUMBNAILS = {
   '00': new URL('../../docs/learning/thumbnails/00-beta-introduction.svg', import.meta.url).href,
@@ -65,15 +73,16 @@ export const LEARNING_HERO_IMAGE = new URL(
 export const LEARNING_VIDEOS: LearningVideo[] = [
   {
     sequence: '00',
-    title: 'EMOS Beta Introduction',
+    title: 'EMOS Beta v2 Product Walkthrough',
     description:
-      'See the full enterprise modernization journey, the evidence, decision, and planning foundation delivered in Beta v1.0, and the product vision beyond it.',
+      'A narrated, captioned walkthrough of the evidence, decision, and planning foundation delivered through Define Target State. All screens use synthetic EMOS data.',
     category: 'Start Here',
-    tags: ['Introduction'],
-    fileName: 'EMOS-Beta-Introduction.mp4',
-    driveFileId: '1I5DLsarRnhBbxMUS-GpO5ew7WLZ2Gt6t',
+    tags: ['Introduction', 'Narrated', 'Captions'],
+    fileName: 'emos-beta-v2-product-demo-narrated-captioned-v1.mp4',
+    localUrl: '/assets/emos/emos-beta-v2-product-demo-narrated-captioned-v1.mp4',
     thumbnailUrl: THUMBNAILS['00'],
-    duration: '4:17',
+    duration: '1:19',
+    releaseLabel: 'Beta v2.0',
   },
   {
     sequence: 'F01',

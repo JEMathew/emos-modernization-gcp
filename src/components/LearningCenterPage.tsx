@@ -236,7 +236,7 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
                                 {video.sequence}
                               </span>
                               <span className="rounded-full border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-tertiary)] px-2 py-1 text-[var(--emos-text-secondary)]">
-                                Beta v1.0
+                                {video.releaseLabel || 'Beta v1.0'}
                               </span>
                               {video.duration && (
                                 <span className="inline-flex items-center gap-1 text-[var(--emos-text-muted)]">
@@ -265,7 +265,7 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
                             <code className="mt-auto block break-all rounded-lg border border-[var(--emos-code-border)] bg-[var(--emos-code-bg)] px-3 py-2 text-[10px] text-[var(--emos-text-muted)]">
                               File: {video.fileName}
                             </code>
-                            {video.driveFileId ? (
+                            {video.driveFileId || video.localUrl ? (
                               <button
                                 type="button"
                                 onClick={(event) => openVideo(video, event.currentTarget)}

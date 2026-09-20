@@ -26,7 +26,7 @@ This manifest records only the real EMOS public-sandbox capture used on the land
 | Role | Source | New versioned asset | Technical record | Accessibility and rollback |
 | --- | --- | --- | --- | --- |
 | Landing poster | `emos-product-hero-production-v2.png` | `emos-product-hero-production-v2-performance.webp` | 1920×1080; 70,132 bytes; SHA-256 `2a05f3d6d47f7712b3d12f9bcea866a6527be4ea0f567a7c7ac1b41597a37b9f` | `<picture>` supplies the retained PNG as browser fallback; original PNG remains the rollback/evidence source |
-| Silent landing loop | `emos-product-demo-v2.mp4` | `emos-product-demo-v2-performance.mp4` | H.264 High, 1920×1080, 30 fps, 16.000 seconds, silent, 1,985,917 bytes, ~993 kbps; SHA-256 `7ec315f7fda794da6114386fa8da461fe2f2b0241e51ff7b7a44c764078bace4` | Original v2 MP4 is retained as the rollback/evidence source; the longer narrated product demo remains future scope |
+| Silent landing loop | `emos-product-demo-v2.mp4` | `emos-product-demo-v2-performance.mp4` | H.264 High, 1920×1080, 30 fps, 16.000 seconds, silent, 1,985,917 bytes, ~993 kbps; SHA-256 `7ec315f7fda794da6114386fa8da461fe2f2b0241e51ff7b7a44c764078bace4` | Original v2 MP4 is retained as the rollback/evidence source; the separate narrated Learning Center walkthrough is documented below |
 
 ### Runtime treatment
 
@@ -53,3 +53,23 @@ The approved v1 assets remain unchanged:
 - Promotion: candidate passed and was promoted to 100% traffic at `https://emos-modernization.ai.studio`.
 - Rollback record: `gemini-reflection-journal-media-ed9afe2` was at 100% traffic before promotion and remains available. `gemini-reflection-journal-cache-b7915d4` is also retained.
 - Live checks: public landing, sandbox, learning, trust, workspace boundary, health, media headers, 401 API boundary and the authenticated Overview/Portfolio/History routes passed. No production console errors or horizontal overflow were observed in the media check.
+
+## Beta v2 narrated product walkthrough
+
+This is a separate Learning Center asset. It does not replace, preload, or add
+audio to the silent landing loop.
+
+| Field | Verified record |
+| --- | --- |
+| Delivery asset | `emos-beta-v2-product-demo-narrated-captioned-v1.mp4` |
+| Format | H.264 MP4, 1920×1080, 24 fps, 79.417 seconds |
+| Bytes / SHA-256 | 4,024,724 bytes; `84132eb9f0d4418ee6bf1d300d7cae3da943dde949c888f13e512f1b16e2a15f` |
+| Visual provenance | Real, publicly served EMOS Learning Center production captures of the synthetic-data workspace: Product Tour, bounded CSV/JSON intake, Enterprise DNA/evidence, assessment, canonical 6R comparison, governance, prioritization/waves and Mobilize/Target State. No product screen was generated or invented. |
+| Narration | One 79.400-second Cillian preset voice (`d8ba9f14-8a24-44db-932b-99e16c45bd32`, `preset`); 197 authored/timed words. No time-stretching was used. |
+| Captions | Burned English Montserrat geometric caps with black outline. `faster-whisper` timed the mixed final audio; the authored script supplied the displayed wording. Transcript gate: 197 timed words, 197 caption words, similarity 0.93. |
+| Caption QA | Start, middle and end frames were sampled after burn; captions were visible and remained in lower-frame safe placement. The delivery audio is AAC and ends within 0.017 seconds of the video. |
+| Playback / accessibility | Local `<video controls>` in the Learning Center, metadata preload only, browser controls and fullscreen; the burned captions remain available wherever the MP4 is played. |
+| Retained rollback assets | The silent landing loop (`emos-product-demo-v2-performance.mp4`), its original v2 source, the prior four-minute demo, and its sidecar VTT/SRT remain unchanged. |
+
+The current production revision and promotion evidence for this new asset are
+recorded in the release evidence documents after the candidate gate completes.

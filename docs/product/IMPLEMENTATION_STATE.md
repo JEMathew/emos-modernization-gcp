@@ -107,6 +107,8 @@ The landing now additionally uses versioned, compression-only derivatives of tho
 
 See `docs/product/MEDIA_MANIFEST.md` for source provenance, accessibility treatment and retained rollback assets.
 
+The Learning Center also hosts `emos-beta-v2-product-demo-narrated-captioned-v1.mp4`: a 79-second, 1080p Cillian-narrated walkthrough with burned English captions. It is built only from real production captures using synthetic EMOS data, covers the journey through Define Target State, and explicitly keeps Execute through Reassess Planned. It is separate from the silent/deferred landing loop and retains every prior media asset for rollback.
+
 ## Known limitations and next action
 
 - No live enterprise connectors, 5,000-asset synchronous capacity claim, organization tenancy/RBAC, autonomous approval, automated migration execution or operational stages 10–15.

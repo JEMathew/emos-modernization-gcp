@@ -53,6 +53,10 @@ The product caption states that these are live public-sandbox captures using syn
 
 Commit `605d75646de194a40a0c7fb5127b7d3ea27aea01` (immutable tag `emos-beta-v2-media-performance-20260921`) retains those sources and replaces only the landing delivery derivatives: a 70,132-byte WebP poster and a 1,985,917-byte silent 1920×1080 / 30 fps / 16-second H.264 loop. The video is no longer in the initial render: poster first, 800 ms defer after usable primary content, static treatment for reduced motion and constrained network, static-by-default small mobile, viewport pause, keyboard Play/Pause and error fallback. It introduces no fictional product screens.
 
+### Beta v2 narrated walkthrough
+
+The Learning Center's `00` entry now uses a local, 79.417-second H.264 1080p product walkthrough, `emos-beta-v2-product-demo-narrated-captioned-v1.mp4` (`84132eb9f0d4418ee6bf1d300d7cae3da943dde949c888f13e512f1b16e2a15f`, 4,024,724 bytes). It combines real publicly served EMOS product captures with synthetic data, a single 79.400-second Cillian preset narration and burned English Montserrat/black-outline captions. The transcript aligned 197 authored words with 197 timed caption words at 0.93 similarity; no narration was time-stretched. The silent landing loop and earlier long-form demo assets remain unchanged for rollback.
+
 ## Release and rollback record
 
 | Gate | Result |

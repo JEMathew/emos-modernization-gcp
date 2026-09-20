@@ -1,0 +1,58 @@
+{
+  "title": "EMOS Beta v2 Product Walkthrough",
+  "language": "en",
+  "voice": {
+    "name": "Cillian",
+    "voice_id": "d8ba9f14-8a24-44db-932b-99e16c45bd32",
+    "voice_type": "preset",
+    "delivery": "clear, measured enterprise product guide, neutral accent, confident and concise"
+  },
+  "caption_treatment": {
+    "style": "clean geometric caps",
+    "font": "Montserrat",
+    "outline": "black",
+    "language": "English"
+  },
+  "blocks": [
+    {
+      "scene": "Command Center and lifecycle",
+      "vo_line": "EMOS starts in the Command Center, where the full fifteen-stage lifecycle gives every modernization team one shared, governed view of progress."
+    },
+    {
+      "scene": "Portfolio and intake",
+      "vo_line": "Bring a portfolio through bounded CSV or JSON intake. EMOS validates structure, previews mappings, and keeps every permitted record owner-scoped."
+    },
+    {
+      "scene": "Enterprise DNA and evidence",
+      "vo_line": "Enterprise DNA joins business criticality, technology, dependencies, economics, risk, and evidence quality, so missing facts remain visible rather than assumed."
+    },
+    {
+      "scene": "Deterministic assessment",
+      "vo_line": "Assessment calculates readiness, complexity, risk, feasibility, and cost baselines deterministically. AI explains the evidence; it never changes the arithmetic."
+    },
+    {
+      "scene": "Six-R comparison and history",
+      "vo_line": "Teams compare Retain, Retire, Rehost, Replatform, Refactor, and Repurchase, then ask focused follow-ups and reopen the saved assessment history."
+    },
+    {
+      "scene": "Human governance decision",
+      "vo_line": "A named human decision records approval, rejection, or more evidence required, alongside the rationale, exceptions, and bounded governance audit trail."
+    },
+    {
+      "scene": "Prioritization and wave planning",
+      "vo_line": "Prioritization makes trade-offs transparent across value, effort, risk, dependencies, and strategic alignment. Wave planning turns that sequence into a practical roadmap."
+    },
+    {
+      "scene": "Mobilize",
+      "vo_line": "Mobilize assigns accountable owners, closes readiness gaps, and confirms the delivery charter before work moves toward implementation."
+    },
+    {
+      "scene": "Define Target State",
+      "vo_line": "Define Target State records architecture, security, data migration, cutover, rollback expectations, and the accountable owner for the delivery baseline."
+    },
+    {
+      "scene": "Honest capability horizon",
+      "vo_line": "EMOS currently supports the journey through Define Target State. Execute through Reassess remain visibly Planned, creating an honest, governed path forward."
+    }
+  ]
+}
