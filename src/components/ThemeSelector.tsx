@@ -100,7 +100,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ compact = false })
           }}
           aria-orientation="vertical"
           aria-labelledby="theme-selector-button"
-          className="absolute right-0 mt-1.5 w-44 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-strong)] shadow-xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100"
+          className={`absolute w-44 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-strong)] shadow-xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100 ${compact ? 'bottom-full left-0 mb-1.5' : 'right-0 mt-1.5'}`}
         >
           <div className="px-3 py-1.5 border-b border-[var(--emos-border-subtle)]">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--emos-text-muted)]">

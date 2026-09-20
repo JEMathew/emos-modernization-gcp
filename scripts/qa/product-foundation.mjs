@@ -116,6 +116,12 @@ try {
         }
       }
       await page.getByRole('button', { name: /Appearance:/ }).click();
+      const appearanceMenu = page.getByRole('menu');
+      const menuBounds = await appearanceMenu.boundingBox();
+      assert.ok(menuBounds, 'Appearance menu must be visible');
+      assert.ok(menuBounds.x >= 0 && menuBounds.y >= 0, 'Appearance menu must remain within the viewport origin');
+      assert.ok(menuBounds.x + menuBounds.width <= width, 'Appearance menu must remain within the viewport width');
+      assert.ok(menuBounds.y + menuBounds.height <= 960, 'Appearance menu must remain within the viewport height');
       await page.keyboard.press('Home');
       assert.equal(await page.getByRole('menuitemradio', { name: 'Light' }).evaluate(el => el === document.activeElement), true);
       await page.keyboard.press('End');

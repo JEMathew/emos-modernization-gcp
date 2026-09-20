@@ -61,7 +61,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, currentView, assessmentCou
         <a href="/learn" className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-xs text-[var(--emos-text-secondary)] hover:bg-[var(--emos-surface-hover)]"><Library className="h-4 w-4" aria-hidden="true" />Learning Center</a>
         <button onClick={onOpenWalkthrough} className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-xs text-[var(--emos-text-secondary)] hover:bg-[var(--emos-surface-hover)]"><CircleHelp className="h-4 w-4" aria-hidden="true" />Product Tour</button>
         <div className="flex items-center justify-between gap-2 rounded-lg px-1 py-1">
-          <ThemeSelector />
+          <ThemeSelector compact />
           {user && <button onClick={() => signOut()} aria-label="Sign Out" title={`Sign out ${user.displayName || ''}`} className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--emos-text-secondary)] hover:bg-[var(--emos-surface-hover)]"><LogOut className="h-4 w-4" aria-hidden="true" /></button>}
         </div>
       </div>
