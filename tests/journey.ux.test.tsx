@@ -9,6 +9,9 @@ import { PortfolioPlanView } from '../src/components/PortfolioPlanView';
 import { ReflectionWorkspace } from '../src/components/ReflectionWorkspace';
 import { SamplePortfolioView } from '../src/components/SamplePortfolioView';
 import { TestWalkthroughModal } from '../src/components/TestWalkthroughModal';
+import { EvidenceWorkbench } from '../src/components/EvidenceWorkbench';
+import { GovernancePriorityView } from '../src/components/GovernancePriorityView';
+import { TargetStateView } from '../src/components/TargetStateView';
 import { SAMPLE_PORTFOLIO } from '../src/data/samplePortfolio';
 import { ThemeProvider } from '../src/lib/theme';
 import type { Interaction, ProgramAlignment } from '../src/types';
@@ -157,6 +160,24 @@ describe('standardized authenticated journey', () => {
     expect(screen.getByLabelText('Current journey stage: Mobilize')).toBeInTheDocument();
   });
 
+  it('connects evidence, governance, priority and target-state workbenches without autonomous approval', () => {
+    const onSaveGovernance = vi.fn(async () => undefined);
+    const { rerender } = render(withTheme(<EvidenceWorkbench workload={SAMPLE_PORTFOLIO[0]} onBack={vi.fn()} onAssess={vi.fn()} />));
+    expect(screen.getByRole('heading', { name: SAMPLE_PORTFOLIO[0].name })).toBeInTheDocument();
+    expect(screen.getByText(/approval remains blocked/i)).toBeInTheDocument();
+
+    rerender(withTheme(<GovernancePriorityView stage="Govern" workloads={SAMPLE_PORTFOLIO} interactions={[{ ...interaction, workloadId: SAMPLE_PORTFOLIO[0].id }]} alignment={alignment} selectedWorkload={SAMPLE_PORTFOLIO[0]} record={null} onSelectWorkload={vi.fn()} onSave={onSaveGovernance} onStage={vi.fn()} />));
+    expect(screen.getByRole('button', { name: 'Approve' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More evidence' })).toBeEnabled();
+
+    rerender(withTheme(<GovernancePriorityView stage="Prioritize" workloads={SAMPLE_PORTFOLIO} interactions={[]} alignment={alignment} selectedWorkload={SAMPLE_PORTFOLIO[0]} record={null} onSelectWorkload={vi.fn()} onSave={onSaveGovernance} onStage={vi.fn()} />));
+    expect(screen.getByRole('columnheader', { name: 'Priority' })).toBeInTheDocument();
+
+    rerender(withTheme(<TargetStateView workload={SAMPLE_PORTFOLIO[0]} governance={null} plan={{ userId: 'owner', workloadId: SAMPLE_PORTFOLIO[0].id, architecturePattern: '', platformPattern: '', availabilityTarget: '', recoveryTarget: '', securityRequirements: '', dataMigrationApproach: '', cutoverApproach: '', rollbackPlan: '', owner: '', status: 'DRAFT', updatedAt: '2026-09-20T00:00:00.000Z' }} onSave={vi.fn()} onBack={vi.fn()} />));
+    expect(screen.getByRole('button', { name: /Approve delivery baseline/i })).toBeDisabled();
+    expect(screen.getByText(/Execute, Validate and Transition remain Planned/i)).toBeInTheDocument();
+  });
+
   it('provides one governed initial assessment path', async () => {
     const onSaveNew = vi.fn(async () => undefined);
     render(workspace(null, { onSaveNew }));
@@ -204,12 +225,12 @@ describe('standardized authenticated journey', () => {
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 
-  it('uses the canonical seven-stage beta journey in Product Tour', () => {
+  it('uses the complete MVP journey through target state in Product Tour', () => {
     render(withTheme(<TestWalkthroughModal isOpen={true} onClose={vi.fn()} />));
 
-    expect(['Align', 'Discover', 'Understand', 'Assess', 'Decide', 'Plan', 'Mobilize'].map((stage, index) =>
+    expect(['Align', 'Discover', 'Understand', 'Assess', 'Decide', 'Govern', 'Prioritize', 'Plan', 'Mobilize', 'Define Target State'].map((stage, index) =>
       screen.getByRole('button', { name: `Step ${index + 1}: ${stage}` }),
-    )).toHaveLength(7);
+    )).toHaveLength(10);
     expect(screen.getByRole('button', { name: 'Step 4: Assess' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Step 5: Decide' })).toBeInTheDocument();
     expect(screen.getByText(/Trust controls apply throughout/i)).toBeInTheDocument();

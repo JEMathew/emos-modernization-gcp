@@ -204,7 +204,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
               <div className="space-y-1">
                 <p className="font-medium text-[var(--emos-text-primary)]">No assessments saved yet</p>
                 <p className="text-[11px] text-[var(--emos-text-muted)]">
-                  Submit your first workload to generate an explainable 6R decision with Gemini.
+                  Submit your first workload to generate an explainable, evidence-grounded 6R assessment.
                 </p>
               </div>
             )}

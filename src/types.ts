@@ -116,6 +116,46 @@ export interface ProgramAlignment {
   updatedAt: string;
 }
 
+export type HumanDecision = 'DRAFT' | 'APPROVED' | 'REJECTED' | 'MORE EVIDENCE';
+
+export interface GovernanceAuditEvent {
+  id: string;
+  action: HumanDecision | 'EXCEPTION RECORDED';
+  actor: string;
+  rationale: string;
+  createdAt: string;
+}
+
+export interface GovernanceRecord {
+  userId: string;
+  workloadId: string;
+  assessmentId: string;
+  decision: HumanDecision;
+  approver: string;
+  rationale: string;
+  exception: string;
+  audit: GovernanceAuditEvent[];
+  updatedAt: string;
+}
+
+export type TargetStateStatus = 'DRAFT' | 'BASELINE APPROVED';
+
+export interface TargetStatePlan {
+  userId: string;
+  workloadId: string;
+  architecturePattern: string;
+  platformPattern: string;
+  availabilityTarget: string;
+  recoveryTarget: string;
+  securityRequirements: string;
+  dataMigrationApproach: string;
+  cutoverApproach: string;
+  rollbackPlan: string;
+  owner: string;
+  status: TargetStateStatus;
+  updatedAt: string;
+}
+
 export type WaveReadiness = 'READY' | 'CONDITIONAL' | 'ASSESSMENT REQUIRED';
 
 export interface WaveWorkload {

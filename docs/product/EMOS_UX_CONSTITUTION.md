@@ -215,3 +215,11 @@ The authenticated workspace now uses the approved application pattern: a persist
 The dark navy, cyan journey accent and restrained gold primary action are implemented as theme-aware tokens rather than copied pixels. Existing Light, Dark and System behavior remains authoritative. The coded data, navigation manifest, accessible labels and responsive rules remain the product source of truth when a Higgsfield frame differs. At 390 px the product uses one content column and the import experience remains card-based with no horizontal page overflow; desktop surfaces use the extra width without changing information architecture.
 
 The three retained Higgsfield generations are visual references. No new generation was purchased for this checkpoint. Their text and metrics are not evidence, and their acceptance checklists remain subject to product-owner review. Later website and demo work must capture the stable coded product and must not imply that Planned stages are available.
+
+### Integrated MVP boundary — 20 September 2026
+
+The coded product now carries one connected path through Align, Discover, Understand, Assess, Decide, Govern, Prioritize, Plan, Mobilize and Define Target State. Evidence, governance, prioritization and target-state workbenches have stable URLs. Execute, Validate, Transition, Measure Benefits, Learn and Reassess remain visible, inert and labelled Planned.
+
+The UI must preserve three truths at every breakpoint: evidence status is not recommendation confidence; model explanation is not human approval; and a target-state baseline is not migration execution. Governance decisions name the human reviewer, record rationale and exceptions separately, and retain bounded audit history. Customer-facing language stays vendor-neutral.
+
+The application shell, real data state, focus order, responsive rules and accessible controls are authoritative. Higgsfield references influence color, hierarchy, composition and motion only. The public website and demo may use the four approved concept assets as atmospheric/context media, but functional claims must be illustrated with real product captures from the exact release candidate.

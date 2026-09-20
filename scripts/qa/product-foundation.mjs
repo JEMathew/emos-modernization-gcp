@@ -99,6 +99,22 @@ try {
       await checkWidth('mobilize');
       await page.getByRole('button', { name: 'New Assessment' }).click();
       await checkWidth('assessment');
+      if (width === 1440 || width <= 390) {
+        const routeChecks = [
+          { path: '/app/workloads/customer-analytics/evidence', heading: 'Customer Analytics', label: 'evidence' },
+          { path: '/app/govern?workload=customer-analytics', heading: 'Governance and human decision', label: 'governance' },
+          { path: '/app/prioritize?workload=customer-analytics', heading: 'Portfolio prioritization', label: 'prioritization' },
+          { path: '/app/workloads/customer-analytics/target-state', heading: 'Target-state workbench', label: 'target-state' },
+        ];
+        for (const routeCheck of routeChecks) {
+          await page.goto(`http://127.0.0.1:${port}${routeCheck.path}`);
+          await page.getByRole('heading', { name: routeCheck.heading, exact: true }).waitFor();
+          await checkWidth(routeCheck.label);
+          if (width === 1440 || routeCheck.label === 'target-state') {
+            await page.screenshot({ path: resolve(output, `${routeCheck.label}-${width}-${theme}.png`), fullPage: true });
+          }
+        }
+      }
       await page.getByRole('button', { name: /Appearance:/ }).click();
       await page.keyboard.press('Home');
       assert.equal(await page.getByRole('menuitemradio', { name: 'Light' }).evaluate(el => el === document.activeElement), true);

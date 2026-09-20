@@ -308,7 +308,7 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getAllByText(/^Product Vision$/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Beta v1\.0 Publicly Live/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/^Available Today$/i)).not.toBeInTheDocument();
-    expect(screen.getAllByText(/Beta v1\.0 delivers the evidence, decision and planning foundation today\./i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/The MVP connects evidence, governed decisions, prioritization, planning, mobilization and target-state definition today\./i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/15 lifecycle stages \+ Mobilize handoff/i).length).toBeGreaterThan(0);
     expect(screen.getByText('One Lifecycle. Three Honest Delivery States.')).toBeInTheDocument();
     expect(screen.getAllByText(/^SHIPPED$/i).length).toBeGreaterThan(0);
@@ -337,14 +337,14 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     chooseMenuItem('About', /^Vision$/i);
     expect(screen.getAllByText(/^Product Vision$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/transition to live operations/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Available in Beta/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Available in MVP/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^Mobilize$/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/^Learn$/i)).toBeInTheDocument();
     expect(screen.getByText(/^Reassess$/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /The entire modernization journey—built in defensible stages/i })).toBeInTheDocument();
 
-    chooseMenuItem('About', /^Founder$/i);
-    expect(screen.getByText(/Built by someone who had this problem/i)).toBeInTheDocument();
+    chooseMenuItem('About', /^Product Builder$/i);
+    expect(screen.getByText(/Product Builder Perspective/i)).toBeInTheDocument();
     expect(screen.getAllByText(/15\+ Years/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/16\+ Years/i)).not.toBeInTheDocument();
     expect(screen.getByText(/3\+ Years Building, Shipping and Launching Products into New Markets/i)).toBeInTheDocument();

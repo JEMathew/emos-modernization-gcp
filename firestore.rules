@@ -141,6 +141,52 @@ service cloud.firestore {
         data.updatedAt is string && data.updatedAt.size() <= 100;
     }
 
+    function validGovernanceRecord(userId, workloadId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'userId', 'workloadId', 'assessmentId', 'decision', 'approver', 'rationale',
+          'exception', 'audit', 'updatedAt'
+        ]) &&
+        data.keys().hasAll([
+          'userId', 'workloadId', 'assessmentId', 'decision', 'approver', 'rationale',
+          'exception', 'audit', 'updatedAt'
+        ]) &&
+        data.userId == userId && data.workloadId == workloadId &&
+        data.assessmentId is string && data.assessmentId.size() <= 100 &&
+        data.decision in ['DRAFT', 'APPROVED', 'REJECTED', 'MORE EVIDENCE'] &&
+        data.approver is string && data.approver.size() <= 250 &&
+        data.rationale is string && data.rationale.size() <= 2000 &&
+        data.exception is string && data.exception.size() <= 2000 &&
+        data.audit is string && data.audit.size() <= 12000 &&
+        data.updatedAt is string && data.updatedAt.size() <= 100;
+    }
+
+    function validTargetStatePlan(userId, workloadId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'userId', 'workloadId', 'architecturePattern', 'platformPattern', 'availabilityTarget',
+          'recoveryTarget', 'securityRequirements', 'dataMigrationApproach', 'cutoverApproach',
+          'rollbackPlan', 'owner', 'status', 'updatedAt'
+        ]) &&
+        data.keys().hasAll([
+          'userId', 'workloadId', 'architecturePattern', 'platformPattern', 'availabilityTarget',
+          'recoveryTarget', 'securityRequirements', 'dataMigrationApproach', 'cutoverApproach',
+          'rollbackPlan', 'owner', 'status', 'updatedAt'
+        ]) &&
+        data.userId == userId && data.workloadId == workloadId &&
+        data.architecturePattern is string && data.architecturePattern.size() <= 2000 &&
+        data.platformPattern is string && data.platformPattern.size() <= 2000 &&
+        data.availabilityTarget is string && data.availabilityTarget.size() <= 500 &&
+        data.recoveryTarget is string && data.recoveryTarget.size() <= 500 &&
+        data.securityRequirements is string && data.securityRequirements.size() <= 2000 &&
+        data.dataMigrationApproach is string && data.dataMigrationApproach.size() <= 2000 &&
+        data.cutoverApproach is string && data.cutoverApproach.size() <= 2000 &&
+        data.rollbackPlan is string && data.rollbackPlan.size() <= 2000 &&
+        data.owner is string && data.owner.size() <= 250 &&
+        data.status in ['DRAFT', 'BASELINE APPROVED'] &&
+        data.updatedAt is string && data.updatedAt.size() <= 100;
+    }
+
     match /users/{userId} {
       allow read, delete: if isOwner(userId);
       allow create, update: if isOwner(userId) && validUserProfile(userId);
@@ -159,6 +205,18 @@ service cloud.firestore {
     match /users/{userId}/programContext/{contextId} {
       allow read: if isOwner(userId);
       allow create, update: if isOwner(userId) && contextId == 'alignment' && validProgramAlignment(userId);
+      allow delete: if false;
+    }
+
+    match /users/{userId}/governance/{workloadId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && validGovernanceRecord(userId, workloadId);
+      allow delete: if false;
+    }
+
+    match /users/{userId}/targetState/{workloadId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && validTargetStatePlan(userId, workloadId);
       allow delete: if false;
     }
 

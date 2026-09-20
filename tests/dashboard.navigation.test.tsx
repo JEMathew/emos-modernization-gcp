@@ -24,8 +24,11 @@ vi.mock('../src/lib/firebase', () => ({
     if (backend.fail === 'alignment') error(new Error('permission-denied')); else if (!backend.pending) success(null);
     return () => {};
   },
+  subscribeToGovernanceRecords: (_uid: string, success: Function) => { success([]); return () => {}; },
+  subscribeToTargetStatePlans: (_uid: string, success: Function) => { success([]); return () => {}; },
   saveInteraction: vi.fn(), updateInteraction: vi.fn(), deleteInteraction: vi.fn(),
   saveImportedWorkloads: vi.fn(), deleteImportedWorkload: vi.fn(), clearAllImportedWorkloads: vi.fn(), saveProgramAlignment: vi.fn(),
+  saveGovernanceRecord: vi.fn(), saveTargetStatePlan: vi.fn(),
 }));
 vi.mock('../src/lib/gemini', () => ({ chatWithGemini: vi.fn(), generateAssessmentMeta: vi.fn() }));
 const user = { uid: 'navigation-owner', displayName: 'Test user' } as any;
@@ -104,8 +107,8 @@ describe('authenticated workspace navigation', () => {
   it('makes all available stages navigable, keeps future stages inert, and opens Assess with workload evidence', () => {
     display();
     fireEvent.click(screen.getByRole('button', { name: /View entire lifecycle/i }));
-    expect(screen.queryByRole('button', { name: /6\. Govern/i })).not.toBeInTheDocument();
-    expect(screen.getByText(/6\. Govern/i).closest('[aria-disabled="true"]')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /6\. Govern/i })).toBeInTheDocument();
+    expect(screen.getByText(/10\. Execute/i).closest('[aria-disabled="true"]')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /4\. Assess/i }));
     expect(screen.getByLabelText('Current journey stage: Assess')).toBeInTheDocument();
     expect((screen.getByRole('textbox') as HTMLTextAreaElement).value).toContain(SAMPLE_PORTFOLIO[0].name);
@@ -117,6 +120,15 @@ describe('authenticated workspace navigation', () => {
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Return to Command Center' }));
     expect(screen.getByRole('heading', { name: 'Command Center' })).toBeInTheDocument();
+  });
+  it.each([
+    ['/app/workloads/customer-analytics/evidence', 'Customer Analytics'],
+    ['/app/govern?workload=customer-analytics', 'Governance and human decision'],
+    ['/app/prioritize?workload=customer-analytics', 'Portfolio prioritization'],
+    ['/app/workloads/customer-analytics/target-state', 'Target-state workbench'],
+  ])('opens the integrated MVP direct route %s', (path, heading) => {
+    window.history.replaceState({}, '', path); display();
+    expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
   });
   it('shows a loading state while subscriptions are unresolved', () => {
     backend.pending = true; display();

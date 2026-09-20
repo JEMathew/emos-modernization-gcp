@@ -67,7 +67,7 @@ export function CommandCenter({ workloads, interactions, alignment, isLoading, i
           </section>
           <section className="space-y-4 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5" aria-label="Decision and planning workspaces">
             <h2 className="text-base font-semibold">Move the work forward</h2>
-            {(['Assess', 'Decide', 'Plan', 'Mobilize'] as const).map(stage => <button key={stage} onClick={() => onStage(stage)} className="flex min-h-11 w-full items-center justify-between rounded-lg border border-[var(--emos-border-subtle)] px-3 text-sm">{stage}<ArrowRight className="h-4 w-4" aria-hidden="true" /></button>)}
+            {(['Assess', 'Decide', 'Govern', 'Prioritize', 'Plan', 'Mobilize', 'Define Target State'] as const).map(stage => <button key={stage} onClick={() => onStage(stage)} className="flex min-h-11 w-full items-center justify-between rounded-lg border border-[var(--emos-border-subtle)] px-3 text-sm">{stage}<ArrowRight className="h-4 w-4" aria-hidden="true" /></button>)}
             <p role="status" className="text-xs leading-5 text-[var(--emos-text-secondary)]">AI activity: {isProcessing ? 'Processing your request.' : 'Idle. Starts only when you request an assessment or follow-up.'}</p>
           </section>
         </div>

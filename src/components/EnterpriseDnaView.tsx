@@ -22,6 +22,7 @@ interface EnterpriseDnaViewProps {
   workload: EnterpriseWorkload;
   onBackToPortfolio: () => void;
   onAssess: (workload: EnterpriseWorkload) => void;
+  onOpenEvidence?: () => void;
   isProcessing?: boolean;
 }
 
@@ -29,6 +30,7 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
   workload,
   onBackToPortfolio,
   onAssess,
+  onOpenEvidence,
   isProcessing = false,
 }) => {
   const stats = calculateDnaCompleteness(workload.dna);
@@ -166,6 +168,7 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
               <span>Assess for Modernization</span>
               <ArrowRight className="w-3.5 h-3.5 text-black" />
             </button>
+            {onOpenEvidence && <button onClick={onOpenEvidence} className="w-full min-h-11 rounded-xl border border-[var(--emos-journey-border)] bg-[var(--emos-journey-subtle)] px-4 text-xs font-semibold text-[var(--emos-journey-text)]">Open evidence workbench</button>}
           </div>
         </div>
       </div>
@@ -264,7 +267,7 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
             Ready to generate the canonical 6R recommendation?
           </div>
           <div className="text-[11px] text-[var(--emos-text-secondary)]">
-            EMOS will pass all 18 structured Enterprise DNA attributes directly into the Gemini reasoning engine.
+            EMOS will send the 18 structured attributes to its governed server-side reasoning service. Missing evidence remains missing.
           </div>
         </div>
 

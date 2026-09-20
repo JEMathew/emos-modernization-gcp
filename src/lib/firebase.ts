@@ -24,9 +24,10 @@ import {
   type Unsubscribe
 } from 'firebase/firestore';
 import baseFirebaseConfig from '../../firebase-applet-config.json';
-import type { Interaction, UserProfile, EnterpriseWorkload, ProgramAlignment } from '../types';
+import type { Interaction, UserProfile, EnterpriseWorkload, ProgramAlignment, GovernanceRecord, TargetStatePlan } from '../types';
 import { redactSecrets } from './guardrails';
 import { persistPortfolioImport } from './portfolioPersistence';
+import { parseGovernanceAudit, serializeGovernanceAudit } from './governanceAudit';
 
 // Resolve Auth Domain dynamically:
 // - In production browser environments (or emos-modernization.ai.studio), use the same-origin domain
@@ -432,5 +433,49 @@ export function subscribeToProgramAlignment(
   const path = `users/${userId}/programContext/alignment`;
   return onSnapshot(doc(db, path), (snapshot) => {
     onData(snapshot.exists() ? snapshot.data() as ProgramAlignment : null);
+  }, onError);
+}
+
+export async function saveGovernanceRecord(userId: string, record: GovernanceRecord): Promise<void> {
+  const path = `users/${userId}/governance/${record.workloadId}`;
+  try {
+    await setDoc(doc(db, path), sanitizeForFirestore({ ...record, audit: serializeGovernanceAudit(record.audit), userId, updatedAt: new Date().toISOString() }));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
+}
+
+export function subscribeToGovernanceRecords(
+  userId: string,
+  onData: (records: GovernanceRecord[]) => void,
+  onError: (error: unknown) => void,
+): Unsubscribe {
+  const path = `users/${userId}/governance`;
+  return onSnapshot(query(collection(db, path)), (snapshot) => {
+    onData(snapshot.docs.map((item) => {
+      const data = item.data();
+      const audit = parseGovernanceAudit(data.audit);
+      return { ...data, audit, workloadId: item.id } as GovernanceRecord;
+    }));
+  }, onError);
+}
+
+export async function saveTargetStatePlan(userId: string, plan: TargetStatePlan): Promise<void> {
+  const path = `users/${userId}/targetState/${plan.workloadId}`;
+  try {
+    await setDoc(doc(db, path), sanitizeForFirestore({ ...plan, userId, updatedAt: new Date().toISOString() }));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
+}
+
+export function subscribeToTargetStatePlans(
+  userId: string,
+  onData: (plans: TargetStatePlan[]) => void,
+  onError: (error: unknown) => void,
+): Unsubscribe {
+  const path = `users/${userId}/targetState`;
+  return onSnapshot(query(collection(db, path)), (snapshot) => {
+    onData(snapshot.docs.map((item) => ({ ...item.data(), workloadId: item.id }) as TargetStatePlan));
   }, onError);
 }

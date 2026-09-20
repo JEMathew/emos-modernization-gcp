@@ -25,14 +25,14 @@ describe('ModernizationLifecycle', () => {
     }
 
     expect(within(lifecycle).getByText(/Unavailable stages remain visible/i)).toBeInTheDocument();
-    expect(within(lifecycle).getAllByText('Available')).toHaveLength(8);
-    expect(within(lifecycle).getAllByText('Building next')).toHaveLength(4);
+    expect(within(lifecycle).getAllByText('Available')).toHaveLength(11);
+    expect(within(lifecycle).getAllByText('Building next')).toHaveLength(1);
     expect(within(lifecycle).getAllByText('Planned')).toHaveLength(7);
     expect(within(lifecycle).queryByText(/beta|product vision/i)).not.toBeInTheDocument();
     expect(within(lifecycle).getByText(/10\. Execute/i).closest('[aria-disabled="true"]')).toBeInTheDocument();
-    expect(within(lifecycle).getByText(/6\. Govern/i).closest('[aria-disabled="true"]')).toBeInTheDocument();
+    expect(within(lifecycle).getByText(/6\. Govern/i).closest('[aria-disabled="true"]')).not.toBeInTheDocument();
     expect(within(lifecycle).getByText(/3\. Understand/i).closest('[aria-current="step"]')).toBeInTheDocument();
-    for (const unfinished of ['TCO and value analysis', 'Human approval', 'Capacity and resources', 'Approve delivery baseline']) {
+    for (const unfinished of ['Policies and constraints', 'Ownership capture', 'Initial dependency mapping', 'Capacity and resources']) {
       expect(within(lifecycle).getByText(unfinished).closest('li')).toHaveTextContent('Building next');
     }
   });

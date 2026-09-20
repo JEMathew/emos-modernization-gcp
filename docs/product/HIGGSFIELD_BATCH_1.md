@@ -106,3 +106,9 @@ The product owner authorized the functional foundation packet without another im
 The existing three generations were reused to align the coded product shell. No Higgsfield generation, edit, credit, or asset replacement occurred. The implementation adopts the left-rail hierarchy, quiet dark surfaces, cyan lifecycle emphasis and restrained gold primary action while preserving the established IA, accessible React controls, real route state and Light / Dark / System themes.
 
 Local visual review passed for Command Center, Portfolio, Enterprise DNA and intake mapping in desktop dark mode, Command Center in desktop light mode, and the intake mapping flow at 390 px without horizontal overflow. This is implementation-candidate evidence, not silent product-owner acceptance of every generated frame. Website and demo refresh remain deferred until the product workflow and copy are stable enough to capture truthfully.
+
+## Integrated MVP visual decision — 20 September 2026
+
+The functional journey is stable through Define Target State, so real coded-product captures now become the source for website and demo evidence. No replacement UI mockup is required: generating one would risk invented controls, metrics and states. Higgsfield/Higgsedit is limited to restrained title, transition and motion treatment around real captures. The existing hero image, hero animation, Command Center concept and Enterprise DNA concept remain intentionally integrated and retain their recorded hashes.
+
+Demo narrative: public value proposition → authenticated Command Center → safe portfolio intake → Enterprise DNA → evidence gaps → readiness/economics and 6R comparison → human governance → portfolio priority → plan/mobilize → target-state baseline → explicit handoff boundary where Execute and later stages are Planned.

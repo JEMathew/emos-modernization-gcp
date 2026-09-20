@@ -21,6 +21,7 @@ import {
 import type { Interaction, AssessmentMode, Disposition6R, DecisionReadiness, EnterpriseWorkload } from '../types';
 import { formatWorkloadDnaForAssessment } from '../data/samplePortfolio';
 import { JourneyStage } from './JourneyStage';
+import { AssessmentEconomicsPanel } from './AssessmentEconomicsPanel';
 
 interface ReflectionWorkspaceProps {
   activeInteraction: Interaction | null;
@@ -362,6 +363,8 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
             </div>
           )}
 
+          {workload && <AssessmentEconomicsPanel workload={workload} interaction={activeInteraction} />}
+
           {/* Conversation & Assessment Stream */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-3xl mx-auto w-full">
             {/* User Modernization Scope / Evidence */}
@@ -395,7 +398,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
               )}
             </div>
 
-            {/* Initial Gemini Modernization Assessment */}
+            {/* Initial governed modernization assessment */}
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--emos-accent)] font-semibold">
@@ -414,7 +417,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
               <div className="bg-[var(--emos-surface-elevated)] border border-[var(--emos-border-subtle)] p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-md relative">
                 <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--emos-border-subtle)]">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[var(--emos-text-primary)]">Gemini 3.6 Flash</span>
+                    <span className="text-xs font-semibold text-[var(--emos-text-primary)]">Governed reasoning</span>
                     <span className="text-[10px] bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] px-2.5 py-0.5 rounded-full border border-[var(--emos-accent-border)] font-medium uppercase tracking-wider">
                       {activeInteraction.mode === 'options' ? 'Options Comparison' : activeInteraction.mode === 'decision' ? 'Executive Decision' : '6R Assessment'}
                     </span>

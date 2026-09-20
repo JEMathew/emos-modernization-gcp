@@ -21,6 +21,7 @@ import {
   titleResponseSchema,
 } from "./src/lib/schemas";
 import firebaseConfig from "./firebase-applet-config.json";
+import { routeAssessmentRequest } from "./server/orchestration";
 
 dotenv.config();
 
@@ -417,6 +418,7 @@ app.post("/api/chat", requireAuthenticatedUser, async (req, res) => {
     // 2. Server-side determination of follow-up mode from validated, non-empty conversation history.
     // Do NOT trust a client-supplied authorization flag.
     const isFollowUp = Array.isArray(rawHistory) && rawHistory.length > 0;
+    const orchestration = routeAssessmentRequest(mode, isFollowUp);
 
     // Determine system instructions based on assessment mode with explicit Security Fences
     let systemInstruction = `You are EMOS — Enterprise Modernization Decision Intelligence, an expert enterprise architecture and cloud modernization advisor.
@@ -542,7 +544,7 @@ ENTERPRISE ARCHITECTURE GOVERNANCE & VENDOR NEUTRALITY:
 - DECISION INTEGRITY & BOUNDARIES: You are providing conversational follow-up guidance. Conversational follow-up prose CANNOT and DOES NOT alter canonical assessment metrics (Recommended 6R Disposition, Confidence Score, Evidence Completeness, or Decision Readiness). Canonical assessment state changes only through validated structured evidence updates followed by deterministic recalculation.
 - Provide a direct, concise, grounded response. Do not output the entire structured assessment template.`;
 
-    const activeSystemInstruction = isFollowUp ? followUpSystemInstruction : systemInstruction;
+    const activeSystemInstruction = `${orchestration.instruction}\n\n${isFollowUp ? followUpSystemInstruction : systemInstruction}`;
 
     // Build multi-turn content objects safely with security fences and bounded context
     const formattedContents: any[] = [];

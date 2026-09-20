@@ -73,6 +73,18 @@ const validProgramAlignment = (userId: string) => ({
   updatedAt: new Date(0).toISOString(),
 });
 
+const validGovernanceRecord = (userId: string, workloadId = 'workload-1') => ({
+  userId, workloadId, assessmentId: 'assessment-1', decision: 'MORE EVIDENCE', approver: 'CISO delegate',
+  rationale: 'Close dependency and TCO gaps.', exception: '', audit: '[]', updatedAt: new Date(0).toISOString(),
+});
+
+const validTargetStatePlan = (userId: string, workloadId = 'workload-1') => ({
+  userId, workloadId, architecturePattern: 'Decoupled service boundary', platformPattern: 'Managed runtime capability',
+  availabilityTarget: 'Tier 1 SLO', recoveryTarget: 'Documented RTO and RPO', securityRequirements: 'Identity and encryption controls',
+  dataMigrationApproach: 'Reconciled staged migration', cutoverApproach: 'Controlled maintenance window',
+  rollbackPlan: 'Restore at verified checkpoint', owner: 'Architecture owner', status: 'DRAFT', updatedAt: new Date(0).toISOString(),
+});
+
 beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
     projectId: 'demo-emos-guardrails',
@@ -166,6 +178,19 @@ describe('Firestore owner isolation and integrity', () => {
     await assertSucceeds(setDoc(doc(alice, 'users/alice/programContext/alignment'), validProgramAlignment('alice')));
     await assertFails(setDoc(doc(alice, 'users/alice/programContext/alignment'), validProgramAlignment('bob')));
     await assertFails(getDoc(doc(alice, 'users/bob/programContext/alignment')));
+  });
+
+  it('isolates bounded governance and target-state records', async () => {
+    const alice = testEnv.authenticatedContext('alice').firestore();
+    const bob = testEnv.authenticatedContext('bob').firestore();
+    const governance = doc(alice, 'users/alice/governance/workload-1');
+    const target = doc(alice, 'users/alice/targetState/workload-1');
+    await assertSucceeds(setDoc(governance, validGovernanceRecord('alice')));
+    await assertSucceeds(setDoc(target, validTargetStatePlan('alice')));
+    await assertFails(setDoc(governance, { ...validGovernanceRecord('alice'), audit: 'x'.repeat(12001) }));
+    await assertFails(setDoc(target, { ...validTargetStatePlan('alice'), status: 'EXECUTING' }));
+    await assertFails(setDoc(doc(alice, 'users/alice/governance/spoofed'), validGovernanceRecord('bob', 'spoofed')));
+    await assertFails(getDoc(doc(bob, 'users/alice/targetState/workload-1')));
   });
 
   it('validates new import provenance without admitting extra metadata or cross-user access', async () => {

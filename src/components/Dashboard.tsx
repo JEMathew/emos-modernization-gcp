@@ -5,6 +5,9 @@ import { HistorySidebar } from './HistorySidebar';
 import { ReflectionWorkspace } from './ReflectionWorkspace';
 import { SamplePortfolioView } from './SamplePortfolioView';
 import { EnterpriseDnaView } from './EnterpriseDnaView';
+import { EvidenceWorkbench } from './EvidenceWorkbench';
+import { GovernancePriorityView } from './GovernancePriorityView';
+import { TargetStateView } from './TargetStateView';
 import { ImportPortfolioModal } from './ImportPortfolioModal';
 import { TestWalkthroughModal } from './TestWalkthroughModal';
 import { PortfolioPlanView } from './PortfolioPlanView';
@@ -12,7 +15,7 @@ import { ModernizationLifecycle } from './ModernizationLifecycle';
 import { CommandCenter } from './CommandCenter';
 import { useWorkspaceNavigation, type WorkspaceStage } from '../lib/workspaceNavigation';
 import { evaluateEvidenceReadiness } from '../lib/readiness';
-import type { Interaction, AssessmentMode, ChatMessage, EnterpriseWorkload, ProgramAlignment } from '../types';
+import type { Interaction, AssessmentMode, ChatMessage, EnterpriseWorkload, GovernanceRecord, ProgramAlignment, TargetStatePlan } from '../types';
 import { SAMPLE_PORTFOLIO, formatWorkloadDnaForAssessment } from '../data/samplePortfolio';
 import {
   subscribeToUserInteractions,
@@ -27,6 +30,10 @@ import {
   clearAllImportedWorkloads,
   saveProgramAlignment,
   subscribeToProgramAlignment,
+  saveGovernanceRecord,
+  subscribeToGovernanceRecords,
+  saveTargetStatePlan,
+  subscribeToTargetStatePlans,
 } from '../lib/firebase';
 import { chatWithGemini, generateAssessmentMeta } from '../lib/gemini';
 
@@ -52,6 +59,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   };
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [importedWorkloads, setImportedWorkloads] = useState<EnterpriseWorkload[]>([]);
+  const [governanceRecords, setGovernanceRecords] = useState<GovernanceRecord[]>([]);
+  const [targetStatePlans, setTargetStatePlans] = useState<TargetStatePlan[]>([]);
   const selectedId = route.assessmentId;
   const currentView = route.view;
   const [programAlignment, setProgramAlignment] = useState<ProgramAlignment>(defaultAlignment);
@@ -114,6 +123,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       setDataErrors(errors => ({ ...errors, alignment: 'Program alignment could not be loaded. Reload before making changes.' }));
     },
   ), [user.uid]);
+
+  useEffect(() => subscribeToGovernanceRecords(user.uid, setGovernanceRecords, () => {
+    setDataErrors(errors => ({ ...errors, governance: 'Governance records could not be loaded. Reload before making a human decision.' }));
+  }), [user.uid]);
+
+  useEffect(() => subscribeToTargetStatePlans(user.uid, setTargetStatePlans, () => {
+    setDataErrors(errors => ({ ...errors, targetState: 'Target-state records could not be loaded. Reload before approving a baseline.' }));
+  }), [user.uid]);
 
   // Subscribe to real-time imported workloads for this user
   useEffect(() => {
@@ -407,7 +424,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     else if (stage === 'Assess' || stage === 'Decide') {
       const latest = interactions.find(item => item.workloadId === selectedWorkload?.id);
       navigate('workspace', { stage, workloadId: selectedWorkload?.id ?? null, assessmentId: stage === 'Decide' ? latest?.id ?? null : null });
-    } else navigate('plan', { stage });
+    } else if (stage === 'Govern' || stage === 'Prioritize') navigate('governance', { stage, workloadId: selectedWorkload?.id ?? null });
+    else if (stage === 'Define Target State') navigate(selectedWorkload ? 'target' : 'portfolio', { stage, workloadId: selectedWorkload?.id ?? null });
+    else navigate('plan', { stage });
   };
   const openInteraction = (id: string) => {
     const interaction = interactions.find(item => item.id === id);
@@ -419,12 +438,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     Discover: ['Choose the workloads in scope.', 'Supported CSV/JSON inventory or synthetic samples', 'Confirm ownership and scope', 'Portfolio inventory', 'Understand'],
     Understand: ['Inspect the evidence and its gaps.', 'Workload DNA, dependencies, cost and risk', 'Identify evidence to verify', 'Evidence baseline and gap list', 'Assess'],
     Assess: ['Generate a recommendation from evidence.', 'Workload evidence and business context', 'Review the recommendation and assumptions', 'Saved 6R assessment', 'Decide'],
-    Decide: ['Review options and the evidence gate.', 'Saved assessment and supporting evidence', 'Human review; approval workflow is building next', 'Decision summary and follow-up discussion', 'Govern'],
+    Decide: ['Review options and the evidence gate.', 'Saved assessment and supporting evidence', 'Confirm the direction to take into governance', 'Decision summary and follow-up discussion', 'Govern'],
+    Govern: ['Apply decision rights and control gates.', 'Assessment, evidence, architecture, security and compliance', 'Approve, reject or request more evidence', 'Owner-scoped decision and audit record', 'Prioritize'],
+    Prioritize: ['Rank the portfolio transparently.', 'Value, effort, risk, dependency and alignment evidence', 'Confirm funding order', 'Explainable portfolio priority', 'Plan'],
     Plan: ['Sequence the portfolio into delivery waves.', 'Saved decisions and program alignment', 'Review wave order and funding assumptions', 'Wave plan and executive pack', 'Mobilize'],
     Mobilize: ['Review the governed delivery handoff.', 'Owners, wave plan and readiness controls', 'Resolve outstanding readiness actions', 'Mobilization checklist and executive pack', 'Define Target State'],
+    'Define Target State': ['Approve the delivery architecture baseline.', 'Governed decision, target patterns, NFRs and transition controls', 'Approve or retain draft baseline', 'Target architecture and cutover/rollback handoff', 'Execute (Planned)'],
   } as const;
   const guidance = route.stage ? stageGuidance[route.stage] : null;
-  const missingWorkload = (currentView === 'dna' || currentView === 'workspace') && Boolean(route.workloadId) && !selectedWorkload && !isLoadingWorkloads;
+  const missingWorkload = ['dna', 'evidence', 'workspace', 'governance', 'target'].includes(currentView) && Boolean(route.workloadId) && !selectedWorkload && !isLoadingWorkloads;
   const missingAssessment = Boolean(selectedId) && !activeInteraction && !isLoadingHistory;
   const contextMismatch = Boolean(activeInteraction?.workloadId && route.workloadId && activeInteraction.workloadId !== route.workloadId);
   const blocked = !route.known || missingWorkload || missingAssessment || contextMismatch;
@@ -483,7 +505,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 ['Context', route.workloadId ? selectedWorkload?.name ?? 'Loading workload' : route.portfolio === 'sample' ? 'Synthetic sample portfolio' : programAlignment.programName],
               ].map(([label, value]) => <div key={label}><dt className="font-semibold">{label}</dt><dd className="mt-1 leading-5 text-[var(--emos-text-secondary)]">{value}</dd></div>)}
             </dl>
-            {guidance[4] === 'Govern' || guidance[4] === 'Define Target State' ? <p className="mt-3 text-xs text-[var(--emos-text-secondary)]">{guidance[4]} · Building next</p> : <button className="mt-3 min-h-11 text-sm font-semibold text-[var(--emos-accent-text)]" onClick={() => selectStage(guidance[4] as WorkspaceStage)}>Continue to {guidance[4]}</button>}
+            {guidance[4] === 'Execute (Planned)' ? <p className="mt-3 text-xs text-[var(--emos-text-secondary)]">Execute · Planned; no migration action is available.</p> : <button className="mt-3 min-h-11 text-sm font-semibold text-[var(--emos-accent-text)]" onClick={() => selectStage(guidance[4] as WorkspaceStage)}>Continue to {guidance[4]}</button>}
           </details>}
           {currentView === 'overview' && <CommandCenter workloads={workloads} interactions={interactions} alignment={programAlignment} isLoading={isLoading} isProcessing={isProcessing} isSynthetic={route.portfolio === 'sample'} onStage={selectStage} onWorkload={handleSelectWorkloadForDna} onImport={() => setIsImportModalOpen(true)} />}
           {isLoading && currentView !== 'overview' ? <p role="status" className="p-6 text-sm">Loading your saved workspace…</p> : <>
@@ -494,7 +516,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               isProcessing={isProcessing} portfolioSource={route.portfolio}
               onPortfolioSourceChange={portfolio => navigate('portfolio', { portfolio, workloadId: null })}
             />}
-            {currentView === 'dna' && selectedWorkload && <EnterpriseDnaView workload={selectedWorkload} onBackToPortfolio={() => navigate('portfolio')} onAssess={handleAssessWorkload} isProcessing={isProcessing} />}
+            {currentView === 'dna' && selectedWorkload && <EnterpriseDnaView workload={selectedWorkload} onBackToPortfolio={() => navigate('portfolio')} onOpenEvidence={() => navigate('evidence', { workloadId: selectedWorkload.id })} onAssess={handleAssessWorkload} isProcessing={isProcessing} />}
+            {currentView === 'evidence' && selectedWorkload && <EvidenceWorkbench workload={selectedWorkload} onBack={() => navigate('dna', { workloadId: selectedWorkload.id })} onAssess={handleAssessWorkload} isProcessing={isProcessing} />}
             {currentView === 'workspace' && <ReflectionWorkspace
               activeInteraction={activeInteraction} onSaveNew={handleSaveNew} onSendFollowUp={handleSendFollowUp}
               onRetrySave={handleRetrySave} onOpenPortfolio={() => navigate('portfolio')} onOpenDna={handleOpenDna}
@@ -502,7 +525,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               stage={route.stage === 'Assess' ? 'Assess' : 'Decide'}
               workload={route.workloadId ? selectedWorkload : null}
             />}
-            {currentView === 'history' && <section className="p-4 sm:p-7"><h1 className="mb-4 text-2xl font-semibold">Decision history</h1><HistorySidebar interactions={interactions} selectedId={null} onSelect={openInteraction} onDelete={handleDelete} isLoading={isLoadingHistory} /></section>}
+            {currentView === 'history' && <section className="space-y-5 p-4 sm:p-7"><div><h1 className="text-2xl font-semibold">Decision and governance history</h1><p className="mt-1 text-sm text-[var(--emos-text-secondary)]">Trace evidence-grounded AI assessments, human decisions, exceptions and target-state baselines in your owner-scoped workspace.</p></div><HistorySidebar interactions={interactions} selectedId={null} onSelect={openInteraction} onDelete={handleDelete} isLoading={isLoadingHistory} /><div className="grid gap-4 lg:grid-cols-2"><section className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-4"><h2 className="text-sm font-semibold">Human governance records</h2>{governanceRecords.length ? <ul className="mt-3 space-y-2">{governanceRecords.map(record => <li key={record.workloadId} className="rounded-lg bg-[var(--emos-bg-tertiary)] p-3 text-xs"><strong>{workloads.find(item => item.id === record.workloadId)?.name ?? record.workloadId}</strong><span className="mt-1 block text-[var(--emos-text-secondary)]">{record.decision} · {record.approver || 'Approver not recorded'} · {record.audit.length} audit event(s)</span></li>)}</ul> : <p className="mt-3 text-xs text-[var(--emos-text-muted)]">No human governance decisions recorded.</p>}</section><section className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-4"><h2 className="text-sm font-semibold">Target-state baselines</h2>{targetStatePlans.length ? <ul className="mt-3 space-y-2">{targetStatePlans.map(plan => <li key={plan.workloadId} className="rounded-lg bg-[var(--emos-bg-tertiary)] p-3 text-xs"><strong>{workloads.find(item => item.id === plan.workloadId)?.name ?? plan.workloadId}</strong><span className="mt-1 block text-[var(--emos-text-secondary)]">{plan.status} · {plan.owner || 'Owner not recorded'} · {new Date(plan.updatedAt).toLocaleString()}</span></li>)}</ul> : <p className="mt-3 text-xs text-[var(--emos-text-muted)]">No target-state baseline recorded.</p>}</section></div></section>}
+            {currentView === 'governance' && <GovernancePriorityView
+              stage={route.stage === 'Prioritize' ? 'Prioritize' : 'Govern'} workloads={workloads} interactions={interactions} alignment={programAlignment} selectedWorkload={selectedWorkload}
+              record={selectedWorkload ? governanceRecords.find(item => item.workloadId === selectedWorkload.id) ?? null : null}
+              onSelectWorkload={workloadId => navigate('governance', { stage: route.stage === 'Prioritize' ? 'Prioritize' : 'Govern', workloadId })}
+              onSave={async record => { const saved = { ...record, userId: user.uid }; await saveGovernanceRecord(user.uid, saved); setGovernanceRecords(items => [saved, ...items.filter(item => item.workloadId !== saved.workloadId)]); }}
+              onStage={selectStage}
+            />}
             {currentView === 'plan' && <PortfolioPlanView
               workloads={workloads} interactions={interactions} alignment={programAlignment}
               section={route.stage === 'Align' ? 'align' : route.stage === 'Mobilize' ? 'mobilize' : 'waves'}
@@ -512,6 +542,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 setProgramAlignment({ ...alignment, userId: user.uid, updatedAt: new Date().toISOString() });
               }}
               onBack={() => navigate('portfolio')}
+            />}
+            {currentView === 'target' && selectedWorkload && <TargetStateView
+              workload={selectedWorkload}
+              governance={governanceRecords.find(item => item.workloadId === selectedWorkload.id) ?? null}
+              plan={targetStatePlans.find(item => item.workloadId === selectedWorkload.id) ?? {
+                userId: user.uid, workloadId: selectedWorkload.id,
+                architecturePattern: selectedWorkload.dna.targetState.find(item => item.id === 'ts2' && item.status === 'known')?.value ?? '',
+                platformPattern: selectedWorkload.dna.targetState.find(item => item.id === 'ts1' && item.status === 'known')?.value ?? '',
+                availabilityTarget: '', recoveryTarget: '', securityRequirements: '', dataMigrationApproach: '',
+                cutoverApproach: selectedWorkload.dna.targetState.find(item => item.id === 'ts3' && item.status === 'known')?.value ?? '',
+                rollbackPlan: '', owner: programAlignment.deliveryOwner, status: 'DRAFT', updatedAt: new Date(0).toISOString(),
+              }}
+              onSave={async plan => { const saved = { ...plan, userId: user.uid }; await saveTargetStatePlan(user.uid, saved); setTargetStatePlans(items => [saved, ...items.filter(item => item.workloadId !== saved.workloadId)]); }}
+              onBack={() => selectStage('Mobilize')}
             />}
           </>}
         </>}

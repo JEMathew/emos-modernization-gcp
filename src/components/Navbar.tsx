@@ -18,9 +18,9 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ user, currentView, assessmentCount, onNavigate, onNewAssessment, onOpenWalkthrough }) => {
   const items = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, target: 'overview', active: currentView === 'overview' },
-    { id: 'portfolio', label: 'Portfolio', icon: Layers, target: 'portfolio', active: currentView === 'portfolio' || currentView === 'dna' },
-    { id: 'decision', label: 'Decisions', icon: Sparkles, target: 'decision-intelligence', active: currentView === 'workspace' },
-    { id: 'plan', label: 'Plan', icon: Route, target: 'plan', active: currentView === 'plan' },
+    { id: 'portfolio', label: 'Portfolio', icon: Layers, target: 'portfolio', active: currentView === 'portfolio' || currentView === 'dna' || currentView === 'evidence' },
+    { id: 'decision', label: 'Decisions', icon: Sparkles, target: 'decision-intelligence', active: currentView === 'workspace' || currentView === 'governance' },
+    { id: 'plan', label: 'Plan', icon: Route, target: 'plan', active: currentView === 'plan' || currentView === 'target' },
     { id: 'history', label: 'History', icon: FileText, target: 'assessments', active: currentView === 'history' },
   ] as const;
 

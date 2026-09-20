@@ -33,6 +33,7 @@ export const PortfolioPlanView: React.FC<PortfolioPlanViewProps> = ({
   const readyCount = planned.filter((item) => item.readiness === 'READY').length;
   const assessedCount = planned.filter((item) => item.disposition !== 'Assessment required').length;
   const mobilizationReady = readiness.filter((item) => item.status === 'READY').length;
+  const verifiedCostBaselines = workloads.filter((workload) => workload.dna.economics.find((field) => field.id === 'e3')?.status === 'known').length;
 
   const save = async () => {
     setSaveState('saving');
@@ -140,6 +141,14 @@ export const PortfolioPlanView: React.FC<PortfolioPlanViewProps> = ({
         <section className="space-y-4">
           <div className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-4 text-xs leading-relaxed text-[var(--emos-text-secondary)]">
             <strong className="text-[var(--emos-text-primary)]">Deterministic sequencing:</strong> governed 6R disposition, business criticality, dependency complexity, and verified evidence determine placement. Missing assessments and evidence stay visible as gates.
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ['Roadmap', `${waves.length} governed waves`, 'Sequencing recalculates from evidence and decisions.'],
+              ['Capacity owner', draft.deliveryOwner || 'Action required', 'Team capacity is not inferred from inventory.'],
+              ['Milestones', `${waves.length + 1} control points`, 'One approval point per wave plus target-state baseline.'],
+              ['Cost-benefit baseline', `${verifiedCostBaselines}/${workloads.length} verified`, 'Funding comparison stays gated when TCO is missing.'],
+            ].map(([label, value, detail]) => <article key={label} className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-4"><p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--emos-text-muted)]">{label}</p><p className="mt-1 text-sm font-semibold">{value}</p><p className="mt-2 text-[11px] text-[var(--emos-text-secondary)]">{detail}</p></article>)}
           </div>
           <div className="grid gap-4 lg:grid-cols-3">
             {waves.map((wave) => (
