@@ -3,6 +3,7 @@ import { useReducedMotion } from 'motion/react';
 
 const ASSET_ROOT = '/assets/emos';
 const CONCEPT_NOTICE = 'Product concept visuals using synthetic enterprise data.';
+const PRODUCTION_CAPTURE_NOTICE = 'Captured from the live EMOS public evaluation sandbox using synthetic enterprise data.';
 
 export function EmosHeroVisual() {
   const reduceMotion = useReducedMotion();
@@ -12,19 +13,19 @@ export function EmosHeroVisual() {
     <figure className="relative overflow-hidden rounded-[2rem] border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-3 shadow-2xl shadow-black/15">
       <div className="relative overflow-hidden rounded-[1.45rem] bg-[#0b1220]">
         <img
-          src={`${ASSET_ROOT}/emos-landing-hero-v1.png`}
-          alt="EMOS product concept showing an evidence-led modernization overview."
-          width={1376}
-          height={768}
+          src={`${ASSET_ROOT}/emos-product-hero-production-v2.png`}
+          alt="Live EMOS evaluation sandbox showing an evidence-led modernization decision."
+          width={1920}
+          height={1080}
           fetchPriority="high"
           className="block h-auto w-full"
         />
         {reduceMotion === false && !videoFailed && (
           <video
             className="absolute inset-0 h-full w-full object-contain"
-            src={`${ASSET_ROOT}/emos-hero-animation-v1.mp4`}
-            poster={`${ASSET_ROOT}/emos-landing-hero-v1.png`}
-            aria-label="Silent EMOS concept animation"
+            src={`${ASSET_ROOT}/emos-product-demo-v2.mp4`}
+            poster={`${ASSET_ROOT}/emos-product-hero-production-v2.png`}
+            aria-label="Silent walkthrough of the live EMOS public evaluation sandbox"
             aria-describedby="emos-hero-concept-caption"
             autoPlay
             muted
@@ -37,7 +38,7 @@ export function EmosHeroVisual() {
         )}
       </div>
       <figcaption id="emos-hero-concept-caption" className="px-2 pb-2 pt-4 text-xs leading-5 text-[var(--emos-text-muted)]">
-        {CONCEPT_NOTICE} Illustrative preview of the product vision.
+        {PRODUCTION_CAPTURE_NOTICE} The walkthrough shows evidence quality, alternatives and the human decision gate.
       </figcaption>
     </figure>
   );
