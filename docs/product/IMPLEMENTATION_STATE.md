@@ -1,13 +1,14 @@
 # EMOS integrated MVP implementation state
 
-Updated: 20 September 2026. This file records the integrated release candidate; it does not imply product-owner approval or an official hackathon score.
+Updated: 21 September 2026. This file records the production MVP; it does not imply an official hackathon judging score.
 
 ## Release identity
 
 - Repository: `JEMathew/emos-modernization-gcp`
 - Branch: `codex/emos-visual-assets`
 - Visual-alignment baseline: `47d9809058b782f3d578a52426df507d6ccaa696`, immutable tag `emos-packet-2-5-visual-alignment-20260920`.
-- Integrated candidate tag: `emos-integrated-mvp-20260920` after the release commit is created. Do not move the tag.
+- Integrated candidate tag: `emos-integrated-mvp-20260920`. Production media tag: `emos-production-media-v2-20260921`. Do not move either tag.
+- Deployed source: `ed9afe275b918e613c770afb127c56febf9cc03d`; CI run `35530543112`; Cloud Run revision `gemini-reflection-journal-media-ed9afe2` at 100% traffic.
 - Production target: `gemini-reflection-journal`, project `codev-0326`, region `asia-southeast1`, custom domain `https://emos-modernization.ai.studio`.
 - Code rollback: revert the integrated commit or redeploy the immutable visual-alignment baseline after reviewing data/rules compatibility. Never hard-reset a working tree containing user changes.
 - Cloud rollback: record the prior healthy Cloud Run revision before deployment and restore traffic to it if smoke verification fails.
@@ -75,13 +76,13 @@ Known incomplete sub-stages remain labelled `Building next`: policies/constraint
 
 ## Verification snapshot
 
-- PASS — Type/static checks: `npm run lint`.
-- PASS — Unit/API/component/navigation/security tests: 214 tests across 21 files.
+- PASS — Type/static checks and production build for media commit `ed9afe2`.
+- PASS — Unit/API/component/navigation/security and Java 21 Firestore emulator suites in CI run `35530543112`.
 - PASS — Production build. The existing main-chunk warning remains (about 1.68 MB minified / 438 KB gzip).
 - PASS — Local synthetic browser review for desktop, 390 px and 320 px; new deep routes, light/dark/system behavior and no page-level horizontal overflow reviewed.
-- BLOCKED — Firestore Emulator Suite: Java runtime is absent locally, so this cannot be called PASS. Candidate CI or a Java-enabled environment must run it.
-- PARTIAL — Authentication, live Firestore persistence and real Gemini calls have automated contracts but require exact production-revision smoke evidence.
-- PASS — Approved media hashes remain unchanged before the final real-product demo treatment.
+- PASS — Firestore Emulator Suite ran in CI with Java 21; active production ruleset is `84847c06-eb45-422d-87b9-2d8545fa3623`.
+- PASS — Authenticated production assessment/follow-up/history and governance/Target State persistence smoke; optional second-account live isolation remains additional evidence.
+- PASS — Four approved v1 media hashes remain unchanged; two versioned real-production v2 assets were added and verified.
 
 ## Approved media retained
 
@@ -90,15 +91,20 @@ Known incomplete sub-stages remain labelled `Building next`: policies/constraint
 - `emos-command-center-dashboard-v1.png` — `555fee90bf4b4dd7d6b0c83f9e326c19292eee7ad0439af878d36550cb24061d`
 - `emos-enterprise-dna-v1.png` — `68329cbcd2e52498a65585cfc4bd3f47348e912586d757903a43e1ff16b45fff`
 
-The landing page uses the four assets as concept/atmospheric media only. Functional proof must use real coded-product captures. Customer-facing product copy is provider-neutral; Google implementation evidence remains in technical documentation.
+The four v1 files remain retained and unchanged. The landing now uses these additional real-product captures:
+
+- `emos-product-hero-production-v2.png` — `7fd912ddc82651684e3f9d485a7c805433d9b64c07a20880fdeadca12831e1a6`
+- `emos-product-demo-v2.mp4` — `ea048e4369f792481447543aae410b09568a9df4e2c0cfc458e99bf3558bfbb7`
+
+The v2 files were assembled in Higgsedit from the real public production sandbox and are labelled as synthetic-data captures. Command Center and Enterprise DNA v1 remain concept previews. Customer-facing product copy is provider-neutral; Google implementation evidence remains in technical documentation.
 
 ## Known limitations and next action
 
 - No live enterprise connectors, 5,000-asset synchronous capacity claim, organization tenancy/RBAC, autonomous approval, automated migration execution or operational stages 10–15.
 - File intake supports bounded CSV/flat JSON only. XLSX and connector catalog entries remain Planned.
 - Target-state and governance approvals are owner-scoped MVP records; they are not multi-role enterprise workflow enforcement.
-- Firestore rules must be deployed before the client because old rules do not admit the new governance/target-state documents.
-- Run candidate CI with Java 21, then perform authenticated production smoke tests for sign-in, intake persistence, assessment/follow-up/history, governance and target-state save/reopen. Record the deployed revision and prior rollback revision in the integrated build report.
+- Firestore rules must always be deployed before any client that requires a new document shape. The current ruleset preceded this production release; the media-only commit changed no rules.
+- Rollback target is `gemini-reflection-journal-cache-b7915d4`. It was not used because the public and authenticated production smoke matrices passed.
 
 ## Cross-tool continuation
 

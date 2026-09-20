@@ -1,4 +1,4 @@
-# EMOS integrated MVP build result — 20 September 2026
+# EMOS integrated MVP production result — 21 September 2026
 
 ## Outcome
 
@@ -24,17 +24,17 @@ The server registers one EMOS Orchestrator and five bounded specialists: Intake 
 | Responsive behavior | PASS (reviewed) | Desktop plus 390 px and 320 px, no reviewed page overflow |
 | Themes | PASS (reviewed) | Light, Dark and System behavior retained |
 | Keyboard/focus/accessibility | PASS (automated candidate) / PARTIAL (formal audit) | Keyboard theme controls, dialog focus/error behavior and labelled navigation; no formal AT audit |
-| Intake/parser/persistence | PASS (unit/component) / PARTIAL (live) | Bounds, invalid rows, normalization, atomic/idempotent contracts; production persistence pending |
-| Authentication | PASS (automated) / PARTIAL (live) | 16 auth tests and workspace gate; production sign-in pending |
-| Firestore ownership rules | BLOCKED (emulator) | Java runtime unavailable locally; source and mock contracts inspected |
+| Intake/parser/persistence | PASS (unit/component) / PARTIAL (file-chooser confirmation) | Bounds, invalid rows, normalization, atomic/idempotent contracts; governance and Target State records reopened in production; local file selection remained browser-policy blocked |
+| Authentication | PASS | Automated contracts plus authenticated production route matrix and persisted-record reopen |
+| Firestore ownership rules | PASS (CI) / PARTIAL (two-account live proof) | Java 21 emulator suite passed in CI run `35530543112`; production owner records reopened; optional second-account live proof remains |
 | API and AI guardrails | PASS (automated) | Auth, schemas, prompt injection, redaction, empty/malformed output and safe rendering tests |
 | Production build | PASS | Vite and server bundle; known main-chunk warning |
 | Browser golden path | PASS (synthetic) | Coded screens reviewed through Target State; no Firebase/AI calls in fixture |
-| Higgsfield fidelity | PASS (coded reference alignment) / PARTIAL (final demo) | Real product remains source of truth; final live capture/motion evidence pending |
-| Hackathon requirements | PARTIAL | Core requirements implemented; Studio authorship, exact live evidence and official submission remain |
-| Live-service smoke | PENDING | To run after deploy |
-| Git/GCP deployment | PENDING | To record after push/deploy |
-| Rollback verification | PASS (code baseline) / PENDING (Cloud Run) | Immutable prior tag exists; prior revision/traffic test pending |
+| Higgsfield fidelity | PASS | Four real production sandbox captures were assembled in Higgsedit; no fictional UI was generated |
+| Hackathon requirements | PASS for implemented product / PARTIAL for owner submission evidence | Core requirements and unique enhancement are production-smoked; Studio screenshot, social/write-up and official form remain |
+| Live-service smoke | PASS | Public and authenticated custom-domain matrices passed through Define Target State |
+| Git/GCP deployment | PASS | Commit `ed9afe2`, tag `emos-production-media-v2-20260921`, CI `35530543112`, revision `gemini-reflection-journal-media-ed9afe2` |
+| Rollback verification | READY, NOT USED | `gemini-reflection-journal-cache-b7915d4` recorded at 100% before release; all smoke gates passed |
 
 ## Security evidence
 
@@ -42,8 +42,24 @@ Firebase identity gates the workspace; Firestore paths are owner-scoped; model k
 
 ## Visual assets and demo
 
-All four approved assets are preserved with unchanged hashes. The landing uses them as visual context, not proof of functionality. Final demo treatment will use Higgsedit on real product captures after the candidate is live; replacement generated UI is intentionally avoided.
+All four approved v1 assets remain preserved with unchanged hashes. The landing hero now uses two additional versioned, real-product outputs assembled in Higgsedit from the live public production sandbox:
+
+- `emos-product-hero-production-v2.png` — SHA-256 `7fd912ddc82651684e3f9d485a7c805433d9b64c07a20880fdeadca12831e1a6`, 1920×1080.
+- `emos-product-demo-v2.mp4` — SHA-256 `ea048e4369f792481447543aae410b09568a9df4e2c0cfc458e99bf3558bfbb7`, 1920×1080, 16 seconds, silent.
+
+The product caption states that these are live public-sandbox captures using synthetic enterprise data. The Command Center and Enterprise DNA v1 visuals remain concept previews.
 
 ## Release and rollback record
 
-Candidate commit/tag, remote push, Firestore rule deployment, Cloud Run revision, domain smoke, Higgsedit media and prior healthy rollback revision will be appended after publication. A failed production smoke requires traffic restoration to the recorded prior revision.
+| Gate | Result |
+|---|---|
+| Pushed source | `ed9afe275b918e613c770afb127c56febf9cc03d`; immutable tag `emos-production-media-v2-20260921` |
+| CI | Guardrail release gate `35530543112` passed, including Java 21 Firestore emulator and build |
+| Firestore rules | Active ruleset `84847c06-eb45-422d-87b9-2d8545fa3623`; source SHA-256 `75d9b4f20d991ae18d83001a7de245e19bcabfe62a681e517eca897a156b77ff` |
+| Prior healthy rollback | `gemini-reflection-journal-cache-b7915d4`, recorded at 100% traffic |
+| Production | `gemini-reflection-journal-media-ed9afe2`, Ready, 100% traffic at `https://emos-modernization.ai.studio` |
+| Public smoke | PASS for landing, sandbox, learning, trust, stable MVP routes, health, auth boundary and v2 media |
+| Authenticated smoke | PASS for route matrix, saved assessment/follow-up history, named `MORE EVIDENCE` record, Plan/Mobilize and Target State reopen |
+| Rollback action | Not invoked; no release gate failed |
+
+Residuals: the production file chooser was not driven because browser policy blocked local file selection; parser, limits and UI gates remain automated-test-backed. Official submission still needs the owner-supplied AI Studio screenshot, optional second-account live isolation proof, social/write-up link and form submission.

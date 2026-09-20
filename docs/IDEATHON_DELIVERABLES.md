@@ -18,9 +18,9 @@ Do not treat one state as proof of another.
 | Challenge requirement | Status before final publication | Product behavior | Source | Verification |
 |---|---|---|---|---|
 | Google AI Studio security directives | Configured and externally verified on 14 September 2026; durable submission screenshot pending | The build constitution covers threat modelling, authentication, Firestore isolation, secret handling, untrusted content and release gates | [`AI_STUDIO_SECURITY_CONSTITUTION.md`](AI_STUDIO_SECURITY_CONSTITUTION.md) | Saved text was reopened and matched to the canonical 4,654-character source; retain a sanitized Studio screenshot for submission |
-| Firebase authentication | Implemented and locally tested | Google Sign-In; protected APIs verify the Firebase ID token; popup and mobile redirect paths are supported | `src/lib/firebase.ts`, `src/lib/gemini.ts`, `server.ts`, `src/App.tsx` | `tests/auth.android.test.ts`, `tests/api.chat.contract.test.ts`, `tests/public.routes.test.tsx` |
-| Multi-turn Gemini interaction | Implemented and locally tested | Follow-up turns preserve bounded conversation context, call Gemini through the authenticated server and persist the updated thread | `src/components/Dashboard.tsx`, `src/lib/gemini.ts`, `server.ts` | API contract, schema and rendering suites |
-| Isolated Cloud Firestore storage | Implemented; rules suite awaits CI rerun for this commit | User profiles, assessment threads, imported workloads and program alignment use owner-scoped paths and deny unmatched access | `firestore.rules`, `src/lib/firebase.ts` | `tests/firestore.rules.test.ts`; GitHub Actions release gate |
+| Firebase authentication | Implemented, tested and production-smoked | Google Sign-In; protected APIs verify the Firebase ID token; popup and mobile redirect paths are supported | `src/lib/firebase.ts`, `src/lib/gemini.ts`, `server.ts`, `src/App.tsx` | Automated auth/API/public-route suites plus authenticated production route matrix |
+| Multi-turn Gemini interaction | Implemented, tested and production-smoked | Follow-up turns preserve bounded conversation context, call Gemini through the authenticated server and persist the updated thread | `src/components/Dashboard.tsx`, `src/lib/gemini.ts`, `server.ts` | Live assessment `assessment_1789925895321_i0whb`, follow-up and History reopen |
+| Isolated Cloud Firestore storage | Implemented and rules-tested; optional two-account live proof remains | User profiles, assessment threads, imported workloads and program alignment use owner-scoped paths and deny unmatched access | `firestore.rules`, `src/lib/firebase.ts` | Java 21 emulator suite in CI `35530543112`; live governance and Target State save/reopen |
 | Google Cloud Secret Manager | Implemented and externally verified on 14 September 2026, including least-privilege cleanup | Browser code receives no Gemini key; server reads `GEMINI_API_KEY` from the runtime; Cloud Run injects it from Secret Manager | `server.ts`, `README.md` | Service `gemini-reflection-journal` maps `GEMINI_API_KEY` to `emos-gemini-api-key`; the dedicated EMOS runtime retains `Secret Manager Secret Accessor`, and the redundant secret-level grant to the default compute account was removed |
 | Original feature enhancement | Implemented and locally tested | Enterprise DNA, deterministic completeness, canonical 6R reasoning, vendor neutrality, critical-gap readiness, evidence plans, wave planning and executive artifacts | `src/lib/readiness.ts`, `src/lib/guardrails.ts`, `src/lib/wavePlanner.ts`, `src/components/PublicSandboxPage.tsx` | Readiness, guardrail, wave-planning and public-route suites |
 
@@ -47,7 +47,7 @@ Complete this section only after the exact candidate commit is published.
 
 ### Cloud Run and Secret Manager
 
-- [ ] Record the deployed commit: `PENDING` until the current candidate is published.
+- [x] Record the deployed commit: `ed9afe275b918e613c770afb127c56febf9cc03d`; revision `gemini-reflection-journal-media-ed9afe2`.
 - [x] Record the live service: `gemini-reflection-journal` in project `codev-0326`, region `asia-southeast1`, serving `https://emos-modernization.ai.studio/`; verified healthy on 14 September 2026.
 - [x] Verify the Cloud Run environment entry shows `GEMINI_API_KEY` uses `valueFrom.secretKeyRef` with secret `emos-gemini-api-key`; verified from the deployed service YAML on 14 September 2026 without viewing the value.
 - [x] Verify the dedicated runtime service account has `roles/secretmanager.secretAccessor`; confirmed at the secret level on 14 September 2026.
@@ -56,10 +56,10 @@ Complete this section only after the exact candidate commit is published.
 
 ### Firebase and CI
 
-- [ ] GitHub Actions release gate is green for the deployed commit.
-- [ ] Firestore emulator owner-isolation suite passes for that commit.
-- [ ] Live Google Sign-In returns the user to the authenticated product.
-- [ ] A saved assessment and follow-up remain visible only under the authenticated account used for the test.
+- [x] GitHub Actions release gate is green for the deployed commit: `35530543112`.
+- [x] Firestore emulator owner-isolation suite passes for that commit using Java 21.
+- [x] Live Google Sign-In returned the user to the authenticated product during the production release.
+- [x] A saved assessment and follow-up remained visible under the authenticated account used for the test; optional second-account live denial proof remains.
 
 ### Public challenge submission
 
@@ -75,9 +75,9 @@ Complete this section only after the exact candidate commit is published.
 - Unit, API contract and UI suites: passed locally; see the dated work result rather than relying on a permanent hardcoded count.
 - Production build: passed locally.
 - Production dependency audit: 0 vulnerabilities on 10 September 2026.
-- Firestore rules: test suite is committed and release-gated in GitHub Actions; the current Mac lacks the Java runtime needed to rerun it locally.
-- Public repository: verified reachable on 14 September 2026. The landing-page clarity changes require their own green CI run before publication.
-- Deployment: live Cloud Run service, campaign label, Secret Manager `secretKeyRef`, dedicated runtime access and least-privilege cleanup are externally verified on 14 September 2026. The exact new deployed commit remains pending.
+- Firestore rules: Java 21 emulator suite passed in GitHub Actions run `35530543112`; active ruleset `84847c06-eb45-422d-87b9-2d8545fa3623` preceded the application deployment.
+- Public repository: branch and immutable tag `emos-production-media-v2-20260921` were pushed on 21 September 2026.
+- Deployment: `gemini-reflection-journal-media-ed9afe2` is Ready at 100% traffic on `https://emos-modernization.ai.studio`; rollback target `gemini-reflection-journal-cache-b7915d4` was recorded before release.
 
 ## Original-feature explanation
 
