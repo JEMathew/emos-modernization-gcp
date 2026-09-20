@@ -22,7 +22,7 @@ This index maps current product claims to implementation and verification eviden
 ## Verification snapshot
 
 - TypeScript: `npm run lint`
-- Unit/API/security/UI suites: passed in GitHub Actions run `35530543112` for commit `ed9afe275b918e613c770afb127c56febf9cc03d`
+- Unit/API/security/UI suites: passed in GitHub Actions run `35530543112` for commit `ed9afe275b918e613c770afb127c56febf9cc03d`; dated results are recorded here and in the relevant `work_results/` report rather than maintained as a permanent count
 - Production bundle: `npm run build`
 - Production dependency audit: `npm audit --omit=dev --audit-level=moderate` reports 0 vulnerabilities
 - Firestore rules: Java 21 emulator suite passed in CI; active production ruleset is `84847c06-eb45-422d-87b9-2d8545fa3623`
