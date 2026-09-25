@@ -346,13 +346,19 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByRole('heading', { name: /The entire modernization journey—built in defensible stages/i })).toBeInTheDocument();
 
     chooseMenuItem('About', /^Product Builder$/i);
-    expect(screen.getByText(/Product Builder Perspective/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/15\+ Years/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: /Why EMOS exists/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/15\+ years taking enterprise products from opportunity to scale/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/16\+ Years/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/3\+ Years Building, Shipping and Launching Products into New Markets/i)).toBeInTheDocument();
-    expect(screen.getByText(/Modern Data Platforms: Cloud Data Warehouse on GCP and Data Lakehouse on AWS/i)).toBeInTheDocument();
-    expect(screen.getByText(/1\+ Year Leading Data Products/i)).toBeInTheDocument();
-    expect(screen.getByText(/Established the First Product Management Community of Practice at Boeing India and Tally/i)).toBeInTheDocument();
+    expect(screen.getByText(/Business value & opportunity validation/i)).toBeInTheDocument();
+    expect(screen.getByText(/Owned a 0→1 modernization-governance product end to end/i)).toBeInTheDocument();
+    expect(screen.getByText(/EMOS grew from that problem/i)).toBeInTheDocument();
+    const whyEmosVideo = screen.getByLabelText(/Why EMOS exists narrated video/i);
+    expect(whyEmosVideo).toHaveAttribute('preload', 'none');
+    expect(whyEmosVideo).toHaveAttribute('poster', '/assets/emos/emos-why-exists-poster.webp');
+    expect(whyEmosVideo.querySelector('source[type="video/webm"]')).toHaveAttribute('src', '/assets/emos/emos-why-exists.webm');
+    expect(whyEmosVideo.querySelector('source[type="video/mp4"]')).toHaveAttribute('src', '/assets/emos/emos-why-exists.mp4');
+    expect(whyEmosVideo.querySelector('track[kind="captions"]')).toHaveAttribute('src', '/assets/emos/emos-why-captions.en.vtt');
+    expect(whyEmosVideo.querySelector('track[kind="captions"]')).toHaveAttribute('default');
     expect(screen.getByRole('link', { name: /Connect With Jincen E Mathew on LinkedIn/i })).toHaveAttribute(
       'href',
       'https://www.linkedin.com/in/jincenmathew/',
