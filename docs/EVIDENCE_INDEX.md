@@ -27,7 +27,7 @@ This index maps current product claims to implementation and verification eviden
 - Production dependency audit: `npm audit --omit=dev --audit-level=moderate` reports 0 vulnerabilities
 - Firestore rules: Java 21 emulator suite passed in CI; active production ruleset is `84847c06-eb45-422d-87b9-2d8545fa3623`
 - GitHub Actions: `.github/workflows/guardrail-release-gate.yml` installs Java 21 and runs the full gate on review branches, pull requests, and `main`
-- Ideathon submission map: `docs/IDEATHON_DELIVERABLES.md` distinguishes verified deployment evidence from the remaining CI and live account-isolation checks
+- Deployment verification: internal delivery records distinguish verified deployment evidence from the remaining CI and live account-isolation checks
 
 ## Production release snapshot — 21 September 2026
 
@@ -48,9 +48,9 @@ This index maps current product claims to implementation and verification eviden
 - Candidate and live proof: landing, sandbox, learning, trust, `/app`, health, optimized asset headers, 401 API boundary, and authenticated Overview/Portfolio/History route mounts passed. Desktop defers then plays; mobile remains static until user request; no console errors or horizontal overflow were found at 390, 768, or 1440 pixels. Appearance modes Light, Dark and System were reviewed locally.
 - Firestore: `firestore.rules` SHA-256 remains `75d9b4f20d991ae18d83001a7de245e19bcabfe62a681e517eca897a156b77ff`; no rules deploy was performed. The local emulator was blocked by missing Java, while CI passed its Java 21 emulator gate.
 
-## Hackathon evidence closure — 21 September 2026
+## Security evidence closure — 21 September 2026
 
-- AI Studio: sanitized owner-supplied captures identify the EMOS workspace and configured Custom instructions. The exported directives substantively cover the challenge's security-constitution requirement. They are not an exact copy of `docs/AI_STUDIO_SECURITY_CONSTITUTION.md`, and duplicated generic guidance is disclosed rather than normalized after the fact.
+- AI Studio: sanitized owner-supplied captures identify the EMOS workspace and configured Custom instructions. The exported directives substantively cover the security-constitution requirement. They are not an exact copy of `docs/AI_STUDIO_SECURITY_CONSTITUTION.md`, and duplicated generic guidance is disclosed rather than normalized after the fact.
 - Two-account isolation: Account A reopened the saved synthetic Customer Analytics assessment with two follow-up exchanges. Account B showed no assessments, governance records or target-state baselines; Account A's known assessment deep link was unavailable. A production Firestore diagnostic authenticated as Account B, passed an owner create/read control, and received `PERMISSION_DENIED` / HTTP 403 for direct Account A read and update requests.
 - Integrity diagnosis: the first unchanged-record comparator returned a false failure because raw JSON key order varied. The record's server update time predates the probe and three post-probe reads were semantically equal with one canonical content fingerprint. The original incomplete result and diagnosis are retained in `work_results/EMOS-LIVE-ISOLATION-EVIDENCE-20260921.md`.
 - Evidence contains only synthetic data and omits tokens, emails, user identifiers, project identifiers, raw database paths and private URLs.

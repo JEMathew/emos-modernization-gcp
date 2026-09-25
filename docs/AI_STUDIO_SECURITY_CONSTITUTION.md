@@ -4,7 +4,7 @@
 
 This is the canonical instruction set for the Google AI Studio workspace used to build EMOS. It tells the builder how to treat identity, enterprise evidence, generative output, persistence and secrets before producing code.
 
-The checked-in text makes the configuration inspectable. During the release audit on 14 September 2026, the EMOS Google AI Studio Custom Instructions field was found empty. The canonical instruction set below was then applied, saved and reopened in that workspace; the reopened value matched this file exactly (4,654 characters). A durable, sanitized screenshot that shows both the EMOS workspace identity and the instructions remains required for the final submission artifact.
+The checked-in text makes the configuration inspectable. During the release audit on 14 September 2026, the EMOS Google AI Studio Custom Instructions field was found empty. The canonical instruction set below was then applied, saved and reopened in that workspace; the reopened value matched this file exactly (4,654 characters). A durable, sanitized screenshot that shows both the EMOS workspace identity and the instructions remains required for external verification.
 
 ## Custom instructions
 
@@ -68,7 +68,7 @@ Engineering and release gates:
 If a requested feature conflicts with these instructions, stop and surface the conflict before weakening a control.
 ```
 
-## Configuration evidence required for submission
+## Configuration evidence for external verification
 
 Capture one screenshot from Google AI Studio that shows:
 
@@ -77,6 +77,6 @@ Capture one screenshot from Google AI Studio that shows:
 - enough of the opening and security sections to identify this constitution;
 - no credentials, API keys, tokens, private data or unrelated account information.
 
-Record the verification date and deployed commit in the [Ideathon evidence pack](IDEATHON_DELIVERABLES.md). If the configured text differs from this file, reconcile the difference before submission.
+Record the verification date and deployed commit in the internal delivery evidence. If the configured text differs from this file, reconcile the difference before external verification.
 
-Configuration last visually verified: **14 September 2026**. Exact text match after reopen: **verified**. Durable submission screenshot showing the EMOS workspace identity: **pending**.
+Configuration last visually verified: **14 September 2026**. Exact text match after reopen: **verified**. Durable verification screenshot showing the EMOS workspace identity: **pending**.

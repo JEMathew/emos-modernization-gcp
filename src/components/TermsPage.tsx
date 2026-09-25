@@ -128,7 +128,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ user, onNavigate }) => {
                 Usage Terms
               </span>
               <span className="text-xs text-[var(--emos-text-muted)] font-mono">
-                EMOS Ideathon Demonstration
+                EMOS Beta Prototype
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-serif font-bold text-[var(--emos-text-primary)] tracking-tight">
@@ -144,10 +144,10 @@ export const TermsPage: React.FC<TermsPageProps> = ({ user, onNavigate }) => {
             <div className="p-4 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] space-y-1.5">
               <div className="flex items-center gap-2 text-xs font-semibold text-[var(--emos-text-primary)]">
                 <FileCheck2 className="w-4 h-4 text-[var(--emos-accent)] shrink-0" />
-                <span>Ideathon Demonstration</span>
+                <span>Beta Prototype</span>
               </div>
               <p className="text-xs text-[var(--emos-text-secondary)] leading-relaxed">
-                EMOS is an AI-native decision intelligence prototype created for ideathon evaluation and concept exploration.
+                EMOS is an AI-native decision intelligence prototype available for product evaluation and concept exploration.
               </p>
             </div>
             <div className="p-4 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] space-y-1.5">
@@ -167,10 +167,10 @@ export const TermsPage: React.FC<TermsPageProps> = ({ user, onNavigate }) => {
             <section id="terms-section-demonstration" className="p-6 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] space-y-3">
               <div className="flex items-center gap-2.5 text-base font-serif font-bold text-[var(--emos-text-primary)]">
                 <Scale className="w-5 h-5 text-[var(--emos-accent)]" />
-                <h2>1. Decision-Support and Ideathon Demonstration</h2>
+                <h2>1. Decision-Support Beta</h2>
               </div>
               <p>
-                The Enterprise Modernization Operating System (EMOS) is designed and made available as a <strong>decision-support and ideathon demonstration prototype</strong>.
+                The Enterprise Modernization Operating System (EMOS) is designed and made available as a <strong>decision-support Beta prototype</strong>.
               </p>
               <ul className="list-disc list-inside space-y-1 pl-1 text-xs sm:text-sm">
                 <li>EMOS illustrates how AI-assisted workflows, Enterprise DNA evidence completeness tracking, and multi-turn architectural inquiry can structure legacy migration evaluations.</li>
@@ -218,7 +218,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ user, onNavigate }) => {
                 <h2>4. Acceptable Use Policy</h2>
               </div>
               <p>
-                You agree to use EMOS solely for lawful demonstration, evaluation, and ideathon review purposes. You agree not to:
+                You agree to use EMOS solely for lawful demonstration and evaluation purposes. You agree not to:
               </p>
               <ul className="list-disc list-inside space-y-1 pl-1 text-xs sm:text-sm">
                 <li>Attempt to bypass, subvert, or probe authentication controls, authorization checks, or Firestore security rules.</li>
@@ -264,7 +264,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ user, onNavigate }) => {
                   </a>
                 </div>
                 <p className="text-xs text-[var(--emos-text-muted)]">
-                  Project: EMOS (Enterprise Modernization Operating System) • Ideathon Demonstration
+                  Project: EMOS (Enterprise Modernization Operating System)
                 </p>
               </div>
             </section>
@@ -279,7 +279,6 @@ export const TermsPage: React.FC<TermsPageProps> = ({ user, onNavigate }) => {
             <span className="font-serif font-semibold text-[var(--emos-text-primary)]">EMOS</span>
             <span>—</span>
             <span>Enterprise Modernization Operating System</span>
-            <span className="hidden md:inline">• Ideathon Demonstration</span>
           </div>
           <div className="flex items-center gap-6">
             <button

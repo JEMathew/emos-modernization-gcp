@@ -5,11 +5,10 @@ import { describe, expect, it } from 'vitest';
 const readRepositoryFile = (path: string) =>
   readFileSync(resolve(process.cwd(), path), 'utf8');
 
-describe('Ideathon evidence documentation', () => {
-  it('links the evidence pack and security constitution from the README', () => {
+describe('engineering evidence documentation', () => {
+  it('links current security and evidence references from the README', () => {
     const readme = readRepositoryFile('README.md');
 
-    expect(readme).toContain('docs/IDEATHON_DELIVERABLES.md');
     expect(readme).toContain('docs/AI_STUDIO_SECURITY_CONSTITUTION.md');
     expect(readme).toContain('docs/EVIDENCE_INDEX.md');
     expect(readme).toContain('claude/messaging-source.md');
@@ -27,7 +26,7 @@ describe('Ideathon evidence documentation', () => {
     expect(constitution).toContain('no unresolved critical evidence gaps');
   });
 
-  it('maps every challenge requirement and distinguishes verified from pending external proof', () => {
+  it('keeps the historical delivery evidence complete and external proof explicitly pending', () => {
     const deliverables = readRepositoryFile('docs/IDEATHON_DELIVERABLES.md');
 
     for (const requirement of [
