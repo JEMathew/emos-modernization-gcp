@@ -441,7 +441,7 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
             /* View 2: Technical Validation (Progressive Disclosure) */
             <div className="space-y-4">
               <div className="rounded-xl border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] p-3 text-xs leading-relaxed text-[var(--emos-text-secondary)]">
-                <strong className="text-[var(--emos-text-primary)]">For evaluators and technical reviewers.</strong> This evidence supports hackathon judging and security review; it is not part of the normal end-user assessment workflow.
+                <strong className="text-[var(--emos-text-primary)]">For evaluators and technical reviewers.</strong> This evidence supports technical validation and security review; it is not part of the normal end-user assessment workflow.
               </div>
               {/* Secondary Sub-Tabs */}
               <div className="flex gap-2 p-1 bg-[var(--emos-bg-tertiary)] rounded-xl border border-[var(--emos-border-subtle)] text-xs">
