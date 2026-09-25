@@ -1,6 +1,6 @@
 # EMOS — Enterprise Modernization Operating System
 
-> **Ideathon Release: Evidence, Decision and Planning Foundation**
+> **Beta v1.0: Evidence, Decision and Planning Foundation**
 >
 > **One operating system for the entire enterprise modernization journey.**
 >
@@ -14,7 +14,7 @@ The broader EMOS vision extends an approved modernization disposition through go
 
 Enterprise modernization teams routinely make multi-million dollar application and data-platform decisions using information fragmented across legacy inventories, architectural tribal knowledge, partial dependency maps, operational cost signals, compliance constraints, and subjective expert judgment.
 
-**EMOS Decision Intelligence** addresses this critical bottleneck. Rather than attempting to build the entire modernization operating system in one challenge, this release proves a secure, production-deployed vertical slice of EMOS focused on modernization Decision Intelligence. It structures legacy workload evidence into a rigorous **Enterprise DNA**, calculates deterministic evidence completeness, and leverages **Google Gemini** to produce explainable, vendor-neutral modernization assessments governed by the canonical **6R framework**.
+**EMOS Decision Intelligence** addresses this critical bottleneck. This Beta release proves a secure, production-deployed vertical slice of EMOS focused on modernization Decision Intelligence. It structures legacy workload evidence into a rigorous **Enterprise DNA**, calculates deterministic evidence completeness, and leverages **Google Gemini** to produce explainable, vendor-neutral modernization assessments governed by the canonical **6R framework**.
 
 ### The Modernization Principle
 > **“The modernization disposition is not the end of the EMOS journey. It is the routing decision that determines which governed modernization path should follow.”**
@@ -30,7 +30,7 @@ The current Decision Intelligence capability determines *what* should happen bas
 - **Demo Videos**: [Complete library on Google Drive](https://drive.google.com/drive/folders/1ONwIDuVpKqu3DJzmHgzrtYTeJaOUXqQ1?usp=drive_link) · [Narrated EMOS Beta introduction](docs/demo/EMOS-Beta-Introduction.mp4)
 - **Subtitles**: [WebVTT](docs/demo/EMOS-Beta-Introduction.vtt) · [SRT](docs/demo/EMOS-Beta-Introduction.srt)
 - **Repository**: [github.com/JEMathew/emos-modernization-gcp](https://github.com/JEMathew/emos-modernization-gcp)
-- **Ideathon Evidence**: [Requirement map and two-minute judge path](docs/IDEATHON_DELIVERABLES.md) · [Google AI Studio security constitution](docs/AI_STUDIO_SECURITY_CONSTITUTION.md) · [Claim-to-source evidence index](docs/EVIDENCE_INDEX.md)
+- **Engineering Evidence**: [Google AI Studio security constitution](docs/AI_STUDIO_SECURITY_CONSTITUTION.md) · [Claim-to-source evidence index](docs/EVIDENCE_INDEX.md)
 
 [<img src="docs/learning/emos-learning-background.png" alt="Open the public EMOS Beta v1.0 Learning Center" width="760">](docs/LEARN.md)
 
@@ -112,7 +112,7 @@ EMOS (Enterprise Modernization Operating System)
 
 ## Current vs. Future Scope
 
-| Capability | Ideathon Release (Implemented) | Full EMOS Vision (Future Scope) |
+| Capability | Beta v1.0 (Implemented) | Full EMOS Vision (Future Scope) |
 | :--- | :--- | :--- |
 | **Portfolio Discovery** | Sample + user-imported portfolio (CSV/JSON) | Automated enterprise discovery & live CMDB sync |
 | **Enterprise DNA** | Structured 18-attribute evidence model | Continuously refreshed enterprise evidence from telemetry |
@@ -137,7 +137,7 @@ EMOS (Enterprise Modernization Operating System)
 
 ## Current 6R vs. Future Configurable 7R Framework
 
-### Current Ideathon Implementation: Canonical 6R
+### Current Beta Implementation: Canonical 6R
 The active application implements strictly the **canonical 6R modernization taxonomy**:
 - **Retain**: Keep workload in its current operational state; monitor tech debt and lifecycle risks.
 - **Retire**: Decommission workloads that no longer provide business value or duplicate functionality.
@@ -172,7 +172,7 @@ In the EMOS operating philosophy, the modernization disposition is a **routing d
 - **REFACTOR** → Define target architecture → Decompose/redesign → Transform application/data → Incrementally migrate → Test → Deploy → Validate
 - **REPURCHASE** → Product/SaaS evaluation → Fit-gap assessment → Procurement → Integration → Data migration → User transition → Retire legacy capability
 
-> **Scope Note**: These execution workflows represent the broader EMOS vision. They are intentionally **not implemented** in the current Ideathon release, which focuses on providing the trusted **Decision Intelligence** foundation that routes workloads into these journeys.
+> **Scope Note**: These execution workflows represent the broader EMOS vision. They are intentionally **not implemented** in the current Beta release, which focuses on providing the trusted **Decision Intelligence** foundation that routes workloads into these journeys.
 
 ---
 
@@ -213,7 +213,7 @@ Recommended Next Actions
 Users start from a representative enterprise portfolio or import their own real-world portfolio CSV/JSON files instead of a blank AI prompt.
 - **Pre-Seeded Archetypes**: Representative enterprise workloads across core legacy patterns (monolithic web apps, legacy data warehouses, client-server document management).
 - **Import Enterprise Portfolio (BYOP)**: Architects can upload custom enterprise inventory files (`.csv`, `.json`) or download 4 benchmark industry portfolios with instant schema validation and visual preview.
-*(Note: The Ideathon implementation provides controlled CSV/JSON ingestion and sample datasets for discovery and does not claim live automated CMDB or cloud agent discovery).*
+*(Note: The current Beta provides controlled CSV/JSON ingestion and sample datasets for discovery and does not claim live automated CMDB or cloud agent discovery).*
 
 ### 2. Enterprise DNA
 Each workload is represented through structured evidence across six core architectural dimensions:
@@ -449,9 +449,9 @@ The application enforces defense-in-depth principles for enterprise data protect
 
 ---
 
-## Challenge Alignment
+## Implementation Evidence
 
-| Evaluation Criterion | EMOS Implementation |
+| Product Attribute | EMOS Implementation |
 | :--- | :--- |
 | **Authenticity** | Dedicated enterprise modernization decision intelligence that replaces open-ended chat with structured portfolio discovery, Enterprise DNA modeling, and canonical 6R analysis. |
 | **Usability** | Guided end-to-end user journey: Portfolio Discovery ➔ Enterprise DNA ➔ 1-Click Modernization Assessment ➔ Explainable 6R Decision with interactive multi-turn advisory. |
@@ -460,9 +460,9 @@ The application enforces defense-in-depth principles for enterprise data protect
 
 ---
 
-## The Ideathon Story: A Production-Deployed Vertical Slice
+## Current Beta Scope: A Production-Deployed Vertical Slice
 
-Rather than attempting to build the entire modernization operating system in one challenge, this release proves a **secure, production-deployed vertical slice of EMOS focused on modernization Decision Intelligence**.
+This release proves a **secure, production-deployed vertical slice of EMOS focused on modernization Decision Intelligence**.
 
 It implements the trusted progression that must precede any automated or governed execution:
 ```
@@ -498,7 +498,7 @@ The following capabilities represent the broader EMOS vision and are **strictly 
 - **Sample & User-Imported Portfolio**: Workload discovery uses representative seeded enterprise datasets or user-imported CSV/JSON files; automated real-time discovery via CMDB/cloud agent ingestion is future scope.
 - **Predefined Evidence Schema**: Enterprise DNA currently uses a structured 18-attribute model rather than continuous dynamic repository analysis.
 - **Canonical 6R Taxonomy**: The current release evaluates canonical 6R dispositions; extensible 7R (including a separate Relocate disposition) is planned for the broader EMOS roadmap.
-- **Single-Phase Decision Intelligence**: Upstream automated discovery connectors, ARB governance workflows, migration wave scheduling, automated code execution, and benefit realization are outside the current Ideathon scope.
+- **Single-Phase Decision Intelligence**: Upstream automated discovery connectors, ARB governance workflows, migration wave scheduling, automated code execution, and benefit realization are outside the current Beta scope.
 - **User-Bound Multi-Tenancy**: Data isolation is currently enforced at the authenticated user level (`/users/{userId}`); organization-wide role-based access control (RBAC) and enterprise tenant workspaces are planned for future releases.
 
 ---
@@ -591,7 +591,7 @@ gcloud secrets add-iam-policy-binding emos-gemini-api-key \
 
 ## Google Cloud Run Deployment
 
-*Note: The current challenge deployment is hosted in `asia-southeast1`.*
+*Note: The current deployment is hosted in `asia-southeast1`.*
 
 ### 1. Deploy the Application
 
@@ -607,19 +607,7 @@ gcloud run deploy gemini-reflection-journal \
   --set-secrets="GEMINI_API_KEY=emos-gemini-api-key:latest"
 ```
 
-*(To match the active challenge deployment, replace `<REGION>` with `asia-southeast1`).*
-
-### 2. Required Campaign Labeling (Verification Binding)
-
-Apply the mandatory verification resource label for automated challenge compliance:
-
-```bash
-gcloud run services update gemini-reflection-journal \
-  --update-labels=dev-tutorial=cloud-run-ai-challenge \
-  --region=<REGION>
-```
-
-*(Replace `<REGION>` with `asia-southeast1` or your selected deployment region).*
+*(To match the active deployment, replace `<REGION>` with `asia-southeast1`).*
 
 ---
 

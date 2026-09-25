@@ -116,8 +116,9 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(headings.length).toBeGreaterThanOrEqual(1);
 
     // Mandatory Terms Criteria per specifications
-    // 1. Decision-support and ideathon demonstration
-    expect(screen.getByText(/1\. Decision-Support and Ideathon Demonstration/i)).toBeInTheDocument();
+    // 1. Decision-support Beta
+    expect(screen.getByText(/1\. Decision-Support Beta/i)).toBeInTheDocument();
+    expect(screen.queryByText(/ideathon|hackathon|competition|judging/i)).not.toBeInTheDocument();
     expect(screen.getByText(/exploratory decision-intelligence prototype/i)).toBeInTheDocument();
 
     // 2. Recommendations are advisory heuristics, not professional/migration advice
@@ -187,7 +188,8 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     render(<App />);
 
     expect(screen.getByRole('heading', { level: 1, name: /Terms of Service/i })).toBeInTheDocument();
-    expect(screen.getByText(/1\. Decision-Support and Ideathon Demonstration/i)).toBeInTheDocument();
+    expect(screen.getByText(/1\. Decision-Support Beta/i)).toBeInTheDocument();
+    expect(screen.queryByText(/ideathon|hackathon|competition|judging/i)).not.toBeInTheDocument();
   });
 
   it('renders the public evaluation sandbox without requiring Google Sign-In', () => {
@@ -376,7 +378,6 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.queryByText(/Never turns weak evidence/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/zero password storage/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/ensuring enterprise-grade credential management/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Ideathon Release/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Decision Intelligence/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /5-Minute Tour/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /View Guided Tour/i })).not.toBeInTheDocument();

@@ -27,4 +27,4 @@ This index maps current product claims to implementation and verification eviden
 - Production dependency audit: `npm audit --omit=dev --audit-level=moderate` reports 0 vulnerabilities
 - Firestore rules: included in CI; local emulator requires Java 21
 - GitHub Actions: `.github/workflows/guardrail-release-gate.yml` installs Java 21 and runs the full gate on review branches, pull requests, and `main`
-- Ideathon submission map: `docs/IDEATHON_DELIVERABLES.md` distinguishes verified deployment evidence from the remaining CI and live account-isolation checks
+- Deployment verification: internal delivery records distinguish verified deployment evidence from the remaining CI and live account-isolation checks

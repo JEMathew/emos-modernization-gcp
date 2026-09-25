@@ -99,7 +99,7 @@ fifteen lifecycle stages.
 
 ## 7. Agentic Register
 
-*Use for agentic-AI audiences, hackathons and investors. Same facts, different
+*Use for agentic-AI and investor audiences. Same facts, different
 emphasis.*
 
 > EMOS is designed to become the governance envelope within which modernization

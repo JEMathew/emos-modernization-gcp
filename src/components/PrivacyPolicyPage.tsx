@@ -130,9 +130,6 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ user, onNa
                 Privacy Disclosure
               </span>
               <span className="text-xs text-[var(--emos-text-muted)] font-mono">
-                EMOS Ideathon Demonstration
-              </span>
-              <span className="text-xs text-[var(--emos-text-muted)] font-mono">
                 • Effective date: September 6, 2026 • Last updated: September 6, 2026
               </span>
             </div>
@@ -140,7 +137,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ user, onNa
               Privacy Policy
             </h1>
             <p className="text-sm sm:text-base text-[var(--emos-text-secondary)] leading-relaxed max-w-3xl">
-              This Privacy Policy explains how the Enterprise Modernization Operating System (EMOS) processes, stores, and protects portfolio architecture inputs, modernization assessments, and authentication data during ideathon demonstration and evaluation use.
+              This Privacy Policy explains how the Enterprise Modernization Operating System (EMOS) processes, stores, and protects portfolio architecture inputs, modernization assessments, and authentication data during product demonstration and evaluation use.
             </p>
           </div>
 
@@ -211,7 +208,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ user, onNa
                 <li>Program alignment configuration, including program name, sponsors, outcomes, risk tolerance, and time horizon.</li>
               </ul>
               <p className="text-xs text-[var(--emos-text-muted)] bg-[var(--emos-bg-tertiary)] p-3 rounded-xl border border-[var(--emos-border-subtle)]">
-                <strong>Demonstration Environment Notice:</strong> EMOS is an exploratory ideathon decision-support prototype. Do not submit production credentials, private keys, database connection strings, confidential business secrets, or non-public personal information.
+                <strong>Demonstration Environment Notice:</strong> EMOS is an exploratory decision-support prototype. Do not submit production credentials, private keys, database connection strings, confidential business secrets, or non-public personal information.
               </p>
             </section>
 
@@ -344,7 +341,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ user, onNa
                   </a>
                 </div>
                 <p className="text-xs text-[var(--emos-text-muted)]">
-                  Project: EMOS (Enterprise Modernization Operating System) • Ideathon Demonstration
+                  Project: EMOS (Enterprise Modernization Operating System)
                 </p>
               </div>
             </section>
@@ -359,7 +356,6 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ user, onNa
             <span className="font-serif font-semibold text-[var(--emos-text-primary)]">EMOS</span>
             <span>—</span>
             <span>Enterprise Modernization Operating System</span>
-            <span className="hidden md:inline">• Ideathon Demonstration</span>
           </div>
           <div className="flex items-center gap-6">
             <button
