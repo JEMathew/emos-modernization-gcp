@@ -68,6 +68,6 @@ export const LANDING_NAVIGATION = {
   ],
   about: [
     { id: 'vision', label: 'Vision' },
-    { id: 'founder', label: 'Founder' },
+    { id: 'founder', label: 'Product Builder' },
   ],
 } as const;
