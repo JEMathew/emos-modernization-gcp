@@ -21,6 +21,8 @@ import {
   titleResponseSchema,
 } from "./src/lib/schemas";
 import firebaseConfig from "./firebase-applet-config.json";
+import { orchestrateAskEmosWithGemini } from "./src/lib/agents/geminiOrchestrator";
+import { callGeminiStructuredJson } from "./src/lib/agents/geminiRuntime";
 
 dotenv.config();
 
@@ -708,6 +710,68 @@ ${titleGuard.sanitizedMessage}`;
       title: "Modernization Assessment " + new Date().toLocaleDateString(),
       category: "Legacy Application",
     }));
+  }
+});
+
+// Governed Two-Specialist-Agent Ask EMOS endpoint (server-side Gemini, deterministic orchestration & guardrails)
+app.post("/api/ask-emos", requireAuthenticatedUser, async (req, res) => {
+  try {
+    const body = req.body || {};
+    const rawQuestion = typeof body.question === "string" ? body.question.trim() : "";
+    const workload = body.workload;
+    const validStage =
+      typeof body.currentStage === "string" && body.currentStage.length <= 40
+        ? body.currentStage.trim()
+        : undefined;
+    const validEstate =
+      typeof body.estateName === "string" && body.estateName.length <= 120
+        ? body.estateName.trim()
+        : undefined;
+
+    if (
+      !rawQuestion ||
+      rawQuestion.length > 2000 ||
+      !workload ||
+      typeof workload !== "object" ||
+      typeof workload.id !== "string" ||
+      !workload.id.trim() ||
+      typeof workload.name !== "string" ||
+      !workload.name.trim() ||
+      !workload.dna ||
+      typeof workload.dna !== "object" ||
+      !Array.isArray(workload.dna.business) ||
+      !Array.isArray(workload.dna.technology) ||
+      !Array.isArray(workload.dna.dependency) ||
+      !Array.isArray(workload.dna.economics) ||
+      !Array.isArray(workload.dna.dataAndRisk) ||
+      !Array.isArray(workload.dna.targetState)
+    ) {
+      return res.status(400).json({
+        error: "Invalid Ask EMOS request: question, workload identity, and complete DNA structure are required.",
+      });
+    }
+
+    const fenced = validateAndFenceUserPrompt(rawQuestion);
+    const safeQuestion = fenced.redactedInput || rawQuestion;
+
+    const result = await orchestrateAskEmosWithGemini(
+      {
+        question: safeQuestion,
+        workload,
+        currentStage: validStage,
+        estateName: validEstate,
+        activeInteraction: body.activeInteraction ?? null,
+      },
+      (params) => callGeminiStructuredJson({ ...params, timeoutMs: 45_000 }),
+    );
+
+    return res.json(result);
+  } catch (error: any) {
+    console.error("Error in /api/ask-emos:", redactSecrets(error instanceof Error ? error.message : String(error)));
+    return res.status(503).json({
+      error: "AI reasoning is temporarily unavailable. Deterministic EMOS evidence status remains available.",
+      code: "ASK_EMOS_UNAVAILABLE",
+    });
   }
 });
 

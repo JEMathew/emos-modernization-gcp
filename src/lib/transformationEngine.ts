@@ -113,16 +113,18 @@ export function buildDefaultLifecycleState(
     'Learn': { desc: 'Record variance between original assumptions and observed outcomes for future waves.', owner: 'Modernization PMO', gate: 'Lessons learned cataloged', deliverable: 'Enterprise DNA Learning Record' },
   };
 
-  const defaultCompleted = governanceApproved
+  const effectiveApproved = isReady && governanceApproved;
+
+  const defaultCompleted = effectiveApproved
     ? Math.min(meta.stages.length, Math.max(2, completedStageCountOverride ?? 2))
     : isReady
     ? 1
     : 0;
 
-  const hasBlocker = !blockerCleared && (!isReady || !governanceApproved);
+  const hasBlocker = !isReady || (!blockerCleared && !effectiveApproved);
   const activeBlockerText = !isReady
     ? `Evidence Readiness Gate blocked (${rec.evidenceCompleteness}%): Verify ${rec.criticalGaps.slice(0, 2).join(' & ') || 'missing critical DNA fields'} before approval.`
-    : !governanceApproved
+    : !effectiveApproved
     ? 'Awaiting Human Governance Approval sign-off before execution stages can proceed.'
     : null;
 
@@ -256,22 +258,22 @@ export function buildDefaultLifecycleState(
     workloadId: workload.id,
     disposition,
     plainEnglish: meta.plainEnglish,
-    governanceStatus: governanceApproved
+    governanceStatus: effectiveApproved
       ? 'APPROVED'
       : isReady
       ? 'PENDING_APPROVAL'
       : 'BLOCKED_EVIDENCE',
-    approvedBy: governanceApproved ? 'Chief Enterprise Architect & CISO Delegate' : undefined,
-    approvedRole: governanceApproved ? 'Architecture Review Board (ARB)' : undefined,
-    approvedAt: governanceApproved ? new Date().toISOString() : undefined,
-    approvalNote: governanceApproved ? `Approved ${meta.plainEnglish} (${disposition}) based on ${rec.evidenceCompleteness}% verified Enterprise DNA evidence.` : undefined,
+    approvedBy: effectiveApproved ? 'Chief Enterprise Architect & CISO Delegate' : undefined,
+    approvedRole: effectiveApproved ? 'Architecture Review Board (ARB)' : undefined,
+    approvedAt: effectiveApproved ? new Date().toISOString() : undefined,
+    approvalNote: effectiveApproved ? `Approved ${meta.plainEnglish} (${disposition}) based on ${rec.evidenceCompleteness}% verified Enterprise DNA evidence.` : undefined,
     overallProgress,
     currentPhaseLabel: `${currentStage.order}. ${currentStage.label}`,
     nextGateLabel: nextStage.gateRequirement,
     activeBlocker: activeBlockerText,
     agentAlert: !isReady
       ? `Modernization Agent blocked execution: ${rec.criticalGaps.length} critical evidence gap(s) must be verified before governance sign-off.`
-      : !governanceApproved
+      : !effectiveApproved
       ? `Evidence Readiness Gate passed (${rec.evidenceCompleteness}% READY). Modernization Agent recommends Human Governance Approval to unlock ${meta.stages[1] || 'execution'}.`
       : `Governance approved. Modernization Agent is tracking ${currentStage.label} against ${nextStage.gateRequirement}.`,
     currentArchSummary: `${workload.currentStack} · ${workload.hosting} · ${workload.knownDependencies}`,

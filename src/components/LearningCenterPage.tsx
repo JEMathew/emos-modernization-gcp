@@ -23,7 +23,10 @@ import {
   type LearningVideo,
 } from '../data/learningVideos';
 
+import type { User } from 'firebase/auth';
+
 interface LearningCenterPageProps {
+  user?: User | null;
   onNavigate: (path: string) => void;
   videos?: readonly LearningVideo[];
 }
@@ -50,6 +53,7 @@ const LIFECYCLE_TOPIC_GUIDES = [
 type CategoryFilter = 'All Categories' | LearningCategory;
 
 export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
+  user = null,
   onNavigate,
   videos = LEARNING_VIDEOS,
 }) => {
@@ -99,7 +103,7 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
 
   return (
     <div className="emos-landing min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] font-sans transition-colors">
-      <header className="sticky top-0 z-30 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]/88 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-surface)]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[88rem] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           <a
             href="/"
@@ -107,22 +111,34 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
             className="group flex min-w-0 items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--emos-accent)]"
             aria-label="Return to EMOS home"
           >
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#A88554] to-[#E5C492] shadow-md transition-transform group-hover:scale-105">
-              <Sparkles className="h-4 w-4 text-black" aria-hidden="true" />
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#4648D4] text-white shadow-xs transition-colors">
+              <Sparkles className="h-4 w-4 text-white" aria-hidden="true" />
             </span>
-            <span className="truncate font-serif text-base font-bold tracking-wider">EMOS</span>
-            <span className="hidden rounded-full border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--emos-accent-text)] sm:inline">
+            <span className="truncate font-display text-base font-bold tracking-tight">EMOS</span>
+            <span className="hidden rounded-full border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--emos-accent-text)] sm:inline">
               Learning Center
             </span>
           </a>
 
           <div className="flex items-center gap-2">
+            {user && (
+              <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                Signed in as {user.displayName || user.email}
+              </span>
+            )}
+            <a
+              href="/workspace"
+              onClick={navigate('/workspace')}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-3.5 text-xs font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)]"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Back to Workspace</span>
+            </a>
             <a
               href="/"
               onClick={navigate('/')}
-              className="hidden min-h-10 items-center gap-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] px-3 text-xs font-semibold text-[var(--emos-text-secondary)] transition-colors hover:text-[var(--emos-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)] sm:inline-flex"
+              className="hidden min-h-9 items-center gap-1.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] px-3 text-xs font-semibold text-[var(--emos-text-secondary)] transition-colors hover:text-[var(--emos-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)] sm:inline-flex"
             >
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
               EMOS Home
             </a>
             <ThemeSelector />
@@ -150,16 +166,95 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
               <p className="max-w-3xl text-base leading-8 text-[var(--emos-text-secondary)]">
                 Follow the evidence-to-decision journey from portfolio discovery and Enterprise DNA through explainable 6R recommendations, governance, wave planning and mobilization readiness.
               </p>
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    const introVideo = videos.find((v) => v.sequence === '00') || videos[0];
+                    if (introVideo?.driveFileId) {
+                      openVideo(introVideo, e.currentTarget);
+                    }
+                  }}
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-5 text-sm font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)] cursor-pointer"
+                >
+                  <Play className="h-4 w-4" aria-hidden="true" />
+                  <span>Start Guided Journey</span>
+                </button>
                 <a
                   href="#catalogue"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-5 text-sm font-bold text-black transition-all hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)]"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] px-4 text-sm font-semibold text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] transition-colors"
                 >
                   Browse All 20 Lessons
                 </a>
               </div>
             </div>
           </motion.div>
+        </section>
+
+        {/* Task / Role-Based Learning Paths aligned to Canonical 4-Stage EMOS Model */}
+        <section aria-label="Task and role-based learning paths" className="mx-auto max-w-[88rem] px-4 pt-10 sm:px-6 lg:px-8">
+          <div className="mb-4">
+            <p className="text-[11px] font-mono font-semibold uppercase tracking-[0.12em] text-[var(--emos-accent-text)]">
+              Task &amp; Role-Based Learning
+            </p>
+            <h2 className="mt-1 font-display text-xl font-bold text-[var(--emos-text-primary)]">
+              Learn by Modernization Stage
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {[
+              {
+                stage: '01 · Understand',
+                role: 'Leaders & Architects',
+                desc: 'Explore portfolios, upload CSV/JSON inventories, and inspect Enterprise DNA.',
+                seq: 'F10',
+              },
+              {
+                stage: '02 · Decide',
+                role: 'Solution Architects',
+                desc: 'Verify evidence gates, compare all 6Rs, and govern human approval.',
+                seq: 'F03',
+              },
+              {
+                stage: '03 · Transform',
+                role: 'Program & Platform Teams',
+                desc: 'Sequence waves, clear mobilization gates, and track execution stages.',
+                seq: 'F19',
+              },
+              {
+                stage: '04 · Outcomes',
+                role: 'Executives & Delivery Leads',
+                desc: 'Measure Baseline vs. Target vs. Observed impact and capture wave lessons.',
+                seq: 'F04',
+              },
+            ].map((path) => {
+              const targetVideo = videos.find((v) => v.sequence === path.seq) || videos[0];
+              return (
+                <div
+                  key={path.stage}
+                  className="stitch-card p-4 flex flex-col justify-between gap-3"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[10px] font-mono text-[var(--emos-text-muted)]">
+                      <span className="font-bold text-[var(--emos-accent-text)] uppercase">{path.stage}</span>
+                      <span>{path.role}</span>
+                    </div>
+                    <p className="text-xs text-[var(--emos-text-secondary)] leading-relaxed">{path.desc}</p>
+                  </div>
+                  {targetVideo?.driveFileId && (
+                    <button
+                      type="button"
+                      onClick={(e) => openVideo(targetVideo, e.currentTarget)}
+                      className="self-start inline-flex items-center gap-1.5 text-xs font-semibold text-[#4648D4] dark:text-[#818CF8] hover:underline cursor-pointer"
+                    >
+                      <Play className="w-3 h-3" />
+                      <span>Watch {path.seq} Lesson</span>
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </section>
 
         <section id="catalogue" className="mx-auto max-w-[88rem] scroll-mt-24 px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
@@ -282,15 +377,20 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
                                 </span>
                               ))}
                             </div>
-                            <code className="mt-auto block break-all rounded-lg border border-[var(--emos-code-border)] bg-[var(--emos-code-bg)] px-3 py-2 text-[10px] text-[var(--emos-text-muted)]">
-                              File: {video.fileName}
-                            </code>
+                            <details className="mt-auto text-[11px] text-[var(--emos-text-muted)]">
+                              <summary className="cursor-pointer font-medium hover:text-[var(--emos-text-secondary)]">
+                                Reference metadata
+                              </summary>
+                              <code className="mt-1.5 block break-all rounded-md border border-[var(--emos-code-border)] bg-[var(--emos-code-bg)] px-2.5 py-1.5 text-[11px] text-[var(--emos-text-muted)]">
+                                File: {video.fileName}
+                              </code>
+                            </details>
                             {video.driveFileId ? (
                               <button
                                 type="button"
                                 onClick={(event) => openVideo(video, event.currentTarget)}
                                 aria-label={`Play ${video.sequence}: ${video.title} in EMOS`}
-                                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-4 text-xs font-bold text-black transition-opacity hover:opacity-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)]"
+                                className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-4 text-xs font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--emos-accent)] cursor-pointer"
                               >
                                 <Play className="h-3.5 w-3.5" aria-hidden="true" />
                                 Play in EMOS
@@ -362,7 +462,7 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
                           <button
                             type="button"
                             onClick={(e) => openVideo(matchedVideo, e.currentTarget)}
-                            className="px-2.5 py-1 rounded-lg bg-[#A88554] text-black text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer"
+                            className="px-2.5 py-1 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] text-white text-[11px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors"
                           >
                             <Play className="w-3 h-3" />
                             <span>Watch</span>

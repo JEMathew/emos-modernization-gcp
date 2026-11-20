@@ -152,8 +152,8 @@ describe('EMOS v2 Full-Lifecycle Autonomous Implementation', () => {
     expect(screen.getByText('61%')).toBeInTheDocument();
     expect(screen.getByText('Gate: NEEDS EVIDENCE')).toBeInTheDocument();
 
-    // Click Verify Evidence (Google Cloud Target) -> jumps from 61% NEEDS EVIDENCE to 100% READY
-    fireEvent.click(screen.getByRole('button', { name: /Verify Evidence \(Google Cloud Target\)/i }));
+    // Click Load Sample Evidence (Google Cloud Demo) -> jumps from 61% NEEDS EVIDENCE to 100% READY
+    fireEvent.click(screen.getByRole('button', { name: /Load Sample Evidence \(Google Cloud Demo\)/i }));
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(screen.getByText('Gate: READY')).toBeInTheDocument();
     expect(onUpdateWorkloadDna).toHaveBeenCalled();
@@ -370,8 +370,8 @@ describe('EMOS v2 Full-Lifecycle Autonomous Implementation', () => {
     expect(screen.getByText('61%')).toBeInTheDocument();
     expect(screen.getByText('Gate: NEEDS EVIDENCE')).toBeInTheDocument();
 
-    // 3. Verify missing critical evidence with Google Cloud target strategy -> 100% READY
-    fireEvent.click(screen.getByRole('button', { name: /Verify Evidence \(Google Cloud Target\)/i }));
+    // 3. Load sample evidence with Google Cloud target strategy -> 100% READY
+    fireEvent.click(screen.getByRole('button', { name: /Load Sample Evidence \(Google Cloud Demo\)/i }));
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(screen.getByText('Gate: READY')).toBeInTheDocument();
 

@@ -12,7 +12,7 @@ import { CAPABILITY_HORIZON, EMOS_FACTS, EMOS_POSITIONING, LANDING_NAVIGATION } 
 import { evaluateEvidenceReadiness } from '../lib/readiness';
 import { downloadSampleDecisionBrief } from '../lib/sampleDecisionBrief';
 import { ThemeSelector } from './ThemeSelector';
-import { EmosHeroVisual, EmosProductVisuals } from './EmosVisuals';
+import { EmosProductVisuals } from './EmosVisuals';
 import { BuilderVideo } from './BuilderVideo';
 
 interface LandingPageProps {
@@ -227,13 +227,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
   };
 
   return (
-    <div className="emos-landing min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] selection:bg-[#A88554] selection:text-black font-sans transition-colors">
-      <header className="sticky top-0 z-40 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]/88 backdrop-blur-xl">
+    <div className="emos-landing min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] selection:bg-[#4648D4] selection:text-white font-sans transition-colors">
+      <header className="sticky top-0 z-40 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-surface)]/92 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[88rem] items-center justify-between px-4 sm:px-6 lg:px-8">
           <a href="/" onClick={(event) => selectSection(event, 'home')} className="flex items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--emos-accent)]">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-[#A88554] to-[#E5C492] text-black shadow-md"><Sparkles className="h-4 w-4" /></span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#4648D4] text-white shadow-xs"><Sparkles className="h-4 w-4" /></span>
             <span className="leading-tight">
-              <span className="block font-serif text-base font-bold tracking-wider">EMOS</span>
+              <span className="block font-display text-base font-bold tracking-tight">EMOS</span>
               <span className="hidden text-[10px] text-[var(--emos-text-muted)] sm:block">Enterprise Modernization Operating System</span>
             </span>
           </a>
@@ -246,17 +246,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
           </nav>
           <div className="flex items-center gap-2.5">
             <ThemeSelector />
-            <button id="landing-header-signin-btn" onClick={handleSignIn} disabled={isSigningIn} className="hidden min-h-[34px] rounded-xl bg-[#A88554] px-3.5 text-xs font-semibold text-black hover:bg-[#BCA075] disabled:opacity-75 sm:block sm:text-sm">{isSigningIn ? 'Connecting…' : 'Sign In With Google'}</button>
-            <button type="button" aria-label="Open Navigation Menu" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((current) => !current)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] xl:hidden">{mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button>
+            <button id="landing-header-signin-btn" onClick={handleSignIn} disabled={isSigningIn} className="hidden min-h-[34px] rounded-lg bg-[#4648D4] px-3.5 text-xs font-semibold text-white hover:bg-[#3B3DC2] disabled:opacity-75 sm:block sm:text-sm cursor-pointer">{isSigningIn ? 'Connecting…' : 'Sign In With Google'}</button>
+            <button type="button" aria-label="Open Navigation Menu" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((current) => !current)} className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] xl:hidden">{mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button>
           </div>
         </div>
         <AnimatePresence>
-          {mobileMenuOpen && <motion.nav className="absolute inset-x-0 top-16 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-[var(--emos-border-strong)] bg-[var(--emos-bg-secondary)] p-4 shadow-2xl xl:hidden" aria-label="Mobile Landing Page Navigation" initial={reduceMotion ? false : { opacity: 0, y: -10 }} animate={reduceMotion ? undefined : { opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0, y: -8 }} transition={{ duration: 0.18 }}>
+          {mobileMenuOpen && <motion.nav className="absolute inset-x-0 top-16 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-4 shadow-2xl xl:hidden" aria-label="Mobile Landing Page Navigation" initial={reduceMotion ? false : { opacity: 0, y: -10 }} animate={reduceMotion ? undefined : { opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0, y: -8 }} transition={{ duration: 0.18 }}>
             <div className="mx-auto grid max-w-2xl gap-5 sm:grid-cols-2">
               <div><p className="px-3 text-xs font-semibold uppercase tracking-wider text-[var(--emos-text-muted)]">EMOS</p><div className="mt-2 grid gap-1">{EMOS_NAV.map(({ id, label }) => <a key={id} href={id === 'home' ? '/' : `#${id}`} onClick={(event) => selectSection(event, id)} className={`${navLinkClass(id)} block text-sm`}>{label}</a>)}</div></div>
               <div><p className="px-3 text-xs font-semibold uppercase tracking-wider text-[var(--emos-text-muted)]">Evaluate</p><div className="mt-2 grid gap-1"><a id="landing-mobile-learn-link" href="/learn" onClick={(event) => { setMobileMenuOpen(false); navigate(event, '/learn'); }} className="flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-[var(--emos-text-secondary)]"><Library className="h-4 w-4" />Learning Center</a><a href="/sandbox" onClick={(event) => { setMobileMenuOpen(false); navigate(event, '/sandbox'); }} className="flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-[var(--emos-text-secondary)]"><Sparkles className="h-4 w-4" />Public Sandbox</a><a href="/trust" onClick={(event) => { setMobileMenuOpen(false); navigate(event, '/trust'); }} className="flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-[var(--emos-text-secondary)]"><ShieldCheck className="h-4 w-4" />Trust and Evaluation</a></div></div>
               <div><p className="px-3 text-xs font-semibold uppercase tracking-wider text-[var(--emos-text-muted)]">About</p><div className="mt-2 grid gap-1">{ABOUT_NAV.map(({ id, label }) => <a key={id} href={`#${id}`} onClick={(event) => selectSection(event, id)} className={`${navLinkClass(id)} block text-sm`}>{label}</a>)}</div></div>
-              <div className="grid content-end gap-2"><a href="#design-partner" onClick={(event) => selectSection(event, 'design-partner')} className="flex min-h-11 items-center justify-center rounded-xl border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] px-4 text-sm font-semibold text-[var(--emos-accent-text)]">Become a Design Partner</a><button onClick={handleSignIn} className="min-h-11 rounded-xl bg-[#A88554] px-4 text-sm font-semibold text-black sm:hidden">Sign In With Google</button></div>
+              <div className="grid content-end gap-2"><a href="#design-partner" onClick={(event) => selectSection(event, 'design-partner')} className="flex min-h-11 items-center justify-center rounded-lg border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] px-4 text-sm font-semibold text-[var(--emos-accent-text)]">Become a Design Partner</a><button onClick={handleSignIn} className="min-h-11 rounded-lg bg-[#4648D4] px-4 text-sm font-semibold text-white sm:hidden">Sign In With Google</button></div>
             </div>
           </motion.nav>}
         </AnimatePresence>
@@ -272,39 +272,224 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
         {activeSection === 'home' && <section className="landing-scene landing-hero relative" aria-labelledby="landing-title">
-          <div className="pointer-events-none absolute inset-0 landing-grid opacity-50" aria-hidden="true" />
-          <div className="relative mx-auto grid max-w-[88rem] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12 lg:px-8 lg:py-16">
-            <Reveal>
-              <h1 id="landing-title" className="max-w-4xl font-serif text-4xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-[3.65rem] xl:text-[4.2rem]">{EMOS_POSITIONING.hero}</h1>
-              <div className="mt-7 max-w-2xl border-l-2 border-[var(--emos-accent)] pl-4 sm:pl-5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--emos-accent-text)]">{EMOS_POSITIONING.visionLabel}</p>
-                <p className="mt-2 text-base leading-7 text-[var(--emos-text-secondary)] sm:text-lg sm:leading-8">{EMOS_POSITIONING.productVision} <strong className="font-semibold text-[var(--emos-text-primary)]">{EMOS_POSITIONING.betaScope}</strong></p>
+          <div className="pointer-events-none absolute inset-0 landing-grid opacity-55" aria-hidden="true" />
+          <div className="relative mx-auto max-w-[82rem] px-4 pt-12 pb-12 sm:px-6 lg:px-8 lg:pt-16">
+            {/* Centered Stitch v12 Operating Canvas Hero */}
+            <Reveal className="mx-auto max-w-4xl text-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-[var(--emos-accent-text)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#4648D4]" />
+                <span>{EMOS_POSITIONING.visionLabel} · Enterprise Modernization Operating System</span>
               </div>
-              {authError && <div className="mt-6 flex max-w-xl items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs text-rose-700 dark:text-rose-300"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><span>{authError}</span></div>}
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <a href="/workspace" onClick={(event) => navigate(event, '/workspace')} className="group inline-flex min-h-[50px] items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-6 text-sm font-semibold text-black shadow-lg transition-all hover:-translate-y-0.5 sm:text-base"><Sparkles className="h-5 w-5" />Launch Interactive Workspace<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a>
-                <a href="/sandbox" onClick={(event) => navigate(event, '/sandbox')} className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] px-5 text-sm font-semibold transition-all hover:-translate-y-0.5"><ShieldCheck className="h-4 w-4 text-[var(--emos-accent)]" />Explore Without Sign-In</a>
-                <button id="primary-google-signin-btn" onClick={handleSignIn} disabled={isSigningIn} className="group flex min-h-[50px] items-center justify-center gap-3 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] px-5 text-sm font-semibold transition-all hover:-translate-y-0.5 disabled:opacity-75"><GoogleIcon />{isSigningIn ? 'Authenticating…' : 'Use Your Portfolio'}</button>
-                <button id="learn-more-walkthrough-btn" onClick={onOpenWalkthrough} className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] px-5 text-sm font-semibold text-[var(--emos-text-secondary)] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[var(--emos-surface-hover)] hover:text-[var(--emos-text-primary)]"><CirclePlay className="h-4 w-4 text-[var(--emos-accent)]" />Product Tour</button>
+
+              <h1 id="landing-title" className="mt-5 font-display text-3xl font-bold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.35rem] text-[var(--emos-text-primary)]">
+                {EMOS_POSITIONING.hero}
+              </h1>
+
+              <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-[var(--emos-text-secondary)] sm:text-base sm:leading-7">
+                {EMOS_POSITIONING.productVision}{' '}
+                <strong className="font-semibold text-[var(--emos-text-primary)]">{EMOS_POSITIONING.betaScope}</strong>
+              </p>
+
+              {authError && (
+                <div className="mx-auto mt-5 flex max-w-xl items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-left text-xs text-rose-700 dark:text-rose-300">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{authError}</span>
+                </div>
+              )}
+
+              {/* Maximum 2 Primary CTAs */}
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <a
+                  href="/workspace"
+                  onClick={(event) => navigate(event, '/workspace')}
+                  className="group inline-flex min-h-[46px] w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-6 text-sm font-semibold text-white shadow-sm transition-all"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>Launch Interactive Workspace</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </a>
+                <a
+                  href="/sandbox"
+                  onClick={(event) => navigate(event, '/sandbox')}
+                  className="inline-flex min-h-[46px] w-full sm:w-auto items-center justify-center gap-2 rounded-lg border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] px-5 text-sm font-semibold text-[var(--emos-text-primary)] transition-all"
+                >
+                  <ShieldCheck className="h-4 w-4 text-[#4648D4] dark:text-[#818CF8]" />
+                  <span>Explore Without Sign-In</span>
+                </a>
               </div>
-              <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[var(--emos-text-muted)]">
-                <span className="inline-flex items-center gap-1.5"><CirclePlay className="h-3.5 w-3.5 text-[var(--emos-accent)]" />{EMOS_FACTS.learningLibraryLabel}</span>
-                <span className="inline-flex items-center gap-1.5"><Github className="h-3.5 w-3.5 text-[var(--emos-accent)]" />Public Repository Under CI</span>
-                <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-[var(--emos-accent)]" />Google Sign In</span>
+
+              {/* Compact Secondary Utility Links */}
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-xs">
+                <button
+                  id="learn-more-walkthrough-btn"
+                  onClick={onOpenWalkthrough}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] px-3 py-1.5 font-semibold text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:border-[var(--emos-border-strong)] transition-colors cursor-pointer"
+                >
+                  <CirclePlay className="h-3.5 w-3.5 text-[#4648D4] dark:text-[#818CF8]" />
+                  <span>Product Tour</span>
+                </button>
+                <button
+                  id="primary-google-signin-btn"
+                  onClick={handleSignIn}
+                  disabled={isSigningIn}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-semibold text-[var(--emos-text-secondary)] hover:text-[var(--emos-accent-text)] transition-colors cursor-pointer disabled:opacity-75"
+                >
+                  <GoogleIcon />
+                  <span>{isSigningIn ? 'Authenticating…' : 'Sign in with Google'}</span>
+                </button>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[var(--emos-text-muted)]">
+                <span className="inline-flex items-center gap-1.5"><CirclePlay className="h-3.5 w-3.5 text-[#4648D4] dark:text-[#818CF8]" />{EMOS_FACTS.learningLibraryLabel}</span>
+                <span className="inline-flex items-center gap-1.5"><Github className="h-3.5 w-3.5 text-[#4648D4] dark:text-[#818CF8]" />Public Repository Under CI</span>
+                <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-[#4648D4] dark:text-[#818CF8]" />Google Sign In</span>
               </div>
             </Reveal>
 
-            <Reveal delay={0.16} className="relative">
-              <div className="landing-orbit absolute -inset-10 rounded-full border border-[var(--emos-accent-border)] opacity-40" aria-hidden="true" />
-              <EmosHeroVisual />
+            {/* Crisp Flat Stitch v12 Product Preview Card (No Decorative 3D Tilt) */}
+            <Reveal delay={0.14} className="mx-auto mt-10 max-w-4xl">
+              <div className="stitch-card overflow-hidden shadow-md">
+                <div className="px-4 py-2.5 bg-[var(--emos-bg)] border-b border-[var(--emos-border-subtle)] flex items-center justify-between gap-2 text-[11px] font-mono">
+                  <div className="flex items-center gap-2">
+                    <span className="flex gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+                    </span>
+                    <span className="text-[var(--emos-text-muted)] ml-1">emos-console // synthetic-estate-preview</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] font-semibold">
+                    Deterministic Readiness Gate
+                  </span>
+                </div>
+
+                <div className="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                  {/* Left: Readiness Gauge Summary */}
+                  <div className="md:col-span-4 p-4 rounded-xl bg-[var(--emos-bg)] border border-[var(--emos-border-subtle)] space-y-3">
+                    <div className="flex items-center justify-between text-[10px] font-mono uppercase text-[var(--emos-text-muted)]">
+                      <span>Estate Readiness</span>
+                      <span className="text-[#4648D4] dark:text-[#818CF8] font-semibold">Apex Aerospace</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-full border-4 border-[#4648D4] flex flex-col items-center justify-center shrink-0">
+                        <span className="font-mono text-sm font-bold text-[var(--emos-text-primary)]">{SCENARIO_READINESS.completeness}%</span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[var(--emos-text-primary)]">{SCENARIO_WORKLOAD.name}</p>
+                        <p className="text-[11px] text-[var(--emos-text-secondary)]">
+                          {SCENARIO_READINESS.knownCount}/{SCENARIO_READINESS.totalCount} verified attributes
+                        </p>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-[var(--emos-border-subtle)] flex items-center justify-between text-[11px]">
+                      <span className="text-[var(--emos-text-muted)]">Gate Threshold: {EMOS_FACTS.readinessThreshold}%</span>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30 font-mono text-[10px] font-bold">
+                        {SCENARIO_READINESS.decisionReadiness}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right: Evidence -> Gate -> 6R Pipeline Preview */}
+                  <div className="md:col-span-8 p-4 rounded-xl bg-[var(--emos-bg)] border border-[var(--emos-border-subtle)] space-y-3">
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <span className="font-semibold text-[var(--emos-text-primary)]">
+                        Evidence → Readiness Gate → Governed 6R
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] font-mono text-[10px] text-[var(--emos-text-muted)]">
+                        Canonical 6R
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                      <div className="p-3 rounded-lg bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)]">
+                        <span className="text-[10px] font-mono uppercase text-[var(--emos-text-muted)] block">Source</span>
+                        <strong className="text-[var(--emos-text-primary)] block mt-0.5">{SCENARIO_WORKLOAD.currentStack}</strong>
+                        <span className="text-[10px] text-[var(--emos-text-secondary)]">{SCENARIO_WORKLOAD.hosting}</span>
+                      </div>
+                      <div className="p-3 rounded-lg bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-center flex flex-col justify-center">
+                        <span className="text-[10px] font-mono uppercase text-[var(--emos-accent-text)] font-bold">EMOS Gate</span>
+                        <span className="text-[11px] font-semibold text-[var(--emos-text-primary)] mt-0.5">
+                          {SCENARIO_READINESS.criticalGaps.length} Critical Gaps Flagged
+                        </span>
+                      </div>
+                      <div className="p-3 rounded-lg bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)]">
+                        <span className="text-[10px] font-mono uppercase text-[var(--emos-text-muted)] block">Outcome</span>
+                        <strong className="text-[var(--emos-text-primary)] block mt-0.5">Human Sign-Off</strong>
+                        <span className="text-[10px] text-[var(--emos-text-secondary)]">Wave-sequenced plan</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-[var(--emos-text-muted)] pt-1">
+                      <span>Synthetic evaluation preview · Zero external credentials required</span>
+                      <a href="/workspace" onClick={(e) => navigate(e, '/workspace')} className="font-semibold text-[#4648D4] dark:text-[#818CF8] hover:underline">
+                        Open Command Center →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </Reveal>
           </div>
-          <div className="relative mx-auto max-w-[88rem] px-4 pb-12 sm:px-6 lg:px-8 lg:pb-16" aria-label="EMOS capability horizon">
-            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--emos-accent-text)]">Capability Horizon</p><h2 className="mt-1 font-serif text-2xl font-semibold">{EMOS_POSITIONING.capabilityHeading}</h2></div><p className="text-xs text-[var(--emos-text-muted)]">{EMOS_POSITIONING.lifecycleLabel}</p></div>
-            <div className="grid gap-3 lg:grid-cols-3">
-              {CAPABILITY_HORIZON.map(({ label, status, stages }) => <div key={`hero-${label}`} className={['rounded-2xl border p-4 backdrop-blur transition-transform hover:-translate-y-0.5', PHASE_CARD_STYLES[status]].join(' ')}><div className="flex items-center justify-between gap-3"><p className="font-serif text-base font-semibold">{label}</p><span className={['rounded-full border px-2 py-1 font-mono text-[9px] font-bold tracking-wider', STATUS_STYLES[status]].join(' ')}>{status}</span></div><p className="mt-3 text-xs leading-5 text-[var(--emos-text-secondary)]">{stages.join(' · ')}</p></div>)}
+
+          {/* 5-Stage Modernization Loop */}
+          <div className="relative mx-auto max-w-[82rem] px-4 pb-12 sm:px-6 lg:px-8">
+            <div className="text-center max-w-2xl mx-auto mb-6">
+              <p className="text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-[var(--emos-accent-text)]">
+                Governed Closed-Loop Architecture
+              </p>
+              <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold text-[var(--emos-text-primary)]">
+                The 5-Stage Modernization Loop
+              </h2>
             </div>
-            <div className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] px-4 py-2.5 text-center text-xs font-semibold text-emerald-700 dark:text-emerald-300">Trust, Security, Governance and Human Accountability Throughout</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {[
+                { num: '01', title: 'Discover & Assess', desc: 'Structure 18 Enterprise DNA attributes across 6 dimensions.', status: 'SHIPPED' },
+                { num: '02', title: 'Decide with Evidence', desc: 'Ground canonical 6R trade-offs with deterministic readiness gates.', status: 'SHIPPED' },
+                { num: '03', title: 'Governed Waves', desc: 'Sequence approved workloads into implementation-ready waves.', status: 'SHIPPED' },
+                { num: '04', title: 'Execute & Measure', desc: 'Track disposition workflows and compare expected vs. observed value.', status: 'VISION' },
+                { num: '05', title: 'Continuous Learning', desc: 'Capture verified lessons into the modernization playbook.', status: 'VISION' },
+              ].map((step) => (
+                <div key={step.num} className="stitch-card p-4 flex flex-col justify-between space-y-3">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-[var(--emos-text-muted)]">{step.num}</span>
+                      <span className={`px-2 py-0.5 rounded-full border font-mono text-[9px] font-bold ${STATUS_STYLES[step.status]}`}>
+                        {step.status}
+                      </span>
+                    </div>
+                    <h3 className="font-display text-sm font-bold text-[var(--emos-text-primary)]">{step.title}</h3>
+                    <p className="text-xs leading-relaxed text-[var(--emos-text-secondary)]">{step.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Capability Horizon: One Lifecycle. Three Honest Delivery States. */}
+          <div className="relative mx-auto max-w-[82rem] px-4 pb-14 sm:px-6 lg:px-8" aria-label="EMOS capability horizon">
+            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-[var(--emos-accent-text)]">
+                  Capability Horizon
+                </p>
+                <h2 className="mt-1 font-display text-2xl font-bold text-[var(--emos-text-primary)]">
+                  {EMOS_POSITIONING.capabilityHeading}
+                </h2>
+              </div>
+              <p className="text-xs font-mono text-[var(--emos-text-muted)]">{EMOS_POSITIONING.lifecycleLabel}</p>
+            </div>
+            <div className="grid gap-3 lg:grid-cols-3">
+              {CAPABILITY_HORIZON.map(({ label, status, stages }) => (
+                <div key={`hero-${label}`} className={['rounded-xl border p-4 backdrop-blur transition-transform hover:-translate-y-0.5', PHASE_CARD_STYLES[status]].join(' ')}>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-display text-base font-bold text-[var(--emos-text-primary)]">{label}</p>
+                    <span className={['rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold tracking-wider', STATUS_STYLES[status]].join(' ')}>{status}</span>
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-[var(--emos-text-secondary)]">{stages.join(' · ')}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] px-4 py-2.5 text-center text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+              Trust, Security, Governance and Human Accountability Throughout
+            </div>
           </div>
         </section>}
 
@@ -359,7 +544,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
         {activeSection === 'scenario' && <section id="scenario" className="landing-scene">
           <div className="mx-auto max-w-[88rem] px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
             <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-              <Reveal><StageMarker number="03" label="Wholly Synthetic Scenario" /><h2 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl">The Initiative the Estate Is Blocking</h2><p className="mt-5 text-base leading-8 text-[var(--emos-text-secondary)]">Apex Aerospace Manufacturing has committed to unified customer analytics. A Java 8 and Oracle workload stands in the way—with seven integrations, no verified TCO baseline and no recorded downtime tolerance.</p><div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap"><a href="/sandbox" onClick={(event) => navigate(event, '/sandbox')} className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#A88554] px-5 text-sm font-semibold text-black">Open This Scenario <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a><a href="/learn" onClick={(event) => navigate(event, '/learn')} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] px-5 text-sm font-semibold"><CirclePlay className="h-4 w-4" />Watch the Walkthrough</a><button onClick={() => downloadSampleDecisionBrief(SCENARIO_WORKLOAD)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--emos-text-secondary)] hover:bg-[var(--emos-surface-hover)]"><FileSearch className="h-4 w-4" />Download Decision Brief</button></div></Reveal>
+              <Reveal><StageMarker number="03" label="Wholly Synthetic Scenario" /><h2 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl">The Initiative the Estate Is Blocking</h2><p className="mt-5 text-base leading-8 text-[var(--emos-text-secondary)]">Apex Aerospace Manufacturing has committed to unified customer analytics. A Java 8 and Oracle workload stands in the way—with seven integrations, no verified TCO baseline and no recorded downtime tolerance.</p><div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap"><a href="/sandbox" onClick={(event) => navigate(event, '/sandbox')} className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-5 text-sm font-semibold text-white">Open This Scenario <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a><a href="/learn" onClick={(event) => navigate(event, '/learn')} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] px-5 text-sm font-semibold"><CirclePlay className="h-4 w-4" />Watch the Walkthrough</a><button onClick={() => downloadSampleDecisionBrief(SCENARIO_WORKLOAD)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--emos-text-secondary)] hover:bg-[var(--emos-surface-hover)]"><FileSearch className="h-4 w-4" />Download Decision Brief</button></div></Reveal>
 
               <Reveal delay={0.1} className="overflow-hidden rounded-[1.75rem] border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] shadow-2xl">
                 <div className="flex items-center justify-between border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] px-5 py-4"><div><p className="text-xs font-semibold text-[var(--emos-accent-text)]">EMOS Decision Gate</p><p className="mt-1 text-sm font-medium">Customer Analytics · Java 8 + Oracle</p></div><ShieldCheck className="h-5 w-5 text-[var(--emos-accent)]" /></div>
@@ -407,7 +592,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
 
         {activeSection === 'founder' && <section id="founder" className="landing-scene landing-founder bg-[var(--emos-bg-secondary)]">
           <div className="mx-auto grid max-w-[88rem] gap-8 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:px-8">
-            <Reveal><div className="rounded-3xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-6 shadow-xl"><div className="flex items-center justify-between"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#876637] to-[#E5C492] font-serif text-2xl font-semibold text-black">JM</div><a href="https://www.linkedin.com/in/jincenmathew/" target="_blank" rel="noreferrer" aria-label="Connect With Jincen E Mathew on LinkedIn" title="Connect With Jincen E Mathew on LinkedIn" className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#0A66C2]/30 bg-[#0A66C2]/10 text-[#0A66C2] transition-all hover:-translate-y-0.5 hover:bg-[#0A66C2] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A66C2]"><Linkedin className="h-5 w-5" aria-hidden="true" /></a></div><p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--emos-accent-text)]">Product Builder</p><h2 className="mt-2 font-serif text-3xl font-semibold">Jincen E Mathew</h2><p className="mt-1 text-sm leading-6 text-[var(--emos-text-muted)]">Bengaluru · 15+ years taking enterprise products from opportunity to scale</p><dl className="mt-5 grid gap-4 border-t border-[var(--emos-border-subtle)] pt-5 sm:grid-cols-2 lg:grid-cols-1">{[
+            <Reveal><div className="rounded-3xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-6 shadow-xl"><div className="flex items-center justify-between"><div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#4648D4] font-display text-xl font-bold text-white">JM</div><a href="https://www.linkedin.com/in/jincenmathew/" target="_blank" rel="noreferrer" aria-label="Connect With Jincen E Mathew on LinkedIn" title="Connect With Jincen E Mathew on LinkedIn" className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#0A66C2]/30 bg-[#0A66C2]/10 text-[#0A66C2] transition-all hover:-translate-y-0.5 hover:bg-[#0A66C2] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A66C2]"><Linkedin className="h-5 w-5" aria-hidden="true" /></a></div><p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--emos-accent-text)]">Product Builder</p><h2 className="mt-2 font-serif text-3xl font-semibold">Jincen E Mathew</h2><p className="mt-1 text-sm leading-6 text-[var(--emos-text-muted)]">Bengaluru · 15+ years taking enterprise products from opportunity to scale</p><dl className="mt-5 grid gap-4 border-t border-[var(--emos-border-subtle)] pt-5 sm:grid-cols-2 lg:grid-cols-1">{[
               ['End-to-end ownership', 'Business value & opportunity validation → Design → Build → Production-grade release → Launch & positioning → Scale'],
               ['Oracle · 5 years', 'Led GTM for Oracle Engineered Systems and the Oracle technology stack'],
               ['Tally · 3+ years', 'Built and launched products across new markets and countries'],
@@ -415,7 +600,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
               ['Autodesk · 1+ year', 'Leading data products supporting product-led growth and GTM initiatives'],
               ['Community', 'Established the first product management communities of practice at Tally and Boeing India'],
             ].map(([label, value]) => <div key={label}><dt className="text-sm font-semibold text-[var(--emos-accent-text)]">{label}</dt><dd className="mt-1 text-sm leading-6 text-[var(--emos-text-secondary)]">{value}</dd></div>)}</dl></div></Reveal>
-            <Reveal delay={0.1}><div><h2 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl">Why EMOS exists</h2><div className="mt-5 space-y-4 text-base leading-8 text-[var(--emos-text-secondary)]"><p>At Boeing, the hard part of modernization wasn&apos;t executing a 6R disposition once it was chosen. It was establishing whether the evidence justified committing millions of dollars and years to changing a system.</p><p className="font-serif text-3xl font-semibold leading-tight text-[var(--emos-text-primary)]">EMOS grew from that problem.</p></div><div className="mt-8"><BuilderVideo /></div><div className="mt-6 space-y-4 text-base leading-8 text-[var(--emos-text-secondary)]"><p>EMOS helps enterprises assess modernization options against evidence, make governed decisions and carry those decisions into execution.</p><p>Hyperscaler tools are built to move workloads onto their own clouds. EMOS is vendor-agnostic: the evidence decides the destination, including whether to move at all.</p><p className="text-sm leading-7">Design partners work directly with me to shape the operating model and set the roadmap.</p></div><a href="https://mail.google.com/mail/?view=cm&fs=1&to=jeasom@gmail.com&su=EMOS%20Design%20Partner%20Interest&body=Hi%20Jincen%2C%0A%0AI%27m%20interested%20in%20becoming%20an%20EMOS%20design%20partner." target="_blank" rel="noreferrer" aria-label="Become an EMOS design partner by email" className="group mt-7 inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-6 text-sm font-semibold text-black shadow-lg transition-all hover:-translate-y-0.5">Become a Design Partner <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a></div></Reveal>
+            <Reveal delay={0.1}><div><h2 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl">Why EMOS exists</h2><div className="mt-5 space-y-4 text-base leading-8 text-[var(--emos-text-secondary)]"><p>At Boeing, the hard part of modernization wasn&apos;t executing a 6R disposition once it was chosen. It was establishing whether the evidence justified committing millions of dollars and years to changing a system.</p><p className="font-serif text-3xl font-semibold leading-tight text-[var(--emos-text-primary)]">EMOS grew from that problem.</p></div><div className="mt-8"><BuilderVideo /></div><div className="mt-6 space-y-4 text-base leading-8 text-[var(--emos-text-secondary)]"><p>EMOS helps enterprises assess modernization options against evidence, make governed decisions and carry those decisions into execution.</p><p>Hyperscaler tools are built to move workloads onto their own clouds. EMOS is vendor-agnostic: the evidence decides the destination, including whether to move at all.</p><p className="text-sm leading-7">Design partners work directly with me to shape the operating model and set the roadmap.</p></div><a href="https://mail.google.com/mail/?view=cm&fs=1&to=jeasom@gmail.com&su=EMOS%20Design%20Partner%20Interest&body=Hi%20Jincen%2C%0A%0AI%27m%20interested%20in%20becoming%20an%20EMOS%20design%20partner." target="_blank" rel="noreferrer" aria-label="Become an EMOS design partner by email" className="group mt-7 inline-flex min-h-[46px] items-center justify-center gap-2 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-6 text-sm font-semibold text-white shadow-sm transition-all">Become a Design Partner <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a></div></Reveal>
           </div>
         </section>}
 
@@ -424,7 +609,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenWalkthrough, onN
           <div className="relative mx-auto max-w-[88rem] px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
             <Reveal className="overflow-hidden rounded-[2rem] border border-[var(--emos-accent-border)] bg-[var(--emos-surface)] shadow-2xl">
               <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-                <div className="p-7 sm:p-9 lg:p-10"><StageMarker number="06" label="Design Partner Program" /><h2 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl">Become a Founding Design Partner</h2><p className="mt-5 max-w-2xl text-base leading-8 text-[var(--emos-text-secondary)]">Bring a sanitized, representative portfolio—or model a stuck initiative with synthetic data. In one working session, EMOS produces an evidence-gap assessment and explainable recommendation; you tell me where it fails a real architecture review.</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=jeasom@gmail.com&su=EMOS%20Design%20Partner%20Interest&body=Hi%20Jincen%2C%0A%0AI%27m%20interested%20in%20becoming%20an%20EMOS%20design%20partner.%0A%0AName%3A%0AOrganization%3A%0ARole%3A%0APortfolio%20size%3A%0AModernization%20initiative%3A%0ACurrent%20decision%20process%3A%0AIntended%20business%20outcome%3A%0ABuyer%20or%20budget%20owner%3A%0AData%20or%20security%20restrictions%3A" target="_blank" rel="noreferrer" aria-label="Confirm Design Partner Interest by Email" className="group inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-6 text-sm font-semibold text-black shadow-lg transition-all hover:-translate-y-0.5"><Mail className="h-4 w-4" />Confirm Interest by Email <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a><a href="/sandbox" onClick={(event) => navigate(event, '/sandbox')} className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-bg-secondary)] px-5 text-sm font-semibold"><Sparkles className="h-4 w-4" />Evaluate Without Sign-In</a></div><p className="mt-4 text-sm leading-6 text-[var(--emos-text-muted)]">There is no charge to explore the public beta or sandbox. Commercial pricing has not been set. Prefer another email client? Write to <a className="font-semibold text-[var(--emos-accent-text)] underline underline-offset-4" href="mailto:jeasom@gmail.com?subject=EMOS%20Design%20Partner%20Interest">jeasom@gmail.com</a>.</p></div>
+                <div className="p-7 sm:p-9 lg:p-10"><StageMarker number="06" label="Design Partner Program" /><h2 className="font-serif text-4xl font-semibold leading-tight sm:text-5xl">Become a Founding Design Partner</h2><p className="mt-5 max-w-2xl text-base leading-8 text-[var(--emos-text-secondary)]">Bring a sanitized, representative portfolio—or model a stuck initiative with synthetic data. In one working session, EMOS produces an evidence-gap assessment and explainable recommendation; you tell me where it fails a real architecture review.</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=jeasom@gmail.com&su=EMOS%20Design%20Partner%20Interest&body=Hi%20Jincen%2C%0A%0AI%27m%20interested%20in%20becoming%20an%20EMOS%20design%20partner.%0A%0AName%3A%0AOrganization%3A%0ARole%3A%0APortfolio%20size%3A%0AModernization%20initiative%3A%0ACurrent%20decision%20process%3A%0AIntended%20business%20outcome%3A%0ABuyer%20or%20budget%20owner%3A%0AData%20or%20security%20restrictions%3A" target="_blank" rel="noreferrer" aria-label="Confirm Design Partner Interest by Email" className="group inline-flex min-h-[46px] items-center justify-center gap-2 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-6 text-sm font-semibold text-white shadow-sm transition-all"><Mail className="h-4 w-4" />Confirm Interest by Email <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></a><a href="/sandbox" onClick={(event) => navigate(event, '/sandbox')} className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-bg-secondary)] px-5 text-sm font-semibold"><Sparkles className="h-4 w-4" />Evaluate Without Sign-In</a></div><p className="mt-4 text-sm leading-6 text-[var(--emos-text-muted)]">There is no charge to explore the public beta or sandbox. Commercial pricing has not been set. Prefer another email client? Write to <a className="font-semibold text-[var(--emos-accent-text)] underline underline-offset-4" href="mailto:jeasom@gmail.com?subject=EMOS%20Design%20Partner%20Interest">jeasom@gmail.com</a>.</p></div>
                 <div className="border-t border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] p-7 sm:p-10 lg:border-l lg:border-t-0 lg:p-12"><div className="flex items-center gap-3"><Users className="h-6 w-6 text-[var(--emos-accent)]" /><p className="font-serif text-2xl font-semibold">I Am Looking for Three.</p></div><ul className="mt-8 space-y-4">{['A Tailored Evidence-Gap and Modernization Assessment', 'Direct Influence Over the Product Roadmap', 'Early Access to New Capabilities', 'Founding-Customer Terms When EMOS Becomes Commercial'].map((benefit) => <li key={benefit} className="flex items-start gap-3 text-sm leading-6 text-[var(--emos-text-secondary)]"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--emos-accent)]" />{benefit}</li>)}</ul><div className="mt-8 rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5"><p className="text-xs font-semibold text-[var(--emos-accent-text)]">The Evidence I Need in Return</p><p className="mt-2 text-sm leading-6 text-[var(--emos-text-secondary)]">Where the recommendation is wrong, what evidence it missed and whether the output would support a real buying decision.</p></div></div>
               </div>
             </Reveal>

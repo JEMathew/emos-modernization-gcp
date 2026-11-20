@@ -201,14 +201,16 @@ describe('standardized authenticated journey', () => {
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 
-  it('uses the canonical seven-stage beta journey in Product Tour', () => {
+  it('uses the canonical four-stage business journey in Product Tour', () => {
     render(withTheme(<TestWalkthroughModal isOpen={true} onClose={vi.fn()} />));
 
-    expect(['Align', 'Discover', 'Understand', 'Assess', 'Decide', 'Plan', 'Mobilize'].map((stage, index) =>
+    expect(['Understand', 'Decide', 'Transform', 'Outcomes'].map((stage, index) =>
       screen.getByRole('button', { name: `Step ${index + 1}: ${stage}` }),
-    )).toHaveLength(7);
-    expect(screen.getByRole('button', { name: 'Step 4: Assess' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Step 5: Decide' })).toBeInTheDocument();
+    )).toHaveLength(4);
+    expect(screen.getByRole('button', { name: 'Step 1: Understand' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Step 2: Decide' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Step 3: Transform' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Step 4: Outcomes' })).toBeInTheDocument();
     expect(screen.getByText(/Trust controls apply throughout/i)).toBeInTheDocument();
   });
 });

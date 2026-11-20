@@ -12,7 +12,10 @@
     "lint": "tsc --noEmit",
     "test": "vitest run && npm run test:firestore",
     "test:unit": "vitest run",
-    "test:firestore": "firebase emulators:exec --only firestore --project demo-emos-guardrails \"vitest run --config vitest.firestore.config.ts\""
+    "test:firestore": "firebase emulators:exec --only firestore --project demo-emos-guardrails \"vitest run --config vitest.firestore.config.ts\"",
+    "evals": "tsx evals/runEvals.ts",
+    "evals:live": "tsx evals/live/runLiveEvals.ts",
+    "evals:live:targeted": "NODE_ENV=test tsx evals/live/runTargetedLiveVerify.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

@@ -5,7 +5,10 @@ import type {
   DecisionReadiness,
   TrustIndicators,
   EnterpriseDna,
+  EnterpriseWorkload,
+  Interaction,
 } from '../types';
+import type { AgentToolExecution, SpecialistAgentId } from './agents/types';
 import { redactSecrets } from './guardrails';
 import {
   assessmentResponseSchema,
@@ -111,6 +114,57 @@ export async function generateAssessmentMeta(content: string): Promise<Assessmen
       category: 'Legacy Application',
     };
   }
+}
+
+export interface AskEmosApiResponse {
+  id: string;
+  question: string;
+  workloadId: string;
+  workloadName: string;
+  stage: string;
+  routedAgents: SpecialistAgentId[];
+  handoffOccurred: boolean;
+  governanceIntercepted: boolean;
+  recommended6R: Disposition6R;
+  decisionReadiness: DecisionReadiness;
+  evidenceCompleteness: number;
+  confidenceScore: number;
+  conclusion: string;
+  bullets: string[];
+  nextAction: string;
+  evidenceSummary: string;
+  reasoningSummary: string;
+  toolsCalled: AgentToolExecution[];
+  timestamp: string;
+  isLiveGemini?: boolean;
+  executionMode: 'live-gemini' | 'deterministic-fallback' | 'deterministic-governance-block';
+  modelsUsed?: string[];
+}
+
+export async function askEmosWithGemini(params: {
+  question: string;
+  workload: EnterpriseWorkload;
+  currentStage?: string;
+  estateName?: string;
+  activeInteraction?: Interaction | null;
+}): Promise<AskEmosApiResponse> {
+  const res = await fetch('/api/ask-emos', {
+    method: 'POST',
+    headers: await authenticatedHeaders(),
+    body: JSON.stringify({
+      question: params.question,
+      workload: params.workload,
+      currentStage: params.currentStage,
+      estateName: params.estateName,
+      activeInteraction: params.activeInteraction ?? null,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`ASK_EMOS_HTTP_${res.status}`);
+  }
+
+  return (await res.json()) as AskEmosApiResponse;
 }
 
 // Backward compatibility export

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
-import { Navbar } from './Navbar';
+import { WorkspaceShell, type ShellNavTarget, type DecideSubTab } from './WorkspaceShell';
+import { CommandCenterView } from './CommandCenterView';
 import { HistorySidebar } from './HistorySidebar';
 import { ReflectionWorkspace } from './ReflectionWorkspace';
 import { SamplePortfolioView } from './SamplePortfolioView';
@@ -11,8 +12,10 @@ import { PortfolioPlanView } from './PortfolioPlanView';
 import { ModernizationAgentPanel } from './ModernizationAgentPanel';
 import type { Interaction, AssessmentMode, ChatMessage, EnterpriseWorkload, ProgramAlignment, Disposition6R } from '../types';
 import { SAMPLE_PORTFOLIO, formatWorkloadDnaForAssessment } from '../data/samplePortfolio';
+import { evaluateEvidenceReadiness } from '../lib/readiness';
 import {
   APEX_AEROSPACE_WORKLOADS,
+  ENTERPRISE_ESTATE_PROFILES,
   FINANCIAL_SERVICES_WORKLOADS,
   deriveEvidenceDrivenRecommendation,
   type EnterpriseSampleId,
@@ -36,9 +39,10 @@ import { Bot } from 'lucide-react';
 
 interface DashboardProps {
   user?: User | null;
+  onOpenLearningCenter?: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ user = null, onOpenLearningCenter }) => {
   const effectiveUid = user?.uid || 'local-evaluation-session';
 
   const defaultAlignment: ProgramAlignment = {
@@ -62,7 +66,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
   const [financialWorkloads, setFinancialWorkloads] = useState<EnterpriseWorkload[]>(() => structuredClone(FINANCIAL_SERVICES_WORKLOADS));
   const [approvedWorkloads, setApprovedWorkloads] = useState<Record<string, boolean>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'portfolio' | 'dna' | 'workspace' | 'plan'>('portfolio');
+  const [currentView, setCurrentView] = useState<'command-center' | 'portfolio' | 'dna' | 'workspace' | 'plan'>('command-center');
+  const [planSection, setPlanSection] = useState<'align' | 'waves' | 'mobilize' | 'execute' | 'measure' | 'learn'>('align');
+  const [decideTab, setDecideTab] = useState<DecideSubTab>('recommendation');
+  const [globalSearch, setGlobalSearch] = useState('');
   const [programAlignment, setProgramAlignment] = useState<ProgramAlignment>(defaultAlignment);
   const [selectedWorkload, setSelectedWorkload] = useState<EnterpriseWorkload | null>(SAMPLE_PORTFOLIO[0]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(Boolean(user));
@@ -74,6 +81,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isMobileHistoryOpen, setIsMobileHistoryOpen] = useState(false);
   const [isAgentOpen, setIsAgentOpen] = useState(false);
+  const [pendingAgentQuestion, setPendingAgentQuestion] = useState<{ id: number; text: string } | null>(null);
+
+  const handleAskAgentWithQuestion = (question: string) => {
+    setIsAgentOpen(true);
+    setPendingAgentQuestion({ id: Date.now(), text: question });
+  };
 
   // Sync user profile and test connection on mount when authenticated
   useEffect(() => {
@@ -150,6 +163,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
     setApexWorkloads((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
     setFinancialWorkloads((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
     setImportedWorkloads((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
+    if (evaluateEvidenceReadiness(updated.dna).decisionReadiness !== 'READY') {
+      setApprovedWorkloads((prev) => {
+        if (!prev[updated.id]) return prev;
+        const next = { ...prev };
+        delete next[updated.id];
+        return next;
+      });
+    }
   };
 
   const handleResetSampleWorkload = (workloadId: string) => {
@@ -163,6 +184,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
   };
 
   const handleApproveGovernance = (workloadId: string, _disposition: Disposition6R) => {
+    const targetWorkload = allWorkloads.find((w) => w.id === workloadId);
+    if (!targetWorkload) return;
+    const readiness = evaluateEvidenceReadiness(targetWorkload.dna);
+    if (readiness.decisionReadiness !== 'READY') {
+      return;
+    }
     setApprovedWorkloads((prev) => ({ ...prev, [workloadId]: true }));
   };
 
@@ -539,65 +566,162 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
     }
   };
 
+  const activeProfile = ENTERPRISE_ESTATE_PROFILES[activeEstateId === 'financial-services' ? 'financial-services' : 'apex-aerospace'];
+  const combinedActiveWorkloads = [...activeEstateList, ...importedWorkloads];
+  const needsEvidenceCount = combinedActiveWorkloads.filter((w) => deriveEvidenceDrivenRecommendation(w).decisionReadiness !== 'READY').length;
+
+  const activeShellNav: ShellNavTarget =
+    currentView === 'command-center'
+      ? 'command-center'
+      : currentView === 'portfolio'
+      ? 'portfolio'
+      : currentView === 'dna'
+      ? 'dna'
+      : currentView === 'workspace'
+      ? 'decisions'
+      : planSection === 'mobilize'
+      ? 'governance'
+      : planSection === 'execute'
+      ? 'execute'
+      : planSection === 'measure'
+      ? 'measure'
+      : planSection === 'learn'
+      ? 'learn'
+      : 'plan';
+
+  const syncWorkloadFromInteraction = (interactionId: string | null) => {
+    if (!interactionId) return;
+    const item = interactions.find((i) => i.id === interactionId);
+    if (!item) return;
+    const matchById = item.workloadId
+      ? allWorkloads.find((w) => w.id.toLowerCase() === item.workloadId!.toLowerCase())
+      : undefined;
+    const hint = (item.workloadName || item.title || '').toLowerCase();
+    const matchByName = !matchById && hint
+      ? allWorkloads.find(
+          (w) =>
+            hint === w.name.toLowerCase() ||
+            hint.includes(w.name.toLowerCase()) ||
+            w.name.toLowerCase().includes(hint),
+        )
+      : undefined;
+    const matched = matchById || matchByName;
+    if (matched) {
+      setSelectedWorkload(matched);
+    }
+  };
+
+  const handleShellNavigate = (target: ShellNavTarget) => {
+    setIsMobileHistoryOpen(false);
+    if (target === 'command-center') {
+      setCurrentView('command-center');
+    } else if (target === 'portfolio') {
+      setCurrentView('portfolio');
+    } else if (target === 'dna') {
+      if (!selectedWorkload && activeEstateList.length > 0) {
+        setSelectedWorkload(activeEstateList[0]);
+      }
+      setCurrentView('dna');
+    } else if (target === 'decisions') {
+      const matchingInteraction = selectedWorkload
+        ? interactions.find(
+            (i) =>
+              (i.workloadId && i.workloadId.toLowerCase() === selectedWorkload.id.toLowerCase()) ||
+              (i.workloadName && i.workloadName.toLowerCase() === selectedWorkload.name.toLowerCase()),
+          )
+        : undefined;
+      if (matchingInteraction) {
+        setSelectedId(matchingInteraction.id);
+      } else if (selectedWorkload) {
+        // Keep the user's selected workload intact rather than silently overwriting it with a different workload's assessment
+        setSelectedId(null);
+      } else if (!selectedId && interactions.length > 0) {
+        setSelectedId(interactions[0].id);
+        syncWorkloadFromInteraction(interactions[0].id);
+      }
+      setCurrentView('workspace');
+    } else if (target === 'governance') {
+      setPlanSection('mobilize');
+      setCurrentView('plan');
+    } else if (target === 'plan') {
+      setPlanSection('waves');
+      setCurrentView('plan');
+    } else if (target === 'execute') {
+      setPlanSection('execute');
+      setCurrentView('plan');
+    } else if (target === 'measure') {
+      setPlanSection('measure');
+      setCurrentView('plan');
+    } else if (target === 'learn') {
+      setPlanSection('learn');
+      setCurrentView('plan');
+    }
+  };
+
+  const handleReviewPriorityDecisions = () => {
+    setDecideTab('recommendation');
+    if (interactions.length > 0) {
+      const latestId = selectedId || interactions[0].id;
+      setSelectedId(latestId);
+      syncWorkloadFromInteraction(latestId);
+      setCurrentView('workspace');
+      return;
+    }
+    const priorityWorkload =
+      combinedActiveWorkloads.find((w) => deriveEvidenceDrivenRecommendation(w).decisionReadiness !== 'READY') ||
+      combinedActiveWorkloads[0];
+    if (priorityWorkload) {
+      void handleAssessWorkload(priorityWorkload);
+    } else {
+      setCurrentView('workspace');
+    }
+  };
+
+  const activeWorkloadRec = selectedWorkload ? deriveEvidenceDrivenRecommendation(selectedWorkload) : null;
+
   return (
-    <div className="min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] flex flex-col font-sans selection:bg-[#A88554] selection:text-black transition-colors">
-      <Navbar
+    <>
+      <WorkspaceShell
         user={user}
-        currentView={currentView}
-        selectedId={selectedId}
-        assessmentCount={interactions.length}
-        onNavigate={(view) => {
-          if (view === 'portfolio') {
-            setCurrentView('portfolio');
-            setIsMobileHistoryOpen(false);
-          } else if (view === 'decision-intelligence') {
-            setSelectedId(null);
-            setCurrentView('workspace');
-            setIsMobileHistoryOpen(false);
-          } else if (view === 'assessments') {
-            if (window.innerWidth < 1024) {
-              setIsMobileHistoryOpen(true);
-            } else {
-              if (!selectedId && interactions.length > 0) {
-                setSelectedId(interactions[0].id);
-              }
-            }
-            setCurrentView('workspace');
-          } else if (view === 'plan') {
-            setCurrentView('plan');
-            setIsMobileHistoryOpen(false);
+        activeNav={activeShellNav}
+        activeDecideTab={decideTab}
+        onSelectDecideTab={setDecideTab}
+        activeEstateId={activeEstateId}
+        onChangeEstate={(id) => {
+          setActiveEstateId(id);
+          setSelectedId(null);
+          if (id === 'financial-services') {
+            setSelectedWorkload(financialWorkloads[0]);
+          } else {
+            setSelectedWorkload(apexWorkloads[0]);
           }
         }}
+        estateAssetLabel={`${activeProfile.totalAssetsRepresented.toLocaleString()}+ Assets`}
+        activeWorkloadName={selectedWorkload?.name}
+        activeWorkloadReadiness={activeWorkloadRec?.decisionReadiness}
+        activeWorkloadCompleteness={selectedWorkload?.evidenceCompleteness}
+        workloadCount={combinedActiveWorkloads.length}
+        assessmentCount={interactions.length}
+        needsEvidenceCount={needsEvidenceCount}
+        searchQuery={globalSearch}
+        onSearchChange={setGlobalSearch}
+        onNavigate={handleShellNavigate}
+        onOpenLearningCenter={onOpenLearningCenter}
+        onOpenHistory={() => setIsMobileHistoryOpen((prev) => !prev)}
+        onToggleAgent={() => setIsAgentOpen((prev) => !prev)}
         onNewAssessment={() => {
           setSelectedId(null);
+          setDecideTab('recommendation');
           setCurrentView('workspace');
           setIsMobileHistoryOpen(false);
         }}
         onOpenWalkthrough={() => setIsWalkthroughOpen(true)}
-      />
-
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden max-w-7xl w-full mx-auto border-x border-[var(--emos-border-subtle)] relative">
-        {/* Desktop History Sidebar */}
-        <div className="hidden lg:flex w-80 shrink-0 h-full">
-          <HistorySidebar
-            interactions={interactions}
-            selectedId={currentView === 'workspace' ? selectedId : null}
-            currentView={currentView}
-            onOpenPortfolio={() => setCurrentView('portfolio')}
-            onSelect={(id) => {
-              setSelectedId(id);
-              setCurrentView('workspace');
-            }}
-            onDelete={handleDelete}
-            isLoading={isLoadingHistory}
-          />
-        </div>
-
-        {/* Mobile / Tablet History Drawer Overlay */}
+      >
+        {/* Secondary Assessment History Slide-Over Drawer */}
         {isMobileHistoryOpen && (
-          <div className="lg:hidden fixed inset-0 z-40 flex">
+          <div className="fixed inset-0 z-40 flex">
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+              className="fixed inset-0 bg-slate-900/35 backdrop-blur-xs transition-opacity"
               onClick={() => setIsMobileHistoryOpen(false)}
             />
             <div className="relative w-full max-w-xs sm:max-w-sm h-full bg-[var(--emos-bg-secondary)] shadow-2xl z-50 flex flex-col">
@@ -611,6 +735,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
                 }}
                 onSelect={(id) => {
                   setSelectedId(id);
+                  syncWorkloadFromInteraction(id);
                   setCurrentView('workspace');
                   setIsMobileHistoryOpen(false);
                 }}
@@ -622,12 +747,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
           </div>
         )}
 
+        {currentView === 'command-center' && (
+          <CommandCenterView
+            activeEstateId={activeEstateId}
+            workloads={combinedActiveWorkloads}
+            interactions={interactions}
+            approvedWorkloads={approvedWorkloads}
+            alignment={programAlignment}
+            searchQuery={globalSearch}
+            onSelectWorkloadForDna={handleSelectWorkloadForDna}
+            onAssessWorkload={handleAssessWorkload}
+            onApproveWorkload={handleApproveGovernance}
+            onReviewPriorityDecisions={handleReviewPriorityDecisions}
+            onNavigate={handleShellNavigate}
+            onOpenImportModal={() => setIsImportModalOpen(true)}
+            isProcessing={isProcessing}
+          />
+        )}
+
         {currentView === 'portfolio' && (
           <SamplePortfolioView
             onSelectWorkload={handleSelectWorkloadForDna}
             onAssessWorkload={handleAssessWorkload}
             importedWorkloads={importedWorkloads}
             activeEstateId={activeEstateId}
+            externalSearchQuery={globalSearch}
             onChangeEstate={(id) => {
               setActiveEstateId(id);
               if (id === 'financial-services') {
@@ -639,7 +783,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
             estateWorkloads={activeEstateList}
             interactions={interactions}
             onOpenImportModal={() => setIsImportModalOpen(true)}
-            onOpenPlan={() => setCurrentView('plan')}
+            onOpenPlan={() => {
+              setPlanSection('waves');
+              setCurrentView('plan');
+            }}
             onDeleteImportedWorkload={handleDeleteImportedWorkload}
             onClearImportedPortfolio={handleClearImportedPortfolio}
             isProcessing={isProcessing}
@@ -653,6 +800,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
             onAssess={handleAssessWorkload}
             onUpdateWorkloadDna={handleUpdateWorkloadDna}
             onResetSampleWorkload={handleResetSampleWorkload}
+            onAskAgent={handleAskAgentWithQuestion}
             isProcessing={isProcessing}
           />
         )}
@@ -661,10 +809,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
           <ReflectionWorkspace
             activeInteraction={activeInteraction}
             selectedWorkload={selectedWorkload}
+            allWorkloads={allWorkloads}
+            activeDecideTab={decideTab}
+            onChangeDecideTab={setDecideTab}
             isGovernanceApproved={Boolean(selectedWorkload && approvedWorkloads[selectedWorkload.id])}
             onApproveGovernance={(wlId, disp) => handleApproveGovernance(wlId, disp)}
-            onOpenPlanAndExecute={() => setCurrentView('plan')}
+            onOpenPlanAndExecute={() => {
+              setPlanSection('execute');
+              setCurrentView('plan');
+            }}
             onToggleAgentPanel={() => setIsAgentOpen((prev) => !prev)}
+            onAskAgent={handleAskAgentWithQuestion}
             onSaveNew={handleSaveNew}
             onSendFollowUp={handleSendFollowUp}
             onRetrySave={handleRetrySave}
@@ -679,19 +834,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
 
         {currentView === 'plan' && (
           <PortfolioPlanView
-            workloads={[...activeEstateList, ...importedWorkloads]}
+            workloads={combinedActiveWorkloads}
             interactions={interactions}
             alignment={programAlignment}
             selectedWorkload={selectedWorkload}
             approvedWorkloads={approvedWorkloads}
+            initialSection={planSection}
+            onSectionChange={(sec) => setPlanSection(sec)}
+            onSelectWorkload={(wl) => setSelectedWorkload(wl)}
             onApproveWorkload={handleApproveGovernance}
+            onAskAgent={handleAskAgentWithQuestion}
             onSaveAlignment={async (alignment) => {
               if (user) {
                 await saveProgramAlignment(user.uid, alignment);
               }
               setProgramAlignment({ ...alignment, userId: effectiveUid, updatedAt: new Date().toISOString() });
             }}
-            onBack={() => setCurrentView('portfolio')}
+            onBack={() => setCurrentView('command-center')}
           />
         )}
 
@@ -701,7 +860,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
             <ModernizationAgentPanel
               workload={selectedWorkload}
               activeInteraction={activeInteraction}
+              currentStage={activeShellNav}
+              estateName={activeEstateId}
+              pendingQuestion={pendingAgentQuestion}
               onSendLiveFollowUp={handleSendFollowUp}
+              onNavigateStage={(stage) => {
+                if (stage === 'dna' || stage === 'governance' || stage === 'plan' || stage === 'execute' || stage === 'measure' || stage === 'learn' || stage === 'decisions') {
+                  handleShellNavigate(stage as ShellNavTarget);
+                }
+              }}
               isProcessing={isProcessing}
               isOpen={isAgentOpen}
               onClose={() => setIsAgentOpen(false)}
@@ -709,21 +876,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
             />
           </div>
         )}
-      </div>
-
-      {/* Floating Modernization Agent Launcher Button */}
-      {!isAgentOpen && selectedWorkload && (
-        <button
-          id="floating-agent-toggle-btn"
-          type="button"
-          onClick={() => setIsAgentOpen(true)}
-          aria-label="Open Modernization Agent"
-          className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#A88554] to-[#E5C492] px-4 py-2.5 text-xs font-bold text-black shadow-2xl hover:scale-103 transition-transform cursor-pointer"
-        >
-          <Bot className="w-4 h-4" />
-          <span>Ask Modernization Agent</span>
-        </button>
-      )}
+      </WorkspaceShell>
 
       <ImportPortfolioModal
         isOpen={isImportModalOpen}
@@ -736,6 +889,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user = null }) => {
         isOpen={isWalkthroughOpen}
         onClose={() => setIsWalkthroughOpen(false)}
       />
-    </div>
+    </>
   );
 };

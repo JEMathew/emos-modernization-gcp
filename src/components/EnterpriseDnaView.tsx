@@ -17,9 +17,9 @@ import {
   Edit3,
   Network,
   List,
-  ZoomIn,
-  ZoomOut,
   Check,
+  ChevronDown,
+  AlertTriangle,
 } from 'lucide-react';
 import type { EnterpriseWorkload, DnaField, DnaEvidenceStatus } from '../types';
 import { calculateDnaCompleteness } from '../data/samplePortfolio';
@@ -34,6 +34,7 @@ interface EnterpriseDnaViewProps {
   onAssess: (workload: EnterpriseWorkload) => void;
   onUpdateWorkloadDna?: (updatedWorkload: EnterpriseWorkload) => void;
   onResetSampleWorkload?: (workloadId: string) => void;
+  onAskAgent?: (question: string) => void;
   isProcessing?: boolean;
 }
 
@@ -64,18 +65,37 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
   onAssess,
   onUpdateWorkloadDna,
   onResetSampleWorkload,
+  onAskAgent,
   isProcessing = false,
 }) => {
   const [localWorkload, setLocalWorkload] = useState<EnterpriseWorkload>(workload);
-  const [viewMode, setViewMode] = useState<'list' | 'spatial'>('list');
+  const [viewMode, setViewMode] = useState<'spatial' | 'list'>('spatial');
+  const [focusedNode, setFocusedNode] = useState<'hub' | 'capability' | 'ownership' | 'economics' | 'risks' | 'dependencies'>('hub');
+  const [showDetailedAttributes, setShowDetailedAttributes] = useState<boolean>(false);
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
-  const [selectedSpatialNode, setSelectedSpatialNode] = useState<string>('center');
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [dimensionFilter, setDimensionFilter] = useState<string>('all');
 
   React.useEffect(() => {
     setLocalWorkload(workload);
+    setFocusedNode('hub');
+    setEditingFieldId(null);
   }, [workload]);
+
+  const toggleNodeFocus = (node: typeof focusedNode) =>
+    setFocusedNode((prev) => (prev === node ? 'hub' : node));
+
+  const nodeClass = (node: Exclude<typeof focusedNode, 'hub'>, tone: 'neutral' | 'risk' = 'neutral') => {
+    const isSelected = focusedNode === node;
+    const isReceded = focusedNode !== 'hub' && !isSelected;
+    return [
+      'relative z-10 p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4648D4]',
+      isSelected
+        ? 'bg-[var(--emos-surface)] border-[#4648D4] ring-2 ring-indigo-500/15 shadow-md scale-[1.01]'
+        : tone === 'risk'
+        ? 'bg-rose-50/70 dark:bg-rose-500/10 border-rose-200/80 dark:border-rose-500/30 hover:border-rose-300'
+        : 'bg-[var(--emos-bg)] border-[var(--emos-border-subtle)] hover:border-[var(--emos-border-strong)]',
+      isReceded ? 'opacity-50' : 'opacity-100',
+    ].join(' ');
+  };
 
   const stats = calculateDnaCompleteness(localWorkload.dna);
   const readiness = evaluateEvidenceReadiness(localWorkload.dna);
@@ -93,26 +113,26 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
     onUpdateWorkloadDna?.(updated);
   };
 
-  // Controlled Action 1: Verify Critical Evidence (e.g. for Replatform / Refactor / General Readiness)
-  const handleVerifyAllCriticalEvidence = (targetPlatform = 'Google Cloud (BigQuery + Cloud Run / GKE)') => {
+  // Controlled Demo Action: Load Synthetic Sample Evidence (Vendor-Neutral default; never silently implies external verification)
+  const handleVerifyAllCriticalEvidence = (targetPlatform = 'Vendor-Neutral Managed Cloud Platform') => {
     const nextDna = structuredClone(localWorkload.dna);
     const defaults: Record<string, string> = {
-      d2: 'All interface schemas, owners, and latency SLAs verified',
-      e3: '$4.8M verified 3-year TCO baseline',
-      dr2: '14 TB verified dataset volume and daily ingestion rate',
-      dr3: 'Enterprise compliance, encryption and residency controls verified',
+      d2: 'Sample interface schemas, owners, and latency SLAs (Demo)',
+      e3: '$4.8M sample 3-year TCO baseline (Demo)',
+      dr2: '14 TB sample dataset volume and daily ingestion rate (Demo)',
+      dr3: 'Sample enterprise compliance, encryption and residency controls (Demo)',
       ts1: targetPlatform,
-      ts2: 'Decoupled storage and compute; governed interfaces required',
-      ts3: '4-hour weekend cutover window with rollback checkpoint',
+      ts2: 'Decoupled storage and compute; governed interfaces required (Demo)',
+      ts3: '4-hour weekend cutover window with rollback checkpoint (Demo)',
       t2: localWorkload.dna.technology.find((f) => f.id === 't2')?.status === 'known'
         ? localWorkload.dna.technology.find((f) => f.id === 't2')!.value
-        : 'PostgreSQL / Relational Content Repository',
+        : 'PostgreSQL / Relational Content Repository (Demo)',
     };
     Object.values(nextDna).flat().forEach((field) => {
       if (field.status !== 'known' && defaults[field.id]) {
         field.status = 'known';
         field.value = defaults[field.id];
-        field.detail = 'Verified via Enterprise DNA evidence review.';
+        field.detail = 'Synthetic sample evidence loaded in Demo mode (not independently audited).';
       }
     });
     commitWorkloadUpdate(nextDna);
@@ -141,27 +161,43 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
     setEditingFieldId(null);
   };
 
+  const getField = (group: keyof EnterpriseWorkload['dna'], id: string) =>
+    localWorkload.dna[group].find((f) => f.id === id);
+
+  const lifecycleRiskField = getField('technology', 't4');
+  const infraCostField = getField('economics', 'e1');
+  const licenseCostField = getField('economics', 'e2');
+  const tcoField = getField('economics', 'e3');
+  const depDetailField = getField('dependency', 'd2');
+  const complianceField = getField('dataAndRisk', 'dr3');
+  const driversField = getField('business', 'b3');
+
+  // SVG Radial Ring geometry for Readiness KPI
+  const ringRadius = 18;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringOffset = ringCircumference * (1 - stats.completeness / 100);
+
   const renderStatusBadge = (status: DnaEvidenceStatus) => {
     switch (status) {
       case 'known':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[10px] font-semibold uppercase tracking-wider">
-            <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30 text-[10px] font-semibold uppercase tracking-wider">
+            <CheckCircle2 className="w-3 h-3" />
             <span>VERIFIED</span>
           </span>
         );
       case 'incomplete':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[10px] font-semibold uppercase tracking-wider">
-            <HelpCircle className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30 text-[10px] font-semibold uppercase tracking-wider">
+            <HelpCircle className="w-3 h-3" />
             <span>INCOMPLETE</span>
           </span>
         );
       case 'missing':
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30 text-[10px] font-semibold uppercase tracking-wider">
-            <AlertCircle className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/30 text-[10px] font-semibold uppercase tracking-wider">
+            <AlertCircle className="w-3 h-3" />
             <span>MISSING</span>
           </span>
         );
@@ -179,7 +215,7 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
         className={`p-3.5 rounded-xl border transition-all ${
           isKnown
             ? 'bg-[var(--emos-surface)] border-[var(--emos-border-subtle)]'
-            : 'bg-[var(--emos-surface-elevated)] border-[var(--emos-accent-border)]'
+            : 'bg-amber-50/40 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/30'
         }`}
       >
         <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -191,7 +227,7 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
               onClick={() => setEditingFieldId(isEditing ? null : field.id)}
               aria-label={`Edit evidence for ${field.label}`}
               title={`Edit or verify ${field.label}`}
-              className="p-1 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-tertiary)] hover:border-[var(--emos-accent)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] cursor-pointer transition-colors"
+              className="p-1 rounded-md border border-[var(--emos-border-subtle)] bg-[var(--emos-bg)] hover:border-[#4648D4] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] cursor-pointer transition-colors"
             >
               <Edit3 className="w-3 h-3" />
             </button>
@@ -203,7 +239,7 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
         </div>
 
         {field.detail && (
-          <div className="text-[11px] text-[var(--emos-text-secondary)] mt-1.5 leading-relaxed font-sans">
+          <div className="text-[11px] text-[var(--emos-text-secondary)] mt-1.5 leading-relaxed">
             {field.detail}
           </div>
         )}
@@ -219,7 +255,7 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
                   key={opt}
                   type="button"
                   onClick={() => handleUpdateSingleField(field.id, opt, 'known')}
-                  className="text-left px-2.5 py-1.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] hover:border-[var(--emos-accent)] text-xs text-[var(--emos-text-primary)] flex items-center justify-between gap-2 cursor-pointer transition-colors"
+                  className="text-left px-2.5 py-1.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:border-[#4648D4] text-xs text-[var(--emos-text-primary)] flex items-center justify-between gap-2 cursor-pointer transition-colors"
                 >
                   <span className="truncate">{opt}</span>
                   <Check className="w-3 h-3 text-emerald-500 shrink-0" />
@@ -232,480 +268,549 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
     );
   };
 
-  const spatialDimensions = [
-    { id: 'business', title: 'Business Capability', icon: Briefcase, fields: localWorkload.dna.business, angle: -90 },
-    { id: 'technology', title: 'Technology Stack', icon: Cpu, fields: localWorkload.dna.technology, angle: -30 },
-    { id: 'dependency', title: 'Dependencies & Consumers', icon: Share2, fields: localWorkload.dna.dependency, angle: 30 },
-    { id: 'economics', title: 'Cost & Economics', icon: DollarSign, fields: localWorkload.dna.economics, angle: 90 },
-    { id: 'dataAndRisk', title: 'Data & Risk', icon: ShieldCheck, fields: localWorkload.dna.dataAndRisk, angle: 150 },
-    { id: 'targetState', title: 'Target State Strategy', icon: Compass, fields: localWorkload.dna.targetState, angle: -150 },
-  ];
+  const isAttributesVisible = viewMode === 'list' || showDetailedAttributes;
 
   return (
-    <div id="enterprise-dna-view" className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-5xl mx-auto w-full transition-colors">
-      {/* Navigation & Header */}
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+    <div id="enterprise-dna-view" className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 max-w-[1600px] mx-auto w-full space-y-6 transition-colors">
+      {/* Top Bar: Back + Journey Stage + View Toggle */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             id="back-to-portfolio-btn"
             onClick={onBackToPortfolio}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-xs font-medium text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] transition-colors cursor-pointer min-h-[36px]"
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-xs font-medium text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Enterprise Portfolio</span>
+            <span>Portfolio</span>
           </button>
-
-          {/* 2D List vs Spatial Relationship View Toggle */}
-          <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-xs">
-            <button
-              type="button"
-              onClick={() => setViewMode('list')}
-              aria-pressed={viewMode === 'list'}
-              className={`px-3 py-1.5 rounded-lg font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
-                viewMode === 'list'
-                  ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-2xs'
-                  : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
-              }`}
-            >
-              <List className="w-3.5 h-3.5" />
-              <span>2D Structured View</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('spatial')}
-              aria-pressed={viewMode === 'spatial'}
-              className={`px-3 py-1.5 rounded-lg font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
-                viewMode === 'spatial'
-                  ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)] shadow-2xs'
-                  : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
-              }`}
-            >
-              <Network className="w-3.5 h-3.5" />
-              <span>Spatial DNA Graph</span>
-            </button>
-          </div>
+          <JourneyStage stage="Understand" question="What do we know about this workload, and what evidence is missing?" />
         </div>
 
-        <JourneyStage stage="Understand" question="What do we know about this workload, and what evidence is missing?" />
+        {/* Spatial DNA Mesh vs 2D Structured List Toggle */}
+        <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-xs">
+          <button
+            type="button"
+            onClick={() => setViewMode('spatial')}
+            aria-pressed={viewMode === 'spatial'}
+            className={`px-2.5 py-1 rounded-md font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
+              viewMode === 'spatial'
+                ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] shadow-2xs'
+                : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+            }`}
+          >
+            <Network className="w-3.5 h-3.5" />
+            <span>Spatial DNA Graph</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setViewMode('list');
+              setShowDetailedAttributes(true);
+            }}
+            aria-pressed={viewMode === 'list'}
+            className={`px-2.5 py-1 rounded-md font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
+              viewMode === 'list'
+                ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] shadow-2xs'
+                : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+            }`}
+          >
+            <List className="w-3.5 h-3.5" />
+            <span>2D Structured View</span>
+          </button>
+        </div>
+      </div>
 
-        {/* Workload Hero Banner */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6 shadow-xs">
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[10px] font-mono text-[var(--emos-text-secondary)]">
-                {localWorkload.type}
-              </span>
-              <span className="px-2.5 py-0.5 rounded-md bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[10px] font-mono text-[var(--emos-text-secondary)]">
-                {localWorkload.businessCriticality} Criticality
-              </span>
-              <span className="px-2.5 py-0.5 rounded-md bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[10px] font-mono text-[var(--emos-text-secondary)]">
-                {localWorkload.hosting}
-              </span>
-              <span className={`px-2.5 py-0.5 rounded-md border text-[10px] font-mono font-bold ${
+      {/* Stitch Workload Header Row */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
+            <span className="uppercase tracking-wider text-[var(--emos-text-muted)]">{localWorkload.type}</span>
+            <span className="text-[var(--emos-text-muted)]">·</span>
+            <span className="px-2 py-0.5 rounded bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] font-semibold">
+              {localWorkload.id}
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/30 font-semibold">
+              {localWorkload.businessCriticality} Criticality
+            </span>
+            <span
+              className={`px-2.5 py-0.5 rounded-full border font-bold ${
                 readiness.decisionReadiness === 'READY'
-                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-                  : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30'
-              }`}>
-                Gate: {readiness.decisionReadiness}
-              </span>
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-serif text-[var(--emos-text-primary)] tracking-tight flex items-center gap-2">
-              <Dna className="w-6 h-6 text-[var(--emos-accent)]" />
-              <span>{localWorkload.name} — Enterprise DNA</span>
-              <CapabilityCue cueId="enterprise-dna" />
-            </h1>
-
-            <p className="text-xs sm:text-sm text-[var(--emos-text-secondary)] leading-relaxed">
-              Structured architectural evidence baseline representing verified enterprise attributes and high-impact missing evidence gaps. Current signal: <strong className="text-[var(--emos-text-primary)]">{derivedRec.plainEnglish} ({derivedRec.recommended6R})</strong>.
-            </p>
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30'
+                  : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30'
+              }`}
+            >
+              Gate: {readiness.decisionReadiness}
+            </span>
           </div>
 
-          {/* Evidence Completeness Score Card */}
-          <div className="p-4 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] min-w-[250px] space-y-3 shrink-0">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-wider text-[var(--emos-text-muted)] font-semibold inline-flex items-center gap-1">
-                <span>Evidence Completeness</span>
-                <CapabilityCue cueId="evidence-readiness" />
-              </span>
-              <span className="font-mono text-lg font-bold text-[var(--emos-accent-text)]">
-                {stats.completeness}%
-              </span>
-            </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[var(--emos-text-primary)] tracking-tight flex items-center gap-2">
+            <span>{localWorkload.name}</span>
+            <CapabilityCue cueId="enterprise-dna" />
+          </h1>
+        </div>
 
-            {/* Visual Bar */}
-            <div className="w-full h-2 bg-[var(--emos-surface)] rounded-full overflow-hidden border border-[var(--emos-border-subtle)]">
-              <div
-                className="h-full bg-gradient-to-r from-[#A88554] to-[#E5C492] rounded-full transition-all duration-500"
-                style={{ width: `${stats.completeness}%` }}
-              />
-            </div>
-
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-emerald-600 dark:text-emerald-400 font-medium">{stats.knownCount} Verified Known</span>
-              <span className="text-rose-600 dark:text-rose-400 font-medium">{stats.missingCount + stats.incompleteCount} Missing/Gaps</span>
-            </div>
-
+        {/* State-Aware CTA Hierarchy: Resolve Evidence Gaps is Primary when NEEDS EVIDENCE; Assess for Modernization is Primary when READY */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {readiness.decisionReadiness !== 'READY' ? (
+            <>
+              <button
+                id="resolve-evidence-gaps-primary-btn"
+                type="button"
+                onClick={() => handleVerifyAllCriticalEvidence('Vendor-Neutral Managed Cloud Platform')}
+                className="h-9 px-4 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] text-white text-xs font-semibold inline-flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Load Sample Evidence (Demo)</span>
+              </button>
+              <button
+                id="assess-from-dna-btn"
+                onClick={() => onAssess(localWorkload)}
+                disabled={isProcessing}
+                className="h-9 px-3.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Assess for Modernization</span>
+              </button>
+            </>
+          ) : (
             <button
               id="assess-from-dna-btn"
               onClick={() => onAssess(localWorkload)}
               disabled={isProcessing}
-              className="w-full py-2.5 px-4 rounded-xl bg-[#A88554] hover:bg-[#BCA075] dark:hover:bg-[#E5C492] text-black text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm disabled:opacity-50 active:scale-98 min-h-[40px]"
+              className="h-9 px-4 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] text-white text-xs font-semibold inline-flex items-center gap-2 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
             >
-              <Sparkles className="w-4 h-4 text-black" />
+              <Sparkles className="w-3.5 h-3.5" />
               <span>Assess for Modernization</span>
-              <ArrowRight className="w-3.5 h-3.5 text-black" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
-          </div>
-        </div>
-
-        {/* Controlled Evidence Verification & Editing Bar (Section F) */}
-        <div className="p-4 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-0.5">
-            <p className="text-xs font-semibold text-[var(--emos-text-primary)]">
-              Controlled Evidence Verification & Sensitivity
-            </p>
-            <p className="text-[11px] text-[var(--emos-text-secondary)]">
-              Verify missing critical gaps or click any attribute&apos;s edit icon to see how verified facts update readiness, confidence, and 6R recommendations.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          )}
+          {onAskAgent && (
             <button
-              id="verify-evidence-gcp-btn"
               type="button"
-              onClick={() => handleVerifyAllCriticalEvidence('Google Cloud (BigQuery + Cloud Run / GKE)')}
-              className="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold cursor-pointer transition-colors min-h-[34px]"
+              onClick={() => onAskAgent('What evidence is missing?')}
+              className="px-2 py-1 text-xs font-medium text-[var(--emos-accent-text)] hover:underline inline-flex items-center gap-1 cursor-pointer"
             >
-              Verify Evidence (Google Cloud Target)
+              <span>What&apos;s missing? ↗</span>
             </button>
-            <button
-              id="verify-evidence-neutral-btn"
-              type="button"
-              onClick={() => handleVerifyAllCriticalEvidence('Vendor-Neutral Managed Cloud Platform')}
-              className="px-3 py-1.5 rounded-xl bg-[var(--emos-bg-tertiary)] hover:bg-[var(--emos-surface-hover)] border border-[var(--emos-border-strong)] text-[var(--emos-text-primary)] text-xs font-semibold cursor-pointer transition-colors min-h-[34px]"
-            >
-              Verify Evidence (Vendor Neutral)
-            </button>
-            <button
-              id="reset-sample-dna-btn"
-              type="button"
-              onClick={handleReset}
-              className="px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-[var(--emos-text-secondary)] text-xs font-medium inline-flex items-center gap-1 cursor-pointer transition-colors min-h-[34px]"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset Sample</span>
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Spatial Enterprise DNA Relationship Topology View (Section N1) */}
-      {viewMode === 'spatial' && (
-        <section
-          aria-label="Spatial Enterprise DNA Relationship Topology"
-          className="rounded-3xl border border-[var(--emos-border-strong)] bg-[var(--emos-bg-secondary)] p-5 sm:p-6 space-y-5 shadow-lg"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--emos-border-subtle)] pb-4">
-            <div>
-              <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--emos-accent-text)] font-bold">
-                Spatial Relationship Graph
-              </p>
-              <h2 className="font-serif text-xl font-semibold text-[var(--emos-text-primary)]">
-                {localWorkload.name} — Central Workload & Architectural Dependencies
-              </h2>
+      {/* Compact Readiness & Derived Signal Header Strip (eliminates 4 duplicated KPI boxes) */}
+      <div className="stitch-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <svg className="w-11 h-11 shrink-0 -rotate-90" viewBox="0 0 44 44" aria-hidden="true">
+            <circle cx="22" cy="22" r={ringRadius} fill="none" stroke="var(--emos-border-subtle)" strokeWidth="4" />
+            <circle
+              cx="22"
+              cy="22"
+              r={ringRadius}
+              fill="none"
+              stroke={readiness.decisionReadiness === 'READY' ? '#10B981' : '#4648D4'}
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeDasharray={ringCircumference}
+              strokeDashoffset={ringOffset}
+              className="transition-all duration-300"
+            />
+          </svg>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-display text-xl font-bold text-[var(--emos-text-primary)] tabular-nums">
+                {stats.completeness}%
+              </span>
+              <span className="text-xs text-[var(--emos-text-secondary)]">
+                Evidence Readiness ({stats.knownCount}/{stats.totalCount} verified)
+              </span>
+              <CapabilityCue cueId="evidence-readiness" />
             </div>
+            <p className="text-xs text-[var(--emos-text-muted)]">
+              {readiness.decisionReadiness === 'READY'
+                ? '70% threshold and all critical gaps cleared for 6R review.'
+                : `${stats.missingCount + stats.incompleteCount} attribute gap(s) remain before READY status.`}
+            </p>
+          </div>
+        </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                aria-label="Filter spatial DNA dimensions"
-                value={dimensionFilter}
-                onChange={(e) => setDimensionFilter(e.target.value)}
-                className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] px-2.5 py-1.5 text-xs text-[var(--emos-text-primary)]"
-              >
-                <option value="all">All 6 Dimensions</option>
-                {spatialDimensions.map((d) => (
-                  <option key={d.id} value={d.id}>{d.title}</option>
-                ))}
-              </select>
+        <div className="flex flex-wrap items-center gap-3 text-xs border-t sm:border-t-0 pt-3 sm:pt-0 border-[var(--emos-border-subtle)]">
+          <div className="px-3 py-1.5 rounded-lg bg-[var(--emos-bg)] border border-[var(--emos-border-subtle)]">
+            <span className="text-[11px] text-[var(--emos-text-muted)] mr-1.5">Derived 6R:</span>
+            <strong className="text-[#4648D4] dark:text-[#818CF8]">{derivedRec.recommended6R}</strong>
+            <span className="font-mono text-[11px] text-[var(--emos-text-secondary)] ml-1">({derivedRec.confidenceScore}% confidence)</span>
+          </div>
+          {focusedNode !== 'hub' && (
+            <button
+              type="button"
+              onClick={() => setFocusedNode('hub')}
+              className="px-2.5 py-1.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] text-xs font-medium text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] cursor-pointer"
+            >
+              Reset Focus
+            </button>
+          )}
+        </div>
+      </div>
 
-              <button
-                type="button"
-                onClick={() => setZoomLevel((z) => Math.max(0.85, Number((z - 0.1).toFixed(2))))}
-                aria-label="Zoom out spatial graph"
-                className="p-1.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] text-[var(--emos-text-secondary)] cursor-pointer"
-              >
-                <ZoomOut className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setZoomLevel((z) => Math.min(1.2, Number((z + 0.1).toFixed(2))))}
-                aria-label="Zoom in spatial graph"
-                className="p-1.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] text-[var(--emos-text-secondary)] cursor-pointer"
-              >
-                <ZoomIn className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedSpatialNode('center');
-                  setDimensionFilter('all');
-                  setZoomLevel(1);
-                }}
-                className="px-2.5 py-1.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] text-xs text-[var(--emos-text-secondary)] cursor-pointer"
-              >
-                Reset Focus
-              </button>
-            </div>
+      {/* DOMINANT VISUAL OBJECT: Connected Spatial Workload DNA Mesh */}
+      <section
+        aria-label="Spatial Enterprise DNA Relationship Topology"
+        className="stitch-card p-5 sm:p-6 space-y-5 relative overflow-hidden"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Dna className="w-4 h-4 text-[#4648D4] dark:text-[#818CF8]" />
+            <h2 className="font-display text-sm font-bold text-[var(--emos-text-primary)]">
+              Workload DNA Mesh
+            </h2>
+            <span className="text-xs text-[var(--emos-text-muted)] hidden sm:inline">
+              Select any connected node to focus its relationship
+            </span>
+          </div>
+          <div className="flex items-center gap-3 text-[11px] text-[var(--emos-text-muted)]">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#4648D4]" /> Central Workload
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-rose-500" /> Critical Risks &amp; Gaps
+            </span>
+          </div>
+        </div>
+
+        {/* Connected Topology Canvas with Restrained SVG Hairline Connectors */}
+        <div className="relative space-y-4">
+          <svg
+            className="hidden lg:block pointer-events-none absolute inset-0 w-full h-full z-0"
+            viewBox="0 0 1000 460"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            {/* Top Capability -> Center Hub */}
+            <line
+              x1="500" y1="84" x2="500" y2="148"
+              stroke={focusedNode === 'capability' ? '#4648D4' : 'var(--emos-border-strong)'}
+              strokeWidth={focusedNode === 'capability' ? '2.5' : '1.5'}
+              strokeDasharray={focusedNode === 'capability' ? undefined : '4 4'}
+            />
+            {/* Left Ownership -> Center Hub */}
+            <line
+              x1="245" y1="225" x2="295" y2="225"
+              stroke={focusedNode === 'ownership' ? '#4648D4' : 'var(--emos-border-strong)'}
+              strokeWidth={focusedNode === 'ownership' ? '2.5' : '1.5'}
+            />
+            {/* Center Hub -> Right Economics */}
+            <line
+              x1="705" y1="225" x2="755" y2="225"
+              stroke={focusedNode === 'economics' ? '#4648D4' : 'var(--emos-border-strong)'}
+              strokeWidth={focusedNode === 'economics' ? '2.5' : '1.5'}
+            />
+            {/* Center Hub -> Bottom-Left Risks */}
+            <line
+              x1="430" y1="305" x2="310" y2="355"
+              stroke={focusedNode === 'risks' ? '#E11D48' : 'var(--emos-border-strong)'}
+              strokeWidth={focusedNode === 'risks' ? '2.5' : '1.5'}
+            />
+            {/* Center Hub -> Bottom-Right Dependencies */}
+            <line
+              x1="570" y1="305" x2="690" y2="355"
+              stroke={focusedNode === 'dependencies' ? '#4648D4' : 'var(--emos-border-strong)'}
+              strokeWidth={focusedNode === 'dependencies' ? '2.5' : '1.5'}
+            />
+          </svg>
+
+          {/* Top Node: Business Capability */}
+          <div className="max-w-xl mx-auto">
+            <button
+              type="button"
+              onClick={() => toggleNodeFocus('capability')}
+              aria-pressed={focusedNode === 'capability'}
+              className={`w-full flex items-center justify-between gap-3 ${nodeClass('capability')}`}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="w-9 h-9 rounded-lg bg-slate-900 dark:bg-slate-800 text-white flex items-center justify-center shrink-0">
+                  <Briefcase className="w-4 h-4" />
+                </span>
+                <div className="min-w-0">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--emos-text-muted)] block">
+                    Business Capability
+                  </span>
+                  <p className="font-display text-sm font-bold text-[var(--emos-text-primary)] truncate">
+                    {localWorkload.businessCapability}
+                  </p>
+                  {driversField && (
+                    <p className="text-xs text-[var(--emos-text-secondary)] truncate">
+                      {driversField.value}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <ShieldCheck className="w-4 h-4 text-[var(--emos-text-muted)] shrink-0" />
+            </button>
           </div>
 
-          {/* Interactive Spatial Canvas */}
-          <div
-            className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center transition-transform"
-            style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center top' }}
-          >
-            {/* Left Dimension Nodes */}
-            <div className="space-y-3">
-              {spatialDimensions
-                .slice(0, 3)
-                .filter((d) => dimensionFilter === 'all' || dimensionFilter === d.id)
-                .map((dim) => {
-                  const Icon = dim.icon;
-                  const known = dim.fields.filter((f) => f.status === 'known').length;
-                  const isFocused = selectedSpatialNode === 'center' || selectedSpatialNode === dim.id;
-                  return (
-                    <div
-                      key={dim.id}
-                      onClick={() => setSelectedSpatialNode(selectedSpatialNode === dim.id ? 'center' : dim.id)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          setSelectedSpatialNode(selectedSpatialNode === dim.id ? 'center' : dim.id);
-                        }
-                      }}
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                        selectedSpatialNode === dim.id
-                          ? 'bg-[var(--emos-surface-elevated)] border-[var(--emos-accent)] ring-2 ring-[var(--emos-accent-border)] shadow-lg'
-                          : isFocused
-                          ? 'bg-[var(--emos-surface)] border-[var(--emos-border-subtle)] hover:border-[var(--emos-border-strong)]'
-                          : 'bg-[var(--emos-surface)]/45 border-[var(--emos-border-subtle)] opacity-45'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Icon className="w-4 h-4 text-[var(--emos-accent)]" />
-                          <span className="text-xs font-bold">{dim.title}</span>
-                        </div>
-                        <span className="font-mono text-[11px] text-[var(--emos-accent-text)]">
-                          {known}/{dim.fields.length} verified
-                        </span>
-                      </div>
-                      <ul className="mt-2.5 space-y-1 text-[11px] text-[var(--emos-text-secondary)]">
-                        {dim.fields.map((f) => (
-                          <li key={f.id} className="flex items-center justify-between gap-2">
-                            <span className="truncate">{f.label}:</span>
-                            <span className={`font-medium truncate max-w-[150px] ${f.status === 'known' ? 'text-[var(--emos-text-primary)]' : 'text-rose-500'}`}>
-                              {f.value}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
-            </div>
-
-            {/* Center Hero System Node */}
-            <div className="flex flex-col items-center justify-center py-4">
-              <div
-                onClick={() => setSelectedSpatialNode('center')}
-                role="button"
-                tabIndex={0}
-                className="w-full max-w-xs rounded-3xl border-2 border-[var(--emos-accent)] bg-gradient-to-b from-[var(--emos-surface-elevated)] to-[var(--emos-surface)] p-6 text-center shadow-2xl space-y-3 cursor-pointer"
-              >
-                <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-tr from-[#A88554] to-[#E5C492] text-black flex items-center justify-center shadow-md">
-                  <Dna className="w-6 h-6" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--emos-accent-text)]">
-                    Central System Object
-                  </span>
-                  <h3 className="text-lg font-serif font-bold text-[var(--emos-text-primary)] mt-0.5">
-                    {localWorkload.name}
-                  </h3>
-                  <p className="text-xs text-[var(--emos-text-secondary)] mt-1">
-                    {localWorkload.currentStack} · {localWorkload.hosting}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--emos-border-subtle)] text-xs">
-                  <div className="p-2 rounded-xl bg-[var(--emos-bg-tertiary)]">
-                    <span className="text-[10px] text-[var(--emos-text-muted)] block">Completeness</span>
-                    <strong className="font-mono text-sm text-[var(--emos-accent-text)]">{stats.completeness}%</strong>
-                  </div>
-                  <div className="p-2 rounded-xl bg-[var(--emos-bg-tertiary)]">
-                    <span className="text-[10px] text-[var(--emos-text-muted)] block">Derived 6R</span>
-                    <strong className="text-sm text-[var(--emos-text-primary)]">{derivedRec.recommended6R}</strong>
-                  </div>
-                </div>
-                <p className="text-[11px] font-semibold text-[var(--emos-accent-text)]">
-                  {derivedRec.plainEnglish}
+          {/* Middle Row: Ownership/Domain ↔ Flat Indigo Asset Hub ↔ Economic Burden */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+            <button
+              type="button"
+              onClick={() => toggleNodeFocus('ownership')}
+              aria-pressed={focusedNode === 'ownership'}
+              className={`lg:col-span-3 space-y-2 ${nodeClass('ownership')}`}
+            >
+              <span className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--emos-accent-text)] flex items-center gap-1.5">
+                <Compass className="w-3.5 h-3.5" />
+                <span>Ownership &amp; Domain</span>
+              </span>
+              <p className="font-display text-sm font-bold text-[var(--emos-text-primary)]">
+                {localWorkload.type} · {localWorkload.businessCriticality}
+              </p>
+              <p className="text-xs text-[var(--emos-text-secondary)]">{localWorkload.hosting}</p>
+              {complianceField && (
+                <p className="text-[11px] text-[var(--emos-text-muted)] pt-1.5 border-t border-[var(--emos-border-subtle)]">
+                  Compliance: <span className="text-[var(--emos-text-primary)] font-medium">{complianceField.value}</span>
                 </p>
+              )}
+            </button>
+
+            {/* Center: Restrained Solid Indigo Asset Hub (Focal Anchor) */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setFocusedNode('hub')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setFocusedNode('hub');
+                }
+              }}
+              className="relative z-10 lg:col-span-6 p-5 sm:p-6 rounded-xl bg-[#4648D4] text-white shadow-sm space-y-3.5 cursor-pointer transition-all"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="px-2 py-0.5 rounded bg-white/15 text-[11px] font-mono uppercase tracking-wider font-semibold">
+                  Central System Object
+                </span>
+                <span className="px-2 py-0.5 rounded bg-white/15 text-[11px] font-mono font-semibold">
+                  {localWorkload.id}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight">
+                  {localWorkload.name}
+                </h3>
+                <p className="text-xs sm:text-sm text-indigo-100 mt-1">
+                  {localWorkload.currentStack} · {localWorkload.hosting}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-3 border-t border-white/15 text-xs">
+                <div className="p-2 rounded-lg bg-white/10">
+                  <span className="text-[11px] text-indigo-100 block">Evidence DNA</span>
+                  <strong className="font-mono text-sm">{stats.completeness}% Verified</strong>
+                </div>
+                <div className="p-2 rounded-lg bg-white/10">
+                  <span className="text-[11px] text-indigo-100 block">Derived 6R</span>
+                  <strong className="text-sm">{derivedRec.recommended6R}</strong>
+                </div>
+                <div className="p-2 rounded-lg bg-white/10 col-span-2 sm:col-span-1">
+                  <span className="text-[11px] text-indigo-100 block">Lifecycle Risk</span>
+                  <strong className="text-xs line-clamp-1">{lifecycleRiskField?.value || 'Monitored'}</strong>
+                </div>
               </div>
             </div>
 
-            {/* Right Dimension Nodes */}
-            <div className="space-y-3">
-              {spatialDimensions
-                .slice(3, 6)
-                .filter((d) => dimensionFilter === 'all' || dimensionFilter === d.id)
-                .map((dim) => {
-                  const Icon = dim.icon;
-                  const known = dim.fields.filter((f) => f.status === 'known').length;
-                  const isFocused = selectedSpatialNode === 'center' || selectedSpatialNode === dim.id;
-                  return (
-                    <div
-                      key={dim.id}
-                      onClick={() => setSelectedSpatialNode(selectedSpatialNode === dim.id ? 'center' : dim.id)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          setSelectedSpatialNode(selectedSpatialNode === dim.id ? 'center' : dim.id);
-                        }
-                      }}
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                        selectedSpatialNode === dim.id
-                          ? 'bg-[var(--emos-surface-elevated)] border-[var(--emos-accent)] ring-2 ring-[var(--emos-accent-border)] shadow-lg'
-                          : isFocused
-                          ? 'bg-[var(--emos-surface)] border-[var(--emos-border-subtle)] hover:border-[var(--emos-border-strong)]'
-                          : 'bg-[var(--emos-surface)]/45 border-[var(--emos-border-subtle)] opacity-45'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Icon className="w-4 h-4 text-[var(--emos-accent)]" />
-                          <span className="text-xs font-bold">{dim.title}</span>
-                        </div>
-                        <span className="font-mono text-[11px] text-[var(--emos-accent-text)]">
-                          {known}/{dim.fields.length} verified
-                        </span>
-                      </div>
-                      <ul className="mt-2.5 space-y-1 text-[11px] text-[var(--emos-text-secondary)]">
-                        {dim.fields.map((f) => (
-                          <li key={f.id} className="flex items-center justify-between gap-2">
-                            <span className="truncate">{f.label}:</span>
-                            <span className={`font-medium truncate max-w-[150px] ${f.status === 'known' ? 'text-[var(--emos-text-primary)]' : 'text-rose-500'}`}>
-                              {f.value}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
+            <button
+              type="button"
+              onClick={() => toggleNodeFocus('economics')}
+              aria-pressed={focusedNode === 'economics'}
+              className={`lg:col-span-3 space-y-2 ${nodeClass('economics')}`}
+            >
+              <span className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--emos-accent-text)] flex items-center gap-1.5">
+                <DollarSign className="w-3.5 h-3.5" />
+                <span>Economic Burden</span>
+              </span>
+              <p className="font-display text-sm font-bold text-[var(--emos-text-primary)]">
+                {infraCostField?.value || 'Unverified'}
+              </p>
+              <p className="text-xs text-[var(--emos-text-secondary)]">
+                Licensing: {licenseCostField?.value || 'Unverified'}
+              </p>
+              <p className="text-[11px] font-mono text-[var(--emos-accent-text)] pt-1.5 border-t border-[var(--emos-border-subtle)]">
+                TCO: {tcoField?.value || 'Missing'}
+              </p>
+            </button>
+          </div>
+
+          {/* Bottom Row: Top Critical Risks & Gaps | Top Dependencies */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+            <button
+              type="button"
+              onClick={() => toggleNodeFocus('risks')}
+              aria-pressed={focusedNode === 'risks'}
+              className={`space-y-2 ${nodeClass('risks', 'risk')}`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 inline-flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span>Critical Risks &amp; Evidence Gaps</span>
+                </span>
+                <span className="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-500/20 text-[11px] font-semibold text-rose-700 dark:text-rose-300">
+                  {derivedRec.criticalGaps.length > 0 ? `${derivedRec.criticalGaps.length} Blocking` : 'Monitored'}
+                </span>
+              </div>
+              <ol className="space-y-1.5 text-xs text-[var(--emos-text-primary)] list-decimal list-inside">
+                {(derivedRec.criticalGaps.length > 0
+                  ? derivedRec.criticalGaps.map((g) => `Missing critical evidence: ${g}`)
+                  : derivedRec.keyRisks
+                )
+                  .slice(0, 3)
+                  .map((item, idx) => (
+                    <li key={idx} className="leading-relaxed">
+                      {item}
+                    </li>
+                  ))}
+              </ol>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggleNodeFocus('dependencies')}
+              aria-pressed={focusedNode === 'dependencies'}
+              className={`space-y-2 ${nodeClass('dependencies')}`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--emos-accent-text)] inline-flex items-center gap-1.5">
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Dependencies &amp; Consumers</span>
+                </span>
+                <span className="px-2 py-0.5 rounded bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[11px] font-semibold text-[var(--emos-text-secondary)]">
+                  Blast Radius
+                </span>
+              </div>
+              <ul className="space-y-1.5 text-xs text-[var(--emos-text-primary)]">
+                <li className="leading-relaxed">
+                  <strong>Interfaces:</strong> {localWorkload.knownDependencies}
+                </li>
+                {depDetailField && (
+                  <li className="leading-relaxed text-[var(--emos-text-secondary)]">
+                    <strong>Verification:</strong> {depDetailField.value}
+                    {depDetailField.detail ? ` — ${depDetailField.detail}` : ''}
+                  </li>
+                )}
+              </ul>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Controlled Evidence Verification Toolbar */}
+      <section className="stitch-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <p className="text-xs font-semibold text-[var(--emos-text-primary)]">
+            Controlled Evidence Verification &amp; Sensitivity
+          </p>
+          <p className="text-[11px] text-[var(--emos-text-secondary)]">
+            Verify missing critical gaps or expand the 18-attribute inspector to test how verified facts update readiness and 6R scoring.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            id="verify-evidence-neutral-btn"
+            type="button"
+            onClick={() => handleVerifyAllCriticalEvidence('Vendor-Neutral Managed Cloud Platform')}
+            className="h-8 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold cursor-pointer transition-colors"
+          >
+            Load Sample Evidence (Vendor-Neutral Demo)
+          </button>
+          <button
+            id="verify-evidence-gcp-btn"
+            type="button"
+            onClick={() => handleVerifyAllCriticalEvidence('Google Cloud (BigQuery + Cloud Run / GKE)')}
+            className="h-8 px-3 rounded-lg bg-[var(--emos-bg)] hover:bg-[var(--emos-surface-hover)] border border-[var(--emos-border-strong)] text-[var(--emos-text-primary)] text-xs font-semibold cursor-pointer transition-colors"
+          >
+            Load Sample Evidence (Google Cloud Demo)
+          </button>
+          <button
+            id="reset-sample-dna-btn"
+            type="button"
+            onClick={handleReset}
+            className="h-8 px-3 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-[var(--emos-text-secondary)] text-xs font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <RotateCcw className="w-3 h-3" />
+            <span>Reset Sample</span>
+          </button>
+        </div>
+      </section>
+
+      {/* Progressive Disclosure Accordion: 18 Detailed Enterprise DNA Attributes */}
+      <section className="stitch-card overflow-hidden">
+        <button
+          id="toggle-dna-attributes-btn"
+          type="button"
+          onClick={() => setShowDetailedAttributes((prev) => !prev)}
+          aria-expanded={isAttributesVisible}
+          className="w-full px-5 py-4 flex items-center justify-between gap-4 hover:bg-[var(--emos-surface-elevated)] transition-colors cursor-pointer text-left"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="w-8 h-8 rounded-lg bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] flex items-center justify-center shrink-0">
+              <Cpu className="w-4 h-4" />
+            </span>
+            <div className="min-w-0">
+              <p className="font-display text-sm font-bold text-[var(--emos-text-primary)]">
+                Inspect All 18 Structured Enterprise DNA Attributes (6 Dimensions)
+              </p>
+              <p className="text-xs text-[var(--emos-text-secondary)]">
+                Progressive 60/90-second forensic evidence view — edit or verify individual attributes inline.
+              </p>
             </div>
           </div>
-        </section>
-      )}
 
-      {/* Structured DNA Sections (6 Sections - Always available in 2D list or below spatial view) */}
-      <div className="space-y-6 sm:space-y-8">
-        {/* 1. Business DNA */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-[var(--emos-border-subtle)]">
-            <Briefcase className="w-4 h-4 text-[var(--emos-accent)]" />
-            <h2 className="text-sm font-semibold text-[var(--emos-text-primary)] uppercase tracking-wider">
-              1. Business DNA
-            </h2>
-            <span className="text-xs text-[var(--emos-text-muted)] ml-auto hidden sm:inline">Capability, Criticality & Modernization Drivers</span>
+          <div className="flex items-center gap-2.5 shrink-0">
+            <span className="px-2.5 py-0.5 rounded-full bg-[var(--emos-bg)] border border-[var(--emos-border-subtle)] text-[11px] font-mono text-[var(--emos-text-secondary)]">
+              {stats.knownCount}/{stats.totalCount} Verified
+            </span>
+            <ChevronDown
+              className={`w-4 h-4 text-[var(--emos-text-muted)] transition-transform ${
+                isAttributesVisible ? 'rotate-180' : ''
+              }`}
+            />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {localWorkload.dna.business.map(renderField)}
-          </div>
-        </section>
+        </button>
 
-        {/* 2. Technology DNA */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-[var(--emos-border-subtle)]">
-            <Cpu className="w-4 h-4 text-[var(--emos-accent)]" />
-            <h2 className="text-sm font-semibold text-[var(--emos-text-primary)] uppercase tracking-wider">
-              2. Technology DNA
-            </h2>
-            <span className="text-xs text-[var(--emos-text-muted)] ml-auto hidden sm:inline">Runtime, Database, Hosting & Lifecycle Risk</span>
+        {isAttributesVisible && (
+          <div className="p-5 border-t border-[var(--emos-border-subtle)] space-y-6 bg-[var(--emos-bg)]/50">
+            {[
+              { title: '1. Business DNA', subtitle: 'Capability, Criticality & Modernization Drivers', icon: Briefcase, fields: localWorkload.dna.business, cols: 'lg:grid-cols-3' },
+              { title: '2. Technology DNA', subtitle: 'Runtime, Database, Hosting & Lifecycle Risk', icon: Cpu, fields: localWorkload.dna.technology, cols: 'lg:grid-cols-4' },
+              { title: '3. Dependency DNA', subtitle: 'Known Integrations & Data Pipelines', icon: Share2, fields: localWorkload.dna.dependency, cols: 'lg:grid-cols-2' },
+              { title: '4. Economics DNA', subtitle: 'Infrastructure, Licensing & TCO Baseline', icon: DollarSign, fields: localWorkload.dna.economics, cols: 'lg:grid-cols-3' },
+              { title: '5. Data & Risk DNA', subtitle: 'Data Sensitivity, Volume & Regulatory Mandates', icon: ShieldCheck, fields: localWorkload.dna.dataAndRisk, cols: 'lg:grid-cols-3' },
+              { title: '6. Target-State DNA', subtitle: 'Cloud Strategy, Architectural Mandates & Downtime', icon: Compass, fields: localWorkload.dna.targetState, cols: 'lg:grid-cols-3' },
+            ].map(({ title, subtitle, icon: Icon, fields, cols }) => (
+              <div key={title} className="space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b border-[var(--emos-border-subtle)]">
+                  <Icon className="w-4 h-4 text-[#4648D4] dark:text-[#818CF8]" />
+                  <h3 className="text-xs font-bold text-[var(--emos-text-primary)] uppercase tracking-wider">
+                    {title}
+                  </h3>
+                  <span className="text-xs text-[var(--emos-text-muted)] ml-auto hidden sm:inline">
+                    {subtitle}
+                  </span>
+                </div>
+                <div className={`grid grid-cols-1 sm:grid-cols-2 ${cols} gap-3`}>
+                  {fields.map(renderField)}
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {localWorkload.dna.technology.map(renderField)}
-          </div>
-        </section>
-
-        {/* 3. Dependency DNA */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-[var(--emos-border-subtle)]">
-            <Share2 className="w-4 h-4 text-[var(--emos-accent)]" />
-            <h2 className="text-sm font-semibold text-[var(--emos-text-primary)] uppercase tracking-wider">
-              3. Dependency DNA
-            </h2>
-            <span className="text-xs text-[var(--emos-text-muted)] ml-auto hidden sm:inline">Known Integrations & Data Pipelines</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {localWorkload.dna.dependency.map(renderField)}
-          </div>
-        </section>
-
-        {/* 4. Economics DNA */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-[var(--emos-border-subtle)]">
-            <DollarSign className="w-4 h-4 text-[var(--emos-accent)]" />
-            <h2 className="text-sm font-semibold text-[var(--emos-text-primary)] uppercase tracking-wider">
-              4. Economics DNA
-            </h2>
-            <span className="text-xs text-[var(--emos-text-muted)] ml-auto hidden sm:inline">Infrastructure, Licensing & TCO Baseline</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {localWorkload.dna.economics.map(renderField)}
-          </div>
-        </section>
-
-        {/* 5. Data & Risk DNA */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-[var(--emos-border-subtle)]">
-            <ShieldCheck className="w-4 h-4 text-[var(--emos-accent)]" />
-            <h2 className="text-sm font-semibold text-[var(--emos-text-primary)] uppercase tracking-wider">
-              5. Data & Risk DNA
-            </h2>
-            <span className="text-xs text-[var(--emos-text-muted)] ml-auto hidden sm:inline">Data Sensitivity, Volume & Regulatory Mandates</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {localWorkload.dna.dataAndRisk.map(renderField)}
-          </div>
-        </section>
-
-        {/* 6. Target-State DNA */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b border-[var(--emos-border-subtle)]">
-            <Compass className="w-4 h-4 text-[var(--emos-accent)]" />
-            <h2 className="text-sm font-semibold text-[var(--emos-text-primary)] uppercase tracking-wider">
-              6. Target-State DNA
-            </h2>
-            <span className="text-xs text-[var(--emos-text-muted)] ml-auto hidden sm:inline">Cloud Strategy, Architectural Mandates & Downtime</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {localWorkload.dna.targetState.map(renderField)}
-          </div>
-        </section>
-      </div>
+        )}
+      </section>
 
       {/* Bottom Action Footer */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-        <div className="space-y-1">
+      <div className="stitch-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-0.5">
           <div className="text-xs font-semibold text-[var(--emos-text-primary)]">
             Ready to generate the canonical 6R recommendation?
           </div>
           <div className="text-[11px] text-[var(--emos-text-secondary)]">
-            EMOS will pass all 18 structured Enterprise DNA attributes ({stats.completeness}% verified) directly into the Modernization Agent reasoning engine.
+            EMOS passes all 18 structured Enterprise DNA attributes ({stats.completeness}% verified) directly into the Modernization Agent reasoning engine.
           </div>
         </div>
 
@@ -713,9 +818,9 @@ export const EnterpriseDnaView: React.FC<EnterpriseDnaViewProps> = ({
           id="bottom-assess-from-dna-btn"
           onClick={() => onAssess(localWorkload)}
           disabled={isProcessing}
-          className="py-2.5 px-5 rounded-xl bg-[#A88554] hover:bg-[#BCA075] dark:hover:bg-[#E5C492] text-black text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm disabled:opacity-50 shrink-0 min-h-[38px]"
+          className="h-9 px-4 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] text-white text-xs font-semibold inline-flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs disabled:opacity-50 shrink-0"
         >
-          <Sparkles className="w-4 h-4 text-black" />
+          <Sparkles className="w-3.5 h-3.5" />
           <span>Assess for Modernization</span>
         </button>
       </div>

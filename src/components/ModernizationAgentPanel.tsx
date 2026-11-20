@@ -14,17 +14,19 @@ import {
   X,
 } from 'lucide-react';
 import type { EnterpriseWorkload, Interaction, Disposition6R } from '../types';
-import { deriveEvidenceDrivenRecommendation } from '../data/enterpriseEstates';
 import { buildDefaultLifecycleState, type WorkloadLifecycleState } from '../lib/transformationEngine';
-import { PLAIN_ENGLISH_6R } from '../config/capabilityCues';
+import { orchestrateAskEmos } from '../lib/agents/orchestrator';
+import { askEmosWithGemini, type AskEmosApiResponse } from '../lib/gemini';
+import type { AgentToolExecution, SpecialistAgentId } from '../lib/agents/types';
 import { CapabilityCue } from './CapabilityCue';
 import { SafeMarkdown } from './SafeMarkdown';
 
-export interface AgentToolExecution {
-  toolName: string;
-  label: string;
-  summary: string;
-  status: 'verified';
+export type { AgentToolExecution };
+
+let replySeq = 0;
+function nextReplyId(): string {
+  replySeq += 1;
+  return `agent-reply-${Date.now()}-${replySeq}`;
 }
 
 export interface AgentReply {
@@ -36,15 +38,30 @@ export interface AgentReply {
   evidenceSummary: string;
   reasoningSummary: string;
   toolsCalled: AgentToolExecution[];
+  routedAgents?: SpecialistAgentId[];
+  handoffOccurred?: boolean;
+  governanceIntercepted?: boolean;
   timestamp: string;
   isLiveGemini?: boolean;
+  isFallback?: boolean;
+  fallbackNotice?: string;
 }
 
 interface ModernizationAgentPanelProps {
   workload: EnterpriseWorkload;
   activeInteraction?: Interaction | null;
   lifecycleState?: WorkloadLifecycleState;
+  currentStage?: string;
+  estateName?: string;
+  pendingQuestion?: { id: number; text: string } | null;
   onSendLiveFollowUp?: (interactionId: string, message: string) => Promise<void>;
+  askEmosEndpoint?: (params: {
+    question: string;
+    workload: EnterpriseWorkload;
+    currentStage?: string;
+    estateName?: string;
+    activeInteraction?: Interaction | null;
+  }) => Promise<AskEmosApiResponse>;
   onNavigateStage?: (stage: string) => void;
   isProcessing?: boolean;
   isOpen?: boolean;
@@ -89,126 +106,30 @@ export function runGovernedAgentQuery(
   workload: EnterpriseWorkload,
   lifecycle: WorkloadLifecycleState,
   activeInteraction?: Interaction | null,
+  currentStage?: string,
 ): AgentReply {
-  const rec = deriveEvidenceDrivenRecommendation(workload);
-  const disposition = (activeInteraction?.recommended6R as Disposition6R) || lifecycle.disposition || rec.recommended6R;
-  const plain = PLAIN_ENGLISH_6R[disposition]?.plainEnglish || rec.plainEnglish;
-  const completeness = activeInteraction?.evidenceCompleteness ?? rec.evidenceCompleteness;
-  const readiness = activeInteraction?.decisionReadiness || rec.decisionReadiness;
-  const confidence = activeInteraction?.confidenceScore ?? rec.confidenceScore;
-  const q = question.toLowerCase();
-
-  const toolsCalled: AgentToolExecution[] = [
-    {
-      toolName: 'inspect_workload_dna',
-      label: 'inspect_workload_dna()',
-      summary: `Scanned 18 Enterprise DNA attributes for ${workload.name} (${completeness}% verified).`,
-      status: 'verified',
-    },
-    {
-      toolName: 'evaluate_readiness_gate',
-      label: 'evaluate_readiness_gate()',
-      summary: `Readiness gate is ${readiness} (threshold 70%; critical gaps: ${rec.criticalGaps.length}).`,
-      status: 'verified',
-    },
-  ];
-
-  let conclusion = `${workload.name} is recommended for "${plain}" (${disposition}) at ${confidence}% confidence (${readiness}).`;
-  let bullets: string[] = [...rec.topReasons];
-  let nextAction =
-    readiness === 'NEEDS EVIDENCE'
-      ? `Verify ${rec.criticalGaps.slice(0, 2).join(' and ') || 'missing critical DNA evidence'} in Enterprise DNA to unlock governance approval.`
-      : lifecycle.governanceStatus !== 'APPROVED'
-      ? `Review and record Human Governance Approval for ${workload.name} to proceed to ${lifecycle.currentPhaseLabel}.`
-      : `Complete "${lifecycle.currentPhaseLabel}" and verify gate: ${lifecycle.nextGateLabel}.`;
-
-  if (q.includes('why not') || q.includes('another option') || q.includes('alternative')) {
-    toolsCalled.push({
-      toolName: 'compare_6r_dispositions',
-      label: 'compare_6r_dispositions()',
-      summary: `Evaluated all 6 canonical dispositions against ${workload.name} constraints.`,
-      status: 'verified',
-    });
-    conclusion = `Alternative dispositions were rejected because they either fail to resolve ${workload.name}'s drivers or introduce disproportionate risk.`;
-    bullets = rec.alternatives.slice(0, 3).map((alt) => `${alt.plainEnglish} (${alt.disposition}): ${alt.whyNot}`);
-  } else if (q.includes('missing') || q.includes('gap')) {
-    conclusion =
-      rec.criticalGaps.length > 0
-        ? `${workload.name} is at ${completeness}% evidence completeness with ${rec.criticalGaps.length} critical gap(s) blocking READY status.`
-        : `${workload.name} has ${completeness}% verified evidence and zero blocking critical gaps (READY for human review).`;
-    bullets =
-      rec.criticalGaps.length > 0
-        ? rec.criticalGaps.slice(0, 3).map((g) => `Critical gap requiring verification: ${g}`)
-        : [
-            'All critical Dependency, TCO Baseline, and Target-State attributes are verified.',
-            `Evidence completeness (${completeness}%) exceeds the mandatory 70% threshold.`,
-            'Human approval remains required before transformation execution proceeds.',
-          ];
-  } else if (q.includes('change your recommendation') || q.includes('what would change')) {
-    toolsCalled.push({
-      toolName: 'compare_6r_dispositions',
-      label: 'compare_6r_dispositions()',
-      summary: 'Computed counterfactual sensitivity across Business, Dependency, and Target-State DNA.',
-      status: 'verified',
-    });
-    conclusion = `Changing core criticality, dependency coupling, or target-platform constraints in Enterprise DNA will shift the recommendation for ${workload.name}.`;
-    bullets = [
-      'If business criticality drops to Low and capability is duplicated → recommendation shifts to Safely shut it down (Retire).',
-      'If sub-5ms hardware/vault latency constraints or recent amortization dominate → shifts to Keep it as-is (Retain).',
-      'If a commercial SaaS platform covers 100% of capability without custom differentiation → shifts to Replace it (Repurchase).',
-    ];
-    nextAction = 'Use "Edit Selected Evidence" in Enterprise DNA to test how verified facts alter readiness and 6R scoring.';
-  } else if (q.includes('risk') || q.includes('affected') || q.includes('dependency')) {
-    conclusion = `Primary modernization risk for ${workload.name} centers on ${workload.knownDependencies} and cutover continuity.`;
-    bullets = rec.keyRisks.slice(0, 3);
-  } else if (q.includes('executive')) {
-    conclusion = `Executive Brief: We recommend "${plain}" (${disposition}) for ${workload.name} to deliver ${rec.expectedImpact.split('·')[0].trim()}.`;
-    bullets = [
-      `Business Value: ${rec.expectedImpact}`,
-      `Governance Posture: ${completeness}% evidence verified (${readiness}) · ${confidence}% confidence.`,
-      `Accountability: Bounded by human approval and ${lifecycle.stages.length}-stage execution checkpoints.`,
-    ];
-  } else if (q.includes('blocked') || q.includes('execution')) {
-    toolsCalled.push({
-      toolName: 'build_transformation_stages',
-      label: 'build_transformation_stages()',
-      summary: `Inspected ${lifecycle.stages.length}-stage ${disposition} execution timeline (${lifecycle.overallProgress}% complete).`,
-      status: 'verified',
-    });
-    conclusion = lifecycle.activeBlocker
-      ? `Execution is currently gated at "${lifecycle.currentPhaseLabel}": ${lifecycle.activeBlocker}`
-      : `Execution is active at "${lifecycle.currentPhaseLabel}" (${lifecycle.overallProgress}% overall progress) with no active blockers.`;
-    bullets = [
-      `Current Stage: ${lifecycle.currentPhaseLabel} — Next Gate: ${lifecycle.nextGateLabel}.`,
-      `Target State: ${lifecycle.targetArchSummary}.`,
-      `Dependency Scope: ${workload.knownDependencies}.`,
-    ];
-  } else if (q.includes('expected result') || q.includes('differ') || q.includes('outcome') || q.includes('learn')) {
-    toolsCalled.push({
-      toolName: 'evaluate_outcomes_and_learning',
-      label: 'evaluate_outcomes_and_learning()',
-      summary: `Compared Baseline vs. Target vs. Observed metrics and captured lessons for ${workload.name}.`,
-      status: 'verified',
-    });
-    const firstLesson = lifecycle.learnings[0];
-    conclusion = `Representative outcome tracking for ${workload.name} (${disposition}) confirms target benefit realization with documented lessons for future waves.`;
-    bullets = [
-      ...lifecycle.outcomes.slice(0, 2).map((o) => `${o.label}: Baseline ${o.baseline} → Target ${o.target} → Observed ${o.observed} (${o.deltaSummary}).`),
-      firstLesson ? `Captured Lesson: ${firstLesson.lesson}` : 'Lesson: Validate dependency and TCO evidence prior to wave mobilization.',
-    ];
-    nextAction = 'Record this learning rule into the Enterprise DNA playbook for the next modernization wave.';
-  }
+  const result = orchestrateAskEmos({
+    question,
+    workload,
+    lifecycle,
+    activeInteraction,
+    currentStage,
+  });
 
   return {
-    id: `agent-reply-${Date.now()}`,
-    question,
-    conclusion,
-    bullets: bullets.slice(0, 3),
-    nextAction,
-    evidenceSummary: `${completeness}% verified (${workload.name} · ${workload.currentStack} · ${workload.hosting} · ${workload.knownDependencies})`,
-    reasoningSummary: `Evaluated all 6 canonical dispositions under EMOS deterministic guardrails. Readiness=${readiness}, Confidence=${confidence}%, Primary=${plain} (${disposition}).`,
-    toolsCalled,
-    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    id: nextReplyId(),
+    question: result.question,
+    conclusion: result.conclusion,
+    bullets: result.bullets,
+    nextAction: result.nextAction,
+    evidenceSummary: result.evidenceSummary,
+    reasoningSummary: result.reasoningSummary,
+    toolsCalled: result.toolsCalled,
+    routedAgents: result.routedAgents,
+    handoffOccurred: result.handoffOccurred,
+    governanceIntercepted: result.governanceIntercepted,
+    timestamp: result.timestamp,
+    isLiveGemini: false,
   };
 }
 
@@ -216,7 +137,12 @@ export const ModernizationAgentPanel: React.FC<ModernizationAgentPanelProps> = (
   workload,
   activeInteraction,
   lifecycleState,
+  currentStage,
+  estateName,
+  pendingQuestion,
   onSendLiveFollowUp,
+  askEmosEndpoint = askEmosWithGemini,
+  onNavigateStage,
   isProcessing = false,
   isOpen = true,
   onClose,
@@ -233,40 +159,120 @@ export const ModernizationAgentPanel: React.FC<ModernizationAgentPanelProps> = (
   );
 
   const [input, setInput] = useState('');
-  const [activeGroup, setActiveGroup] = useState<number>(0);
+  const [isQueryingAi, setIsQueryingAi] = useState(false);
+  const [activeGroup, setActiveGroup] = useState<number>(() =>
+    currentStage === 'execute' ? 1 : currentStage === 'measure' || currentStage === 'learn' ? 2 : 0
+  );
   const [replies, setReplies] = useState<AgentReply[]>(() => [
-    runGovernedAgentQuery('Why are you recommending this?', workload, computedLifecycle, activeInteraction),
+    runGovernedAgentQuery('Why are you recommending this?', workload, computedLifecycle, activeInteraction, currentStage),
   ]);
   const [expandedDetail, setExpandedDetail] = useState<Record<string, 'more' | 'evidence' | 'reasoning' | null>>({});
   const scrollEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (currentStage === 'execute') {
+      setActiveGroup(1);
+    } else if (currentStage === 'measure' || currentStage === 'learn') {
+      setActiveGroup(2);
+    } else if (currentStage) {
+      setActiveGroup(0);
+    }
+  }, [currentStage]);
+
+  const lastHandledQuestionIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
     setReplies([
-      runGovernedAgentQuery('Why are you recommending this?', workload, computedLifecycle, activeInteraction),
+      runGovernedAgentQuery('Why are you recommending this?', workload, computedLifecycle, activeInteraction, currentStage),
     ]);
     setExpandedDetail({});
   }, [workload.id, workload.evidenceCompleteness, computedLifecycle.disposition, computedLifecycle.governanceStatus]);
 
-  if (!isOpen) return null;
-
-  const handleAsk = async (questionText: string) => {
+  const executeAsk = async (questionText: string) => {
     const trimmed = questionText.trim();
     if (!trimmed) return;
     setInput('');
 
-    // Always produce immediate deterministic tool-grounded reply
-    const localReply = runGovernedAgentQuery(trimmed, workload, computedLifecycle, activeInteraction);
-    setReplies((prev) => [...prev, localReply]);
+    const baselineReply = runGovernedAgentQuery(trimmed, workload, computedLifecycle, activeInteraction, currentStage);
 
-    // If an active Firestore interaction exists and live follow-up callback is provided, also sync with server-side Gemini
+    // Deterministic governance interception runs before any server/LLM call
+    if (baselineReply.governanceIntercepted) {
+      setReplies((prev) => [...prev, baselineReply]);
+      setTimeout(() => scrollEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 60);
+      return;
+    }
+
+    const pendingId = baselineReply.id;
+    setReplies((prev) => [...prev, baselineReply]);
+    setIsQueryingAi(true);
+    try {
+      const apiResult = await askEmosEndpoint({
+        question: trimmed,
+        workload,
+        currentStage,
+        estateName,
+        activeInteraction,
+      });
+
+      const isFallback = apiResult.executionMode === 'deterministic-fallback';
+      const updatedReply: AgentReply = {
+        id: pendingId,
+        question: apiResult.question || trimmed,
+        conclusion: apiResult.conclusion,
+        bullets: apiResult.bullets,
+        nextAction: apiResult.nextAction,
+        evidenceSummary: apiResult.evidenceSummary,
+        reasoningSummary: apiResult.reasoningSummary,
+        toolsCalled: apiResult.toolsCalled,
+        routedAgents: apiResult.routedAgents,
+        handoffOccurred: apiResult.handoffOccurred,
+        governanceIntercepted: apiResult.governanceIntercepted,
+        timestamp: apiResult.timestamp || baselineReply.timestamp,
+        isLiveGemini: apiResult.executionMode === 'live-gemini',
+        isFallback,
+        fallbackNotice: isFallback
+          ? 'AI reasoning unavailable. Showing deterministic EMOS status/evidence instead.'
+          : undefined,
+      };
+      setReplies((prev) => prev.map((r) => (r.id === pendingId ? updatedReply : r)));
+    } catch {
+      // Explicit deterministic fallback contract — never silently pretend to be Gemini
+      setReplies((prev) =>
+        prev.map((r) =>
+          r.id === pendingId
+            ? {
+                ...r,
+                isLiveGemini: false,
+                isFallback: true,
+                fallbackNotice: 'AI reasoning unavailable. Showing deterministic EMOS status/evidence instead.',
+              }
+            : r,
+        ),
+      );
+    } finally {
+      setIsQueryingAi(false);
+    }
+
     if (activeInteraction && onSendLiveFollowUp) {
       try {
         await onSendLiveFollowUp(activeInteraction.id, trimmed);
       } catch {
-        // Local tool-grounded response remains visible even if live network call fails
+        // Non-blocking sync
       }
     }
     setTimeout(() => scrollEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 60);
+  };
+
+  useEffect(() => {
+    if (!pendingQuestion || lastHandledQuestionIdRef.current === pendingQuestion.id) return;
+    lastHandledQuestionIdRef.current = pendingQuestion.id;
+    void executeAsk(pendingQuestion.text);
+  }, [pendingQuestion, workload, computedLifecycle, activeInteraction, currentStage]);
+
+  if (!isOpen) return null;
+
+  const handleAsk = async (questionText: string) => {
+    await executeAsk(questionText);
   };
 
   const toggleDetail = (id: string, tab: 'more' | 'evidence' | 'reasoning') => {
@@ -279,14 +285,14 @@ export const ModernizationAgentPanel: React.FC<ModernizationAgentPanelProps> = (
   return (
     <aside
       aria-label="Modernization Agent"
-      className={`flex flex-col bg-[var(--emos-bg-secondary)] text-[var(--emos-text-primary)] border-l border-[var(--emos-border-subtle)] ${
+      className={`flex flex-col bg-[var(--emos-bg)] text-[var(--emos-text-primary)] border-l border-[var(--emos-border-subtle)] ${
         variant === 'drawer' ? 'w-full max-w-md h-full shadow-2xl' : 'w-full lg:w-96 shrink-0 h-full'
       }`}
     >
       {/* Header */}
       <div className="px-4 py-3.5 border-b border-[var(--emos-border-subtle)] flex items-center justify-between gap-2 bg-[var(--emos-surface)]">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#A88554] to-[#E5C492] text-black flex items-center justify-center shrink-0 shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#4648D4] text-white flex items-center justify-center shrink-0 shadow-xs">
             <Bot className="w-4 h-4" />
           </div>
           <div className="min-w-0">
@@ -338,32 +344,75 @@ export const ModernizationAgentPanel: React.FC<ModernizationAgentPanelProps> = (
               {/* User Question */}
               <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-[var(--emos-accent-text)]">
                 <span>Q: {reply.question}</span>
-                <span className="text-[10px] font-normal text-[var(--emos-text-muted)]">{reply.timestamp}</span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {reply.isLiveGemini && (
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[9px] font-mono text-emerald-700 dark:text-emerald-300">
+                      Live Gemini
+                    </span>
+                  )}
+                  <span className="text-[10px] font-normal text-[var(--emos-text-muted)]">{reply.timestamp}</span>
+                </div>
               </div>
 
-              {/* 1 Concise Conclusion */}
-              <p className="text-xs font-semibold leading-relaxed text-[var(--emos-text-primary)]">
-                {reply.conclusion}
-              </p>
+              {reply.isFallback && reply.fallbackNotice && (
+                <div
+                  role="status"
+                  className="px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-[11px] text-amber-800 dark:text-amber-200 flex items-center gap-1.5"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{reply.fallbackNotice}</span>
+                </div>
+              )}
 
-              {/* Max 3 Bullets */}
-              <ul className="space-y-1.5 text-xs text-[var(--emos-text-secondary)]">
-                {reply.bullets.map((b, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5 leading-snug">
-                    <span className="text-[var(--emos-accent)] font-bold mt-0.5">•</span>
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
+              {/* 1 Insight (Conclusion + Max 3 Bullets) */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--emos-text-muted)] block">
+                  Insight
+                </span>
+                <p className="text-xs font-semibold leading-relaxed text-[var(--emos-text-primary)]">
+                  {reply.conclusion}
+                </p>
+                <ul className="space-y-1.5 text-xs text-[var(--emos-text-secondary)]">
+                  {reply.bullets.map((b, idx) => (
+                    <li key={idx} className="flex items-start gap-1.5 leading-snug">
+                      <span className="text-[var(--emos-accent)] font-bold mt-0.5">•</span>
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-              {/* 1 Recommended Next Action */}
-              <div className="p-2.5 rounded-xl bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-[11px]">
-                <span className="font-bold uppercase tracking-wider text-[10px] text-[var(--emos-accent-text)] block">
-                  Recommended Next Action
-                </span>
-                <span className="text-[var(--emos-text-primary)] font-medium mt-0.5 block">
-                  {reply.nextAction}
-                </span>
+              {/* 1 Recommended Next Action (Actionable when supported) */}
+              <div className="p-2.5 rounded-xl bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-[11px] space-y-2">
+                <div>
+                  <span className="font-bold uppercase tracking-wider text-[10px] text-[var(--emos-accent-text)] block">
+                    Recommended Next Action
+                  </span>
+                  <span className="text-[var(--emos-text-primary)] font-medium mt-0.5 block">
+                    {reply.nextAction}
+                  </span>
+                </div>
+                {onNavigateStage && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const actionLower = reply.nextAction.toLowerCase();
+                      if (actionLower.includes('enterprise dna') || actionLower.includes('verify')) {
+                        onNavigateStage('dna');
+                      } else if (actionLower.includes('approval') || actionLower.includes('governance')) {
+                        onNavigateStage('governance');
+                      } else if (actionLower.includes('learning') || actionLower.includes('playbook')) {
+                        onNavigateStage('learn');
+                      } else {
+                        onNavigateStage('execute');
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#4648D4] hover:bg-[#3B3DC2] text-white text-[11px] font-semibold transition-colors cursor-pointer"
+                  >
+                    <span>Take Recommended Action</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                )}
               </div>
 
               {/* Progressive Disclosure Drill-Down Buttons: Explain More | Show Evidence | Show Reasoning */}
@@ -461,7 +510,7 @@ export const ModernizationAgentPanel: React.FC<ModernizationAgentPanelProps> = (
           );
         })}
 
-        {isProcessing && (
+        {(isProcessing || isQueryingAi) && (
           <div className="p-3 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] flex items-center gap-2 text-xs text-[var(--emos-text-secondary)] animate-pulse">
             <Sparkles className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
             <span>Modernization Agent is evaluating evidence...</span>
@@ -480,7 +529,7 @@ export const ModernizationAgentPanel: React.FC<ModernizationAgentPanelProps> = (
               onClick={() => setActiveGroup(idx)}
               className={`px-2 py-0.5 rounded-md text-[10px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
                 activeGroup === idx
-                  ? 'bg-[#A88554] text-black'
+                  ? 'bg-[#4648D4] text-white'
                   : 'bg-[var(--emos-bg-tertiary)] text-[var(--emos-text-muted)] hover:text-[var(--emos-text-primary)]'
               }`}
             >
@@ -489,15 +538,15 @@ export const ModernizationAgentPanel: React.FC<ModernizationAgentPanelProps> = (
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-          {CONTEXTUAL_QUESTION_GROUPS[activeGroup].questions.map((q) => (
+        <div className="flex flex-wrap gap-1.5">
+          {CONTEXTUAL_QUESTION_GROUPS[activeGroup].questions.slice(0, 3).map((q) => (
             <button
               key={q}
               type="button"
               onClick={() => handleAsk(q)}
-              className="px-2 py-1 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] hover:border-[var(--emos-accent-border)] hover:text-[var(--emos-accent-text)] text-[10px] text-[var(--emos-text-secondary)] text-left transition-colors cursor-pointer inline-flex items-center gap-1"
+              className="px-2.5 py-1.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-bg)] hover:border-[var(--emos-accent-border)] hover:text-[var(--emos-accent-text)] text-[11px] text-[var(--emos-text-secondary)] text-left transition-colors cursor-pointer inline-flex items-center gap-1"
             >
-              <ChevronRight className="w-2.5 h-2.5 text-[var(--emos-accent)] shrink-0" />
+              <ChevronRight className="w-3 h-3 text-[#4648D4] dark:text-[#818CF8] shrink-0" />
               <span>{q}</span>
             </button>
           ))}
@@ -523,7 +572,7 @@ export const ModernizationAgentPanel: React.FC<ModernizationAgentPanelProps> = (
             type="submit"
             disabled={!input.trim() || isProcessing}
             aria-label="Send question to Modernization Agent"
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-[#A88554] text-black flex items-center justify-center disabled:opacity-40 cursor-pointer"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] text-white flex items-center justify-center disabled:opacity-40 cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
           </button>

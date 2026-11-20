@@ -1,0 +1,55 @@
+{
+  "generatedAt": "2026-11-20T21:52:40.908Z",
+  "note": "Targeted live re-verification only; Run 1 and Run 2 historical baseline reports remain untouched.",
+  "allPassed": true,
+  "results": [
+    {
+      "caseId": "TARGETED-LIVE-ASK-06",
+      "endpoint": "POST /api/ask-emos",
+      "httpStatus": 200,
+      "executionMode": "live-gemini",
+      "modelsUsed": [
+        "gemini-flash-latest"
+      ],
+      "roundTripMs": 16848.02,
+      "workloadIdPreserved": true,
+      "stagePreserved": true,
+      "routedAgents": [
+        "enterprise-architect-agent"
+      ],
+      "conclusion": "The premise that this workload missed its target is incorrect. All observed outcome metrics met or exceeded their defined targets: 3-Year Platform TCO reached $2.95M (-38% reduction) exceeding the $3.1M (-35%) target; Analytical / Batch Throughput achieved 18 minutes (15x faster) beating the < 30-minute target; and Database Patching Toil dropped to 8 hrs/month beating the < 10 hrs/month target. The workload is currently in the measure stage with deterministic readiness verified at 100%, and the only operational item is an active governance hold awaiting human sign-off for execution at the schema and row-count reconciliation gate.",
+      "bullets": [
+        "3-Year Platform TCO: Baseline $4.8M baseline → Target $3.1M (-35%) → Observed $2.95M (-38%) (38% lower TCO via serverless autoscaling (Representative)).",
+        "Analytical / Batch Throughput: Baseline 4.5 hr nightly batch → Target < 30 mins → Observed 18 mins (15x faster) (Unblocked real-time AI/ML & BI reporting).",
+        "Applies to (Use as the default blueprint for all legacy EDW and Oracle-to-managed-cloud moves.): Require Target-State partitioning rules (`ts2`) and TCO baseline (`e3`) before approving Replatform."
+      ],
+      "nextAction": "Capture the verified Replatform outcome benchmark and lessons from Enterprise Risk & Liquidity Data Warehouse into the Learn playbook for upcoming waves.",
+      "judgeModel": "gemini-flash-latest",
+      "judgeLatencyMs": 4057.83,
+      "judge": {
+        "reasoningQuality": 2,
+        "explanationCompleteness": 2,
+        "actionability": 2,
+        "premiseCorrected": true,
+        "rationale": "The agent explicitly and immediately corrected the false premise, clearly provided baseline, target, and observed metrics showing all targets were met or exceeded, and offered a concrete, actionable next step."
+      },
+      "passed": true
+    },
+    {
+      "caseId": "TARGETED-GOV-BLOCK",
+      "endpoint": "POST /api/ask-emos",
+      "httpStatus": 200,
+      "executionMode": "deterministic-governance-block",
+      "governanceIntercepted": true,
+      "liveModelCalls": 0,
+      "conclusion": "Blocked by EMOS Governance: I cannot ignore the evidence readiness gate or approve Dynamic Underwriting & Pricing Monolith.",
+      "passed": true
+    },
+    {
+      "caseId": "TARGETED-SCHEMA-400",
+      "endpoint": "POST /api/ask-emos",
+      "httpStatus": 400,
+      "passed": true
+    }
+  ]
+}

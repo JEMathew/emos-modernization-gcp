@@ -29,59 +29,47 @@ interface TestCase {
 const PRODUCT_TOUR_STEPS = [
   {
     step: 1,
-    stage: 'Align',
-    title: 'Define the modernization intent',
-    icon: ShieldCheck,
-    description: 'Connect the program sponsor, business outcome, constraints, and approval expectations before evaluating workloads.',
-    action: 'Open Plan and Mobilize, then set the program context that will govern portfolio decisions and sequencing.',
+    stage: 'Understand',
+    title: 'Understand your estate and establish evidence',
+    icon: Layers,
+    activities: ['Discover', 'Enterprise DNA', 'Evidence Readiness'],
+    description:
+      'Start from Command Center or Portfolio to see where to focus, inspect Enterprise DNA across 18 attributes, and surface missing evidence before making decisions.',
+    action:
+      'Open Understand → Portfolio or Enterprise DNA, review verified vs. missing attributes, and resolve critical evidence gaps.',
   },
   {
     step: 2,
-    stage: 'Discover',
-    title: 'Choose a workload',
-    icon: Layers,
-    description: 'Start with a sample workload or import your own CSV or JSON portfolio.',
-    action: 'Open a workload card and scan its stack, dependencies, risk signals, and evidence score.',
+    stage: 'Decide',
+    title: 'Assess, compare 6Rs, and govern the decision',
+    icon: ShieldCheck,
+    activities: ['Assess', 'Compare 6Rs', 'Human Approval'],
+    description:
+      'Evaluate all six canonical 6R paths using grounded evidence, understand why a disposition is recommended, and record human governance sign-off before delivery.',
+    action:
+      'Open Decide → Recommendation, Evidence, Alternatives, and Approval to validate rationale and clear governance gates.',
   },
   {
     step: 3,
-    stage: 'Understand',
-    title: 'Inspect Enterprise DNA',
-    icon: Sparkles,
-    description: 'See what the system knows and which architecture fields still need evidence.',
-    action: 'Select "View Enterprise DNA" and review the verified and missing attributes.',
+    stage: 'Transform',
+    title: 'Plan waves and execute the approved change',
+    icon: Route,
+    activities: ['Align', 'Wave Plan', 'Mobilize', 'Execute'],
+    description:
+      'Sequence governed decisions into deterministic delivery waves, verify mobilization controls, and track disposition-specific execution stages and blockers.',
+    action:
+      'Open Transform → Plan and Execute to review wave sequencing, clear active blockers, and complete checkpoint gates.',
   },
   {
     step: 4,
-    stage: 'Assess',
-    title: 'Evaluate the viable 6R options',
+    stage: 'Outcomes',
+    title: 'Measure realized value and learn for future waves',
     icon: Sparkles,
-    description: 'Use structured evidence to evaluate Retain, Retire, Rehost, Replatform, Refactor, and Repurchase without inventing missing facts.',
-    action: 'Select "Assess for Modernization," then review evidence completeness, viable alternatives, risks, assumptions, and gaps.',
-  },
-  {
-    step: 5,
-    stage: 'Decide',
-    title: 'Review the governed 6R decision',
-    icon: ShieldCheck,
-    description: 'Review the recommended disposition, rejected alternatives, confidence, deterministic evidence completeness, readiness, and approval gates.',
-    action: 'Open the completed assessment, add evidence when readiness is blocked, and generate the Executive Decision when the record is defensible.',
-  },
-  {
-    step: 6,
-    stage: 'Plan',
-    title: 'Sequence governed decisions',
-    icon: Route,
-    description: 'Turn assessed workloads into transparent delivery waves while keeping evidence and readiness gates visible.',
-    action: 'Open Plan, complete the program context, and review the deterministic wave sequence.',
-  },
-  {
-    step: 7,
-    stage: 'Mobilize',
-    title: 'Mobilize into Execute, Measure, and Learn',
-    icon: ArrowRight,
-    description: 'Review ownership, governance, platform, security, people, and delivery actions, then progress through governed transformation Execution, Outcome Measurement, and Institutional Learning.',
-    action: 'Open Mobilize, Execute, Measure, and Learn or export the Executive Pack. Trust controls remain active throughout every stage.',
+    activities: ['Measure', 'Learn'],
+    description:
+      'Compare Baseline, Target, and Observed outcomes to verify business impact, and capture assumption deltas into the organizational playbook for future waves.',
+    action:
+      'Open Outcomes → Measure and Learn to verify realized value and apply lessons to the next modernization wave.',
   },
 ];
 
@@ -304,8 +292,17 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
   const [activeView, setActiveView] = useState<'tour' | 'technical'>('tour');
   const [technicalSubTab, setTechnicalSubTab] = useState<'tests' | 'rules'>('tests');
   const [activeTourStep, setActiveTourStep] = useState(0);
+  const [showVerificationDetails, setShowVerificationDetails] = useState(false);
+  const [showTechnicalRules, setShowTechnicalRules] = useState(false);
 
   if (!isOpen) return null;
+
+  const verificationCategorySummary = Array.from(
+    TEST_CASES.reduce((acc, tc) => {
+      acc.set(tc.category, (acc.get(tc.category) || 0) + 1);
+      return acc;
+    }, new Map<TestCase['category'], number>()),
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-fadeIn">
@@ -318,7 +315,7 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
               EMOS Product Tour
             </h3>
             <p className="text-xs text-[var(--emos-text-secondary)] mt-0.5">
-              Follow one workload from alignment through mobilization. Trust controls apply throughout.
+              Follow one workload across Understand → Decide → Transform → Outcomes. Trust controls apply throughout.
             </p>
           </div>
           <button
@@ -359,9 +356,9 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {activeView === 'tour' ? (
-            /* View 1: Product Tour */
+            /* View 1: Product Tour (Canonical 4-Stage Story) */
             <div className="space-y-5">
-              <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-7 sm:gap-2" aria-label="Product tour stages">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Product tour stages">
                 {PRODUCT_TOUR_STEPS.map((stepItem, index) => {
                   const IconComp = stepItem.icon;
                   const isActive = index === activeTourStep;
@@ -371,16 +368,16 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
                       key={stepItem.step}
                       onClick={() => setActiveTourStep(index)}
                       aria-label={`Step ${stepItem.step}: ${stepItem.stage}`}
-                      className={`rounded-xl border px-2 py-3 flex flex-col items-center gap-1.5 transition-colors cursor-pointer ${
+                      className={`rounded-xl border px-3 py-3 flex flex-col items-center gap-1.5 transition-colors cursor-pointer ${
                         isActive
                           ? 'bg-[var(--emos-accent-subtle)] border-[var(--emos-accent-border)] text-[var(--emos-accent-text)]'
                           : 'bg-[var(--emos-surface)] border-[var(--emos-border-subtle)] text-[var(--emos-text-muted)] hover:text-[var(--emos-text-secondary)]'
                       }`}
                     >
-                      <span className={`w-8 h-8 rounded-full flex items-center justify-center ${isActive || isComplete ? 'bg-[#A88554] text-black' : 'bg-[var(--emos-bg-tertiary)] text-[var(--emos-text-muted)]'}`}>
+                      <span className={`w-8 h-8 rounded-full flex items-center justify-center ${isActive || isComplete ? 'bg-[#4648D4] text-white' : 'bg-[var(--emos-bg-tertiary)] text-[var(--emos-text-muted)]'}`}>
                         {isComplete ? <CheckCircle2 className="w-4 h-4" /> : <IconComp className="w-4 h-4" />}
                       </span>
-                      <span className="text-[10px] sm:text-xs font-semibold">{stepItem.stage}</span>
+                      <span className="text-xs font-semibold">{stepItem.stage}</span>
                     </button>
                   );
                 })}
@@ -390,25 +387,41 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
                 const stepItem = PRODUCT_TOUR_STEPS[activeTourStep];
                 const IconComp = stepItem.icon;
                 return (
-                  <div className="min-h-[260px] rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5 sm:p-7 flex flex-col justify-between text-left">
-                    <div>
-                      <div className="flex items-center gap-3 mb-5">
-                        <span className="w-12 h-12 rounded-2xl bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] flex items-center justify-center text-[var(--emos-accent)]">
-                          <IconComp className="w-6 h-6" />
+                  <div className="min-h-[250px] rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5 sm:p-6 flex flex-col justify-between text-left space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <span className="w-11 h-11 rounded-xl bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] flex items-center justify-center text-[#4648D4] dark:text-[#818CF8]">
+                          <IconComp className="w-5 h-5" />
                         </span>
                         <div>
-                          <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--emos-accent-text)] font-semibold">Step {stepItem.step} of {PRODUCT_TOUR_STEPS.length}</p>
-                          <h4 className="font-serif text-xl sm:text-2xl font-semibold text-[var(--emos-text-primary)] mt-1">{stepItem.title}</h4>
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--emos-accent-text)] font-semibold">
+                            Stage {stepItem.step} of {PRODUCT_TOUR_STEPS.length} · {stepItem.stage}
+                          </p>
+                          <h4 className="font-display text-lg sm:text-xl font-bold text-[var(--emos-text-primary)] mt-0.5">
+                            {stepItem.title}
+                          </h4>
                         </div>
                       </div>
-                      <p className="text-sm sm:text-base text-[var(--emos-text-secondary)] leading-relaxed max-w-2xl">{stepItem.description}</p>
+                      <p className="text-sm text-[var(--emos-text-secondary)] leading-relaxed max-w-2xl">
+                        {stepItem.description}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        {stepItem.activities.map((activity) => (
+                          <span
+                            key={activity}
+                            className="px-2 py-0.5 rounded-md bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[11px] font-medium text-[var(--emos-text-secondary)]"
+                          >
+                            {activity}
+                          </span>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="mt-6 p-4 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] flex items-start gap-3">
-                      <ArrowRight className="w-4 h-4 text-[var(--emos-accent)] shrink-0 mt-0.5" />
+                    <div className="p-3.5 rounded-xl bg-[var(--emos-bg)] border border-[var(--emos-border-subtle)] flex items-start gap-3">
+                      <ArrowRight className="w-4 h-4 text-[#4648D4] dark:text-[#818CF8] shrink-0 mt-0.5" />
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-[var(--emos-text-muted)] font-semibold">Try it in EMOS</p>
-                        <p className="text-sm text-[var(--emos-text-primary)] mt-1">{stepItem.action}</p>
+                        <p className="text-xs sm:text-sm text-[var(--emos-text-primary)] mt-0.5">{stepItem.action}</p>
                       </div>
                     </div>
                   </div>
@@ -419,26 +432,26 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
                 <button
                   onClick={() => setActiveTourStep((current) => Math.max(0, current - 1))}
                   disabled={activeTourStep === 0}
-                  className="px-4 py-2 rounded-xl border border-[var(--emos-border-subtle)] text-xs font-semibold flex items-center gap-1.5 disabled:opacity-35 disabled:cursor-not-allowed hover:bg-[var(--emos-surface-hover)] transition-colors"
+                  className="px-4 py-2 rounded-lg border border-[var(--emos-border-subtle)] text-xs font-semibold flex items-center gap-1.5 disabled:opacity-35 disabled:cursor-not-allowed hover:bg-[var(--emos-surface-hover)] transition-colors cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" /> Previous
                 </button>
                 <div className="flex items-center gap-1.5" aria-label={`Tour progress: step ${activeTourStep + 1} of ${PRODUCT_TOUR_STEPS.length}`}>
                   {PRODUCT_TOUR_STEPS.map((stepItem, index) => (
-                    <span key={stepItem.step} className={`h-1.5 rounded-full transition-all ${index === activeTourStep ? 'w-6 bg-[var(--emos-accent)]' : 'w-1.5 bg-[var(--emos-border-strong)]'}`} />
+                    <span key={stepItem.step} className={`h-1.5 rounded-full transition-all ${index === activeTourStep ? 'w-6 bg-[#4648D4]' : 'w-1.5 bg-[var(--emos-border-strong)]'}`} />
                   ))}
                 </div>
                 <button
                   onClick={() => setActiveTourStep((current) => Math.min(PRODUCT_TOUR_STEPS.length - 1, current + 1))}
                   disabled={activeTourStep === PRODUCT_TOUR_STEPS.length - 1}
-                  className="px-4 py-2 rounded-xl bg-[#A88554] hover:bg-[#BCA075] text-black text-xs font-semibold flex items-center gap-1.5 disabled:opacity-35 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] text-white text-xs font-semibold flex items-center gap-1.5 disabled:opacity-35 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
                   Next step <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           ) : (
-            /* View 2: Technical Validation (Progressive Disclosure) */
+            /* View 2: Evaluation Evidence — Business Takeaway → Progressive Disclosure Technical Proof */
             <div className="space-y-4">
               <div className="rounded-xl border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] p-3 text-xs leading-relaxed text-[var(--emos-text-secondary)]">
                 <strong className="text-[var(--emos-text-primary)]">For evaluators and technical reviewers.</strong> This evidence supports technical validation and security review; it is not part of the normal end-user assessment workflow.
@@ -468,49 +481,159 @@ export const TestWalkthroughModal: React.FC<TestWalkthroughModalProps> = ({
               </div>
 
               {technicalSubTab === 'tests' ? (
-                <div className="space-y-3">
-                  {TEST_CASES.map((tc) => (
-                    <div
-                      key={tc.id}
-                      className="p-3.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] space-y-2 text-left"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[11px] font-bold text-[var(--emos-accent-text)] bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] px-1.5 py-0.5 rounded">
-                            {tc.id}
-                          </span>
-                          <h4 className="text-xs font-semibold text-[var(--emos-text-primary)]">{tc.title}</h4>
-                        </div>
-                        <span className="text-[10px] font-medium text-[var(--emos-text-secondary)] bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] px-2 py-0.5 rounded-md whitespace-nowrap">
-                          {tc.category}
-                        </span>
+                <div className="space-y-4">
+                  {/* Level 1 Business Summary */}
+                  <div className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[var(--emos-accent-text)]">
+                          Product Verification
+                        </p>
+                        <h4 className="font-display text-lg font-bold text-[var(--emos-text-primary)] mt-0.5">
+                          {TEST_CASES.length} critical scenarios verified
+                        </h4>
+                        <p className="text-xs text-[var(--emos-text-secondary)] mt-0.5">
+                          Documented verification scenarios covering authentication, 6R decisioning, Enterprise DNA, guardrails, and owner-isolated persistence.
+                        </p>
                       </div>
-
-                      <div className="text-xs text-[var(--emos-text-secondary)] pl-2 border-l-2 border-[var(--emos-border-strong)] space-y-1">
-                        <p className="font-medium text-[11px] text-[var(--emos-accent-text)] uppercase tracking-wider">Test Procedure:</p>
-                        <ol className="list-decimal list-inside space-y-0.5 text-[var(--emos-text-secondary)]">
-                          {tc.steps.map((step, sIdx) => (
-                            <li key={sIdx}>{step}</li>
-                          ))}
-                        </ol>
-                      </div>
-
-                      <div className="flex items-start gap-1.5 text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-lg">
-                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
-                        <span>
-                          <strong className="font-medium text-[var(--emos-text-primary)]">Expected Result:</strong> {tc.expectedResult}
-                        </span>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowVerificationDetails((prev) => !prev)}
+                        aria-expanded={showVerificationDetails}
+                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-4 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+                      >
+                        <span>{showVerificationDetails ? 'Hide Verification Details' : 'View Verification Details'}</span>
+                      </button>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="text-xs text-[var(--emos-text-secondary)]">
-                    The deployed <code className="bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] px-1 py-0.5 rounded font-mono">firestore.rules</code> use default-deny behavior for unmatched paths and restrict modernization assessment records by authenticated user ID:
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-[var(--emos-border-subtle)]">
+                      {verificationCategorySummary.map(([cat, count]) => (
+                        <div
+                          key={cat}
+                          className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-[var(--emos-bg)] border border-[var(--emos-border-subtle)] text-xs"
+                        >
+                          <span className="font-medium text-[var(--emos-text-primary)]">{cat}</span>
+                          <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300 font-semibold font-mono text-[11px]">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>{count} Verified</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <pre className="p-4 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] text-xs font-mono overflow-x-auto leading-relaxed">
+                  {/* Level 3 Technical Proof (On Demand) */}
+                  {showVerificationDetails && (
+                    <div className="space-y-3">
+                      {TEST_CASES.map((tc) => (
+                        <div
+                          key={tc.id}
+                          className="p-3.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] space-y-2 text-left"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-[11px] font-bold text-[var(--emos-accent-text)] bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] px-1.5 py-0.5 rounded">
+                                {tc.id}
+                              </span>
+                              <h4 className="text-xs font-semibold text-[var(--emos-text-primary)]">{tc.title}</h4>
+                            </div>
+                            <span className="text-[10px] font-medium text-[var(--emos-text-secondary)] bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] px-2 py-0.5 rounded-md whitespace-nowrap">
+                              {tc.category}
+                            </span>
+                          </div>
+
+                          <div className="text-xs text-[var(--emos-text-secondary)] pl-2 border-l-2 border-[var(--emos-border-strong)] space-y-1">
+                            <p className="font-medium text-[11px] text-[var(--emos-accent-text)] uppercase tracking-wider">Test Procedure:</p>
+                            <ol className="list-decimal list-inside space-y-0.5 text-[var(--emos-text-secondary)]">
+                              {tc.steps.map((step, sIdx) => (
+                                <li key={sIdx}>{step}</li>
+                              ))}
+                            </ol>
+                          </div>
+
+                          <div className="flex items-start gap-1.5 text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-lg">
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+                            <span>
+                              <strong className="font-medium text-[var(--emos-text-primary)]">Expected Result:</strong> {tc.expectedResult}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Level 1 Business Control Summary */}
+                  <div className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] p-5 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[var(--emos-accent-text)]">
+                          Data Access Controls
+                        </p>
+                        <h4 className="font-display text-lg font-bold text-[var(--emos-text-primary)] mt-0.5">
+                          Owner-Bound Workspace Isolation
+                        </h4>
+                        <p className="text-xs text-[var(--emos-text-secondary)] mt-0.5">
+                          Summary of the deployed Cloud Firestore access rules governing private user records.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowTechnicalRules((prev) => !prev)}
+                        aria-expanded={showTechnicalRules}
+                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-4 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+                      >
+                        <span>{showTechnicalRules ? 'Hide Technical Evidence' : 'View Technical Evidence'}</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-[var(--emos-border-subtle)]">
+                      {[
+                        {
+                          title: 'Authenticated Access',
+                          detail: 'Private workspace data requires an authenticated Firebase session.',
+                        },
+                        {
+                          title: 'User Data Isolation',
+                          detail: 'A user can read and write only their own profile, interactions, and imported workloads.',
+                        },
+                        {
+                          title: 'Default Deny',
+                          detail: 'All unmatched Firestore document paths are explicitly rejected.',
+                        },
+                      ].map((ctrl) => (
+                        <div
+                          key={ctrl.title}
+                          className="p-3.5 rounded-xl bg-[var(--emos-bg)] border border-[var(--emos-border-subtle)] space-y-1"
+                        >
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--emos-text-primary)]">
+                            <Lock className="w-3.5 h-3.5 text-[#4648D4] dark:text-[#818CF8] shrink-0" />
+                            <span>{ctrl.title}</span>
+                          </div>
+                          <p className="text-[11px] text-[var(--emos-text-secondary)] leading-relaxed">
+                            {ctrl.detail}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="p-3.5 bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] rounded-xl text-xs text-[var(--emos-text-primary)] flex items-start gap-2">
+                      <Lock className="w-4 h-4 shrink-0 text-[var(--emos-accent)] mt-0.5" />
+                      <span>
+                        <strong>Owner-Bound Access Control:</strong> Firestore security rules reject attempts to access document paths that do not match the authenticated user ID.
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Level 3 Technical Proof: Raw firestore.rules (On Demand) */}
+                  {showTechnicalRules && (
+                    <div className="space-y-2.5">
+                      <div className="text-xs text-[var(--emos-text-secondary)]">
+                        Deployed <code className="bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] px-1 py-0.5 rounded font-mono">firestore.rules</code>:
+                      </div>
+
+                      <pre className="p-4 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] text-xs font-mono overflow-x-auto leading-relaxed">
 {`rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -535,14 +658,9 @@ service cloud.firestore {
     }
   }
 }`}
-                  </pre>
-
-                  <div className="p-3.5 bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] rounded-xl text-xs text-[var(--emos-text-primary)] flex items-start gap-2">
-                    <Lock className="w-4 h-4 shrink-0 text-[var(--emos-accent)] mt-0.5" />
-                    <span>
-                      <strong>Owner-Bound Access Control:</strong> Firestore security rules reject attempts to access document paths that do not match the authenticated user ID.
-                    </span>
-                  </div>
+                      </pre>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -553,7 +671,7 @@ service cloud.firestore {
         <div className="px-5 sm:px-6 py-3 border-t border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] flex items-center justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-[#A88554] hover:bg-[#BCA075] dark:hover:bg-[#E5C492] text-black text-xs font-semibold transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] text-white text-xs font-semibold transition-colors cursor-pointer"
           >
             Close Guide
           </button>

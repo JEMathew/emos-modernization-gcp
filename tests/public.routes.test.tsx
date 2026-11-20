@@ -21,9 +21,9 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
   beforeAll(() => {
     window.scrollTo = vi.fn();
     class MockIntersectionObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
+      observe() { }
+      unobserve() { }
+      disconnect() { }
     }
     vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
     Object.defineProperty(window, 'matchMedia', {
@@ -229,7 +229,7 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     const onNavigate = vi.fn();
     renderWithTheme(<PublicSandboxPage onNavigate={onNavigate} onSignIn={async () => ({ uid: 'test-user' })} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Continue With Google/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Sign in with Google/i }));
 
     await waitFor(() => expect(onNavigate).toHaveBeenCalledWith('/'));
     expect(window.sessionStorage.getItem('emos-post-auth-route')).toBeNull();
@@ -466,27 +466,34 @@ describe('Public Governance Routes (/privacy & /terms)', () => {
     expect(screen.getByRole('button', { name: /^Product Tour$/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Evaluation Evidence/i })).toBeInTheDocument();
 
-    // Default view: one focused step rather than a text-heavy list.
-    expect(screen.getByText(/Define the modernization intent/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Choose a workload/i)).not.toBeInTheDocument();
+    // Default view: one focused canonical stage rather than a text-heavy list.
+    expect(screen.getByText(/Understand your estate and establish evidence/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Assess, compare 6Rs, and govern the decision/i)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Next step/i }));
-    expect(screen.getByText(/Choose a workload/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Define the modernization intent/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/Assess, compare 6Rs, and govern the decision/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Understand your estate and establish evidence/i)).not.toBeInTheDocument();
 
-    // Switch to evaluation-only evidence.
+    // Switch to evaluation-only evidence (business summary first, technical details on demand).
     fireEvent.click(screen.getByRole('button', { name: /Evaluation Evidence/i }));
     expect(screen.getByText(/For evaluators and technical reviewers/i)).toBeInTheDocument();
     expect(screen.getByText(/not part of the normal end-user assessment workflow/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Test Coverage/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Data Access Controls/i })).toBeInTheDocument();
+    expect(screen.getByText(/17 critical scenarios verified/i)).toBeInTheDocument();
+    expect(screen.queryByText('TC-01')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /View Verification Details/i }));
+    expect(screen.getByText('TC-01')).toBeInTheDocument();
     expect(screen.queryByText(/zero executable risk/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/zero prompt injection bypass/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/zero layout shifting/i)).not.toBeInTheDocument();
 
-    // Switch to security rules tab
+    // Switch to security rules tab (business control summary first, raw rules on demand)
     fireEvent.click(screen.getByRole('button', { name: /Data Access Controls/i }));
     expect(screen.getByText(/Owner-Bound Access Control/i)).toBeInTheDocument();
     expect(screen.getByText(/Firestore security rules reject attempts to access document paths that do not match the authenticated user ID\./i)).toBeInTheDocument();
+    expect(screen.queryByText(/rules_version = '2'/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /View Technical Evidence/i }));
+    expect(screen.getByText(/rules_version = '2'/i)).toBeInTheDocument();
 
     // Absolute guarantee language must be absent
     expect(screen.queryByText(/Owner-Bound Isolation Guarantee/i)).not.toBeInTheDocument();

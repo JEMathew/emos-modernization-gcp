@@ -7,7 +7,10 @@ import { motion, useReducedMotion } from 'motion/react';
 import { ThemeSelector } from './ThemeSelector';
 import { EMOS_FACTS } from '../config/productFacts';
 
+import type { User } from 'firebase/auth';
+
 interface TrustCenterPageProps {
+  user?: User | null;
   onNavigate: (path: string) => void;
 }
 
@@ -58,14 +61,25 @@ const CONFORMANCE_CASES = [
   ['100%', 'READY', 'Complete record, repeated deterministically'],
 ] as const;
 
-export const TrustCenterPage: React.FC<TrustCenterPageProps> = ({ onNavigate }) => {
+export const TrustCenterPage: React.FC<TrustCenterPageProps> = ({ user = null, onNavigate }) => {
   const reduceMotion = useReducedMotion();
   return (
     <div className="emos-landing min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)]">
       <header className="sticky top-0 z-30 border-b border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[88rem] items-center justify-between px-4 sm:px-6 lg:px-8">
-          <button onClick={() => onNavigate('/')} className="inline-flex items-center gap-2 text-sm font-semibold"><ArrowLeft className="h-4 w-4" />EMOS Home</button>
-          <div className="flex items-center gap-2"><ThemeSelector /><a href="https://github.com/JEMathew/emos-modernization-gcp" target="_blank" rel="noreferrer" className="hidden min-h-10 items-center gap-2 rounded-xl border border-[var(--emos-border-strong)] px-3 text-sm font-semibold sm:inline-flex">Public Repository <ExternalLink className="h-4 w-4" /></a></div>
+          <button onClick={() => onNavigate('/')} className="inline-flex items-center gap-2 text-sm font-semibold cursor-pointer"><ArrowLeft className="h-4 w-4" />EMOS Home</button>
+          <div className="flex items-center gap-2">
+            <ThemeSelector />
+            {user && (
+              <button
+                onClick={() => onNavigate('/')}
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-3.5 text-xs font-semibold text-white transition-colors cursor-pointer"
+              >
+                Open Workspace
+              </button>
+            )}
+            <a href="https://github.com/JEMathew/emos-modernization-gcp" target="_blank" rel="noreferrer" className="hidden min-h-9 items-center gap-2 rounded-lg border border-[var(--emos-border-strong)] px-3 text-xs font-semibold sm:inline-flex">Public Repository <ExternalLink className="h-3.5 w-3.5" /></a>
+          </div>
         </div>
       </header>
 

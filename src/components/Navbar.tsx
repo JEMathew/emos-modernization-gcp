@@ -28,8 +28,8 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#A88554] to-[#E5C492] flex items-center justify-center shadow-lg shadow-[#A88554]/15 shrink-0">
-            <Sparkles className="w-4 h-4 text-black" />
+          <div className="w-8 h-8 rounded-lg bg-[#4648D4] flex items-center justify-center shadow-xs shrink-0">
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
           <div>
             <span className="block font-serif font-bold text-[var(--emos-text-primary)] tracking-wider text-base sm:text-lg">
@@ -127,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             id="nav-new-assessment-btn"
             onClick={onNewAssessment}
             aria-label="New Assessment"
-            className="inline-flex min-h-[36px] items-center gap-1 rounded-xl bg-[#A88554] px-3 py-1.5 text-xs font-semibold text-black shadow-sm transition-all hover:bg-[#BCA075] active:scale-98 dark:hover:bg-[#E5C492] cursor-pointer"
+            className="inline-flex min-h-[36px] items-center gap-1 rounded-lg bg-[#4648D4] px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#3B3DC2] active:scale-98 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">New Assessment</span>

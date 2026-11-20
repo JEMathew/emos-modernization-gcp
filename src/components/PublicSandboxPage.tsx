@@ -11,7 +11,10 @@ import { buildSampleDecisionBrief, downloadEvidenceActionPlan, downloadSampleDec
 import { getFriendlyAuthErrorMessage, POST_AUTH_ROUTE_KEY, signInWithGoogle } from '../lib/firebase';
 import { ThemeSelector } from './ThemeSelector';
 
+import type { User } from 'firebase/auth';
+
 interface PublicSandboxPageProps {
+  user?: User | null;
   onNavigate: (path: string) => void;
   onSignIn?: () => Promise<unknown | null>;
 }
@@ -27,7 +30,7 @@ const ALTERNATIVES = [
   ['Repurchase', 'No verified commercial-product fit or replacement evidence has been supplied.'],
 ] as const;
 
-export const PublicSandboxPage: React.FC<PublicSandboxPageProps> = ({ onNavigate, onSignIn }) => {
+export const PublicSandboxPage: React.FC<PublicSandboxPageProps> = ({ user = null, onNavigate, onSignIn }) => {
   const [step, setStep] = useState(0);
   const [evidenceStage, setEvidenceStage] = useState(0);
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -75,7 +78,25 @@ export const PublicSandboxPage: React.FC<PublicSandboxPageProps> = ({ onNavigate
         <div className="mx-auto flex h-16 max-w-[88rem] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           <button onClick={() => onNavigate('/')} className="inline-flex items-center gap-2 rounded-lg text-sm font-semibold"><ArrowLeft className="h-4 w-4" />EMOS Home</button>
           <div className="hidden items-center gap-2 text-xs text-[var(--emos-text-muted)] sm:flex"><LockKeyhole className="h-4 w-4 text-emerald-500" />Read-Only · Synthetic Data · No Sign-In</div>
-          <div className="flex items-center gap-2"><ThemeSelector /><button onClick={handleSignIn} disabled={isSigningIn} className="rounded-xl bg-[#A88554] px-4 py-2 text-sm font-semibold text-black disabled:cursor-wait disabled:opacity-70">{isSigningIn ? 'Connecting…' : 'Continue With Google'}</button></div>
+          <div className="flex items-center gap-2">
+            <ThemeSelector />
+            {user ? (
+              <button
+                onClick={() => onNavigate('/')}
+                className="rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-4 py-2 text-xs sm:text-sm font-semibold text-white transition-colors cursor-pointer"
+              >
+                Open Workspace
+              </button>
+            ) : (
+              <button
+                onClick={handleSignIn}
+                disabled={isSigningIn}
+                className="rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] px-4 py-2 text-xs sm:text-sm font-semibold text-white transition-colors disabled:cursor-wait disabled:opacity-70 cursor-pointer"
+              >
+                {isSigningIn ? 'Connecting…' : 'Sign in with Google'}
+              </button>
+            )}
+          </div>
         </div>
       </header>
 

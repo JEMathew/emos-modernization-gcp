@@ -163,7 +163,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
               onClick={() => setCategoryFilter('all')}
               className={`px-2.5 py-1 rounded-lg transition-colors shrink-0 cursor-pointer ${
                 categoryFilter === 'all'
-                  ? 'bg-[#A88554] text-black font-semibold'
+                  ? 'bg-[#4648D4] text-white font-semibold'
                   : 'bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:bg-[var(--emos-surface-hover)]'
               }`}
             >
@@ -175,7 +175,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
                 onClick={() => setCategoryFilter(cat)}
                 className={`px-2.5 py-1 rounded-lg transition-colors shrink-0 cursor-pointer ${
                   categoryFilter === cat
-                    ? 'bg-[#A88554] text-black font-semibold'
+                    ? 'bg-[#4648D4] text-white font-semibold'
                     : 'bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] hover:bg-[var(--emos-surface-hover)]'
                 }`}
               >
@@ -235,24 +235,20 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
                       {item.workloadName || item.title || 'Untitled Assessment'}
                     </h4>
                   </div>
-                  <span className="text-[11px] text-[var(--emos-text-muted)] shrink-0">
+                  <span className="text-[11px] font-mono text-[var(--emos-text-muted)] shrink-0">
                     {formatDate(item.createdAt)}
                   </span>
                 </div>
 
-                <p className="text-[11px] text-[var(--emos-text-secondary)] line-clamp-2 mt-1.5 font-normal leading-relaxed">
-                  {item.content}
-                </p>
-
-                <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-[var(--emos-border-subtle)] text-[10px]">
-                  <div className="flex items-center gap-1.5 truncate max-w-[200px] flex-wrap">
+                <div className="flex items-center justify-between gap-2 mt-2">
+                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                     {item.recommended6R && (
-                      <span className="px-1.5 py-0.5 rounded bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] font-semibold uppercase tracking-wider text-[9px]">
+                      <span className="px-1.5 py-0.5 rounded bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] font-semibold uppercase tracking-wider text-[10px]">
                         {item.recommended6R}
                       </span>
                     )}
                     {item.decisionReadiness && (
-                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                         item.decisionReadiness === 'READY'
                           ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
                           : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30'
@@ -260,24 +256,31 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
                         {item.decisionReadiness}
                       </span>
                     )}
-                    <span className="px-2 py-0.5 rounded-md bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-accent-text)] font-medium truncate">
-                      {getCategoryLabel(item.category)}
-                    </span>
                   </div>
+                  <span className="text-[11px] font-semibold text-[#4648D4] dark:text-[#818CF8] shrink-0">
+                    Resume Assessment →
+                  </span>
+                </div>
 
-                  {item.turns && item.turns.length > 0 && (
-                    <span className="text-[var(--emos-text-muted)]">
-                      {item.turns.length} {item.turns.length === 1 ? 'turn' : 'turns'}
-                    </span>
-                  )}
+                {/* Progressive Disclosure: Prompt snippet, category, turn count & delete */}
+                <div
+                  className="flex items-center justify-between mt-2 pt-2 border-t border-[var(--emos-border-subtle)] text-[10px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <details className="min-w-0 flex-1 pr-2">
+                    <summary className="cursor-pointer font-medium text-[var(--emos-text-muted)] hover:text-[var(--emos-text-primary)]">
+                      Details · {getCategoryLabel(item.category)}
+                      {item.turns && item.turns.length > 0 ? ` · ${item.turns.length} ${item.turns.length === 1 ? 'turn' : 'turns'}` : ''}
+                    </summary>
+                    <p className="mt-1.5 text-[11px] text-[var(--emos-text-secondary)] leading-relaxed line-clamp-3">
+                      {item.content}
+                    </p>
+                  </details>
 
                   {/* Delete Button / Confirmation */}
-                  <div className="opacity-80 group-hover:opacity-100 transition-opacity">
+                  <div className="opacity-80 group-hover:opacity-100 transition-opacity shrink-0">
                     {isConfirming ? (
-                      <div
-                        className="flex items-center gap-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={() => {
                             onDelete(item.id);
@@ -298,10 +301,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
                     ) : (
                       <button
                         id={`delete-btn-${item.id}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setConfirmDeleteId(item.id);
-                        }}
+                        onClick={() => setConfirmDeleteId(item.id)}
                         className="p-1 text-[var(--emos-text-muted)] hover:text-rose-500 rounded transition-colors cursor-pointer"
                         title="Delete this assessment"
                       >

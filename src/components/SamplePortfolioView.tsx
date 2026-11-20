@@ -36,6 +36,7 @@ interface SamplePortfolioViewProps {
   onAssessWorkload: (workload: EnterpriseWorkload) => void;
   importedWorkloads?: EnterpriseWorkload[];
   activeEstateId?: EnterpriseSampleId;
+  externalSearchQuery?: string;
   onChangeEstate?: (estateId: EnterpriseSampleId) => void;
   estateWorkloads?: EnterpriseWorkload[];
   interactions?: Interaction[];
@@ -51,6 +52,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
   onAssessWorkload,
   importedWorkloads = [],
   activeEstateId = 'apex-aerospace',
+  externalSearchQuery = '',
   onChangeEstate,
   estateWorkloads,
   interactions = [],
@@ -64,11 +66,21 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
   const [selectedEnterprise, setSelectedEnterprise] = useState<'apex-aerospace' | 'financial-services'>(
     activeEstateId === 'financial-services' ? 'financial-services' : 'apex-aerospace'
   );
-  const [portfolioTopologyView, setPortfolioTopologyView] = useState<'registry' | 'spatial'>('registry');
+
+  React.useEffect(() => {
+    const nextEnterprise = activeEstateId === 'financial-services' ? 'financial-services' : 'apex-aerospace';
+    setSelectedEnterprise(nextEnterprise);
+    if (nextEnterprise === 'financial-services') {
+      setShowFullEstateScope(true);
+    }
+  }, [activeEstateId]);
+  const [portfolioTopologyView, setPortfolioTopologyView] = useState<'table' | 'cards' | 'spatial'>('table');
   const [showFullEstateScope, setShowFullEstateScope] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isClearing, setIsClearing] = useState(false);
+
+  const effectiveSearch = (searchQuery || externalSearchQuery).trim();
 
   const activeProfile = ENTERPRISE_ESTATE_PROFILES[selectedEnterprise];
 
@@ -83,8 +95,8 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
   const currentWorkloads = activeTab === 'sample' ? defaultSampleList : importedWorkloads;
 
   const filteredWorkloads = currentWorkloads.filter((w) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
+    if (!effectiveSearch) return true;
+    const q = effectiveSearch.toLowerCase();
     return (
       w.name.toLowerCase().includes(q) ||
       w.id.toLowerCase().includes(q) ||
@@ -136,33 +148,46 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
   };
 
   return (
-    <div id="sample-portfolio-view" className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-7 max-w-5xl mx-auto w-full transition-colors">
+    <div id="sample-portfolio-view" className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-[1600px] mx-auto w-full transition-colors">
       {/* Top Banner & Title */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <JourneyStage stage="Discover" question="What workloads are in scope for modernization?" />
-          <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-xs">
+          <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-xs">
             <button
               type="button"
-              onClick={() => setPortfolioTopologyView('registry')}
-              aria-pressed={portfolioTopologyView === 'registry'}
-              className={`px-2.5 py-1 rounded-lg font-semibold inline-flex items-center gap-1.5 cursor-pointer ${
-                portfolioTopologyView === 'registry'
-                  ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)]'
-                  : 'text-[var(--emos-text-secondary)]'
+              onClick={() => setPortfolioTopologyView('table')}
+              aria-pressed={portfolioTopologyView === 'table'}
+              className={`px-2.5 py-1 rounded-md font-semibold inline-flex items-center gap-1.5 cursor-pointer ${
+                portfolioTopologyView === 'table'
+                  ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] shadow-2xs'
+                  : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
               }`}
             >
               <List className="w-3.5 h-3.5" />
-              <span>Portfolio Registry</span>
+              <span>Systems Registry</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPortfolioTopologyView('cards')}
+              aria-pressed={portfolioTopologyView === 'cards'}
+              className={`px-2.5 py-1 rounded-md font-semibold inline-flex items-center gap-1.5 cursor-pointer ${
+                portfolioTopologyView === 'cards'
+                  ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] shadow-2xs'
+                  : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Cards</span>
             </button>
             <button
               type="button"
               onClick={() => setPortfolioTopologyView('spatial')}
               aria-pressed={portfolioTopologyView === 'spatial'}
-              className={`px-2.5 py-1 rounded-lg font-semibold inline-flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md font-semibold inline-flex items-center gap-1.5 cursor-pointer ${
                 portfolioTopologyView === 'spatial'
-                  ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] border border-[var(--emos-border-strong)]'
-                  : 'text-[var(--emos-text-secondary)]'
+                  ? 'bg-[var(--emos-surface)] text-[var(--emos-accent-text)] shadow-2xs'
+                  : 'text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
               }`}
             >
               <Network className="w-3.5 h-3.5" />
@@ -177,197 +202,124 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
               Enterprise Modernization Portfolio
             </h1>
             <p className="text-xs sm:text-sm text-[var(--emos-text-secondary)] mt-1 max-w-2xl leading-relaxed">
-              Understand your estate, structure modernization evidence, identify evidence gaps, and execute governed 6R modernization decisions.
+              Which workload needs my attention? Review evidence readiness and start a governed 6R assessment.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2 self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
             <button
               id="import-portfolio-header-btn"
               onClick={onOpenImportModal}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#A88554] hover:bg-[#BCA075] dark:hover:bg-[#E5C492] text-black text-xs font-semibold shadow-sm transition-all cursor-pointer min-h-[38px]"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:bg-[var(--emos-surface-hover)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] text-xs font-semibold transition-all cursor-pointer min-h-[38px]"
             >
-              <UploadCloud className="w-4 h-4" />
+              <UploadCloud className="w-3.5 h-3.5" />
               <span>Import CSV / JSON</span>
             </button>
-          </div>
-        </div>
-
-        {/* COMMAND CENTER: What Needs My Attention? (Section T - 4 Primary KPIs) */}
-        <section
-          aria-label="Command Center Attention Summary"
-          className="rounded-2xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-4 sm:p-5 space-y-3.5 shadow-xs"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[var(--emos-accent)]" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--emos-accent-text)]">
-                Command Center · What Needs My Attention?
-              </h2>
-            </div>
-            <span className="text-[11px] font-mono text-[var(--emos-text-muted)]">
-              Active Estate: <strong className="text-[var(--emos-text-primary)]">{activeTab === 'imported' ? 'Uploaded Enterprise Portfolio' : activeProfile.name}</strong>
-              {activeTab === 'sample' && ` (${activeProfile.totalAssetsRepresented.toLocaleString()}+ representative assets)`}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)]">
-              <p className="text-[10px] font-mono uppercase text-[var(--emos-text-muted)]">Portfolio Health</p>
-              <p className="text-lg sm:text-xl font-bold font-mono text-[var(--emos-accent-text)] mt-0.5">{avgCompleteness}% DNA</p>
-              <p className="text-[10px] text-[var(--emos-text-secondary)] mt-0.5">Average verified evidence</p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)]">
-              <p className="text-[10px] font-mono uppercase text-[var(--emos-text-muted)]">Decisions Needing Evidence</p>
-              <p className="text-lg sm:text-xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4" />
-                {decisionsRequiringAttention}
-              </p>
-              <p className="text-[10px] text-[var(--emos-text-secondary)] mt-0.5">Gated below 70% or missing critical DNA</p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)]">
-              <p className="text-[10px] font-mono uppercase text-[var(--emos-text-muted)]">Ready / Active Transforms</p>
-              <p className="text-lg sm:text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" />
-                {readyForTransformation}
-              </p>
-              <p className="text-[10px] text-[var(--emos-text-secondary)] mt-0.5">Ready for governance & execution</p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)]">
-              <p className="text-[10px] font-mono uppercase text-[var(--emos-text-muted)]">Governed Assessments</p>
-              <p className="text-lg sm:text-xl font-bold font-mono text-[var(--emos-text-primary)] mt-0.5">
-                {interactions.length}
-              </p>
-              <p className="text-[10px] text-[var(--emos-text-secondary)] mt-0.5">Persisted across 6R lifecycle</p>
-            </div>
-          </div>
-        </section>
-
-        {/* HOW WOULD YOU LIKE TO START? (Section D - 4 Entry Paths) */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-[var(--emos-text-muted)] font-semibold">
-              How Would You Like to Start?
-            </span>
-            {activeTab === 'sample' && selectedEnterprise === 'apex-aerospace' && (
+            {filteredWorkloads[0] && (
               <button
                 type="button"
-                onClick={() => setShowFullEstateScope((prev) => !prev)}
-                className="text-xs font-semibold text-[var(--emos-accent-text)] hover:underline cursor-pointer"
+                onClick={() => onAssessWorkload(filteredWorkloads[0])}
+                disabled={isProcessing}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer min-h-[38px] disabled:opacity-50"
               >
-                {showFullEstateScope ? 'Show Core 3 Workloads' : 'Show All 6 Apex 6R Archetypes (Retain/Retire/Rehost/Replatform/Refactor/Repurchase)'}
+                <Zap className="w-3.5 h-3.5" />
+                <span>Assess Priority Workload</span>
               </button>
             )}
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-0.5">
-            {/* Path 1: Explore Apex Aerospace (Primary Sample) */}
-            <div
-              id="entry-path-sample"
-              onClick={() => handleSelectEnterprise('apex-aerospace')}
-              className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
-                activeTab === 'sample' && selectedEnterprise === 'apex-aerospace'
-                  ? 'bg-[var(--emos-surface-elevated)] border-[var(--emos-accent)] shadow-sm ring-1 ring-[var(--emos-accent-border)]'
-                  : 'bg-[var(--emos-surface)] border-[var(--emos-border-subtle)] hover:border-[var(--emos-border-strong)] hover:bg-[var(--emos-surface-hover)]'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] font-bold">
-                  Primary Sample
-                </span>
-                <span className="text-[10px] text-[var(--emos-text-secondary)] font-mono">10,420+ Assets</span>
-              </div>
-              <h3 className="text-xs font-semibold text-[var(--emos-text-primary)] mt-2 flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-[var(--emos-accent)] shrink-0" />
-                <span>Explore Apex Aerospace</span>
-              </h3>
-              <p className="text-[11px] text-[var(--emos-text-secondary)] mt-1 leading-snug">
-                Global aircraft manufacturer spanning Engineering, PLM, Shop-Floor MES, Supply Chain, and Enterprise Analytics.
-              </p>
-            </div>
-
-            {/* Path 2: Explore Financial Services (Secondary Sample) */}
-            <div
-              id="entry-path-financial"
-              onClick={() => handleSelectEnterprise('financial-services')}
-              className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
-                activeTab === 'sample' && selectedEnterprise === 'financial-services'
-                  ? 'bg-[var(--emos-surface-elevated)] border-[var(--emos-accent)] shadow-sm ring-1 ring-[var(--emos-accent-border)]'
-                  : 'bg-[var(--emos-surface)] border-[var(--emos-border-subtle)] hover:border-[var(--emos-border-strong)] hover:bg-[var(--emos-surface-hover)]'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-text-secondary)] font-bold">
-                  Secondary Sample
-                </span>
-                <span className="text-[10px] text-[var(--emos-text-secondary)] font-mono">6,850+ Assets</span>
-              </div>
-              <h3 className="text-xs font-semibold text-[var(--emos-text-primary)] mt-2 flex items-center gap-1.5">
-                <Landmark className="w-3.5 h-3.5 text-[var(--emos-accent)] shrink-0" />
-                <span>Explore Financial Services</span>
-              </h3>
-              <p className="text-[11px] text-[var(--emos-text-secondary)] mt-1 leading-snug">
-                Global banking & payments estate covering Fixed Income Clearing, Basel III Risk EDW, AML, SWIFT, and HSM Vaults.
-              </p>
-            </div>
-
-            {/* Path 3: Upload Your Portfolio (CSV / JSON) */}
-            <div
-              id="entry-path-byop"
-              onClick={() => {
-                setActiveTab('imported');
-                if (importedWorkloads.length === 0) {
-                  onOpenImportModal();
-                }
-              }}
-              className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
-                activeTab === 'imported'
-                  ? 'bg-[var(--emos-surface-elevated)] border-[var(--emos-accent)] shadow-sm ring-1 ring-[var(--emos-accent-border)]'
-                  : 'bg-[var(--emos-surface)] border-[var(--emos-border-subtle)] hover:border-[var(--emos-border-strong)] hover:bg-[var(--emos-surface-hover)]'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] font-bold">
-                  CSV / JSON
-                </span>
-                <span className="text-[10px] text-[var(--emos-text-secondary)] font-mono">
-                  {importedWorkloads.length} Imported
-                </span>
-              </div>
-              <h3 className="text-xs font-semibold text-[var(--emos-text-primary)] mt-2 flex items-center gap-1.5">
-                <UploadCloud className="w-3.5 h-3.5 text-[var(--emos-accent)] shrink-0" />
-                <span>Upload Your Portfolio</span>
-              </h3>
-              <p className="text-[11px] text-[var(--emos-text-secondary)] mt-1 leading-snug">
-                Import your organization&apos;s CSV or JSON inventory with schema validation and automatic Enterprise DNA extraction.
-              </p>
-            </div>
-
-            {/* Path 4: Connect Enterprise Sources (Coming Soon / Future) */}
-            <div
-              id="entry-path-connectors"
-              className="p-3.5 rounded-xl border border-dashed border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)]/70 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between gap-1">
-                  <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-[var(--emos-text-muted)] font-bold">
-                    Coming Soon / Future
-                  </span>
-                </div>
-                <h3 className="text-xs font-semibold text-[var(--emos-text-primary)] mt-2 flex items-center gap-1.5">
-                  <Plug className="w-3.5 h-3.5 text-[var(--emos-text-muted)] shrink-0" />
-                  <span>Connect Enterprise Sources</span>
-                </h3>
-                <p className="text-[11px] text-[var(--emos-text-muted)] mt-1 leading-snug">
-                  Automated connectors for ServiceNow CMDB, LeanIX, Apptio, GitHub, and cloud billing telemetry.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
+
+        {/* Compact Single-Row Estate Summary & Source Switcher (replaces stacked duplicate Command Center + 4 tall cards) */}
+        <section
+          aria-label="Command Center Attention Summary"
+          className="stitch-card px-4 py-3 flex flex-col xl:flex-row xl:items-center justify-between gap-3"
+        >
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs">
+            <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--emos-text-primary)]">
+              <Activity className="w-3.5 h-3.5 text-[#4648D4] dark:text-[#818CF8]" />
+              <span>What Needs My Attention?</span>
+            </span>
+            <span className="text-[var(--emos-text-secondary)]">
+              Avg DNA: <strong className="font-mono text-[var(--emos-text-primary)]">{avgCompleteness}%</strong>
+            </span>
+            <span className="text-amber-700 dark:text-amber-300">
+              Evidence Gated: <strong className="font-mono">{decisionsRequiringAttention}</strong>
+            </span>
+            <span className="text-emerald-700 dark:text-emerald-300">
+              Ready: <strong className="font-mono">{readyForTransformation}</strong>
+            </span>
+            <span className="text-[var(--emos-text-secondary)]">
+              Assessed: <strong className="font-mono text-[var(--emos-text-primary)]">{interactions.length}</strong>
+            </span>
+          </div>
+
+          <details className="text-xs">
+            <summary className="cursor-pointer font-medium text-[var(--emos-text-muted)] hover:text-[var(--emos-text-primary)] select-none">
+              Dataset &amp; scope options
+            </summary>
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs">
+              <button
+                id="entry-path-sample"
+                type="button"
+                onClick={() => handleSelectEnterprise('apex-aerospace')}
+                className={`px-2.5 py-1 rounded-md border font-medium inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
+                  activeTab === 'sample' && selectedEnterprise === 'apex-aerospace'
+                    ? 'bg-[var(--emos-accent-subtle)] border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] font-semibold'
+                    : 'bg-[var(--emos-bg)] border-[var(--emos-border-subtle)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+                }`}
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span>Explore Apex Aerospace</span>
+              </button>
+              <button
+                id="entry-path-financial"
+                type="button"
+                onClick={() => handleSelectEnterprise('financial-services')}
+                className={`px-2.5 py-1 rounded-md border font-medium inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
+                  activeTab === 'sample' && selectedEnterprise === 'financial-services'
+                    ? 'bg-[var(--emos-accent-subtle)] border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] font-semibold'
+                    : 'bg-[var(--emos-bg)] border-[var(--emos-border-subtle)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+                }`}
+              >
+                <Landmark className="w-3.5 h-3.5" />
+                <span>Explore Financial Services</span>
+              </button>
+              <button
+                id="entry-path-byop"
+                type="button"
+                onClick={() => {
+                  setActiveTab('imported');
+                  if (importedWorkloads.length === 0) onOpenImportModal();
+                }}
+                className={`px-2.5 py-1 rounded-md border font-medium inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
+                  activeTab === 'imported'
+                    ? 'bg-[var(--emos-accent-subtle)] border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] font-semibold'
+                    : 'bg-[var(--emos-bg)] border-[var(--emos-border-subtle)] text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)]'
+                }`}
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Upload Your Portfolio</span>
+              </button>
+              <span
+                id="entry-path-connectors"
+                title="Future capability: ServiceNow CMDB, LeanIX, Apptio, GitHub connectors"
+                className="px-2.5 py-1 rounded-md border border-dashed border-[var(--emos-border-subtle)] bg-[var(--emos-bg)] text-[11px] text-[var(--emos-text-muted)] inline-flex items-center gap-1"
+              >
+                <Plug className="w-3 h-3" />
+                <span>Connect Enterprise Sources</span>
+              </span>
+              {activeTab === 'sample' && selectedEnterprise === 'apex-aerospace' && (
+                <button
+                  type="button"
+                  onClick={() => setShowFullEstateScope((prev) => !prev)}
+                  className="px-2 py-1 text-[11px] font-semibold text-[#4648D4] dark:text-[#818CF8] hover:underline cursor-pointer"
+                >
+                  {showFullEstateScope ? 'Core 3' : 'All 6 Archetypes'}
+                </button>
+              )}
+            </div>
+          </details>
+        </section>
 
         {/* Spatial Portfolio Intelligence View (Section N2: Enterprise -> Domain -> Capability -> System -> DNA) */}
         {portfolioTopologyView === 'spatial' && activeTab === 'sample' && (
@@ -538,7 +490,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <button
               onClick={onOpenImportModal}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#A88554] hover:bg-[#BCA075] dark:hover:bg-[#E5C492] text-black text-xs font-semibold shadow-sm transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
             >
               <UploadCloud className="w-4 h-4" />
               <span>Import Enterprise Portfolio</span>
@@ -561,8 +513,123 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
         </div>
       )}
 
-      {/* Workload Cards Grid: Responsive 1 col on mobile, 2 on tablet, 3 on desktop */}
-      {filteredWorkloads.length > 0 && (
+      {/* DOMINANT VISUAL OBJECT: Scannable Systems Registry Table (Default) */}
+      {filteredWorkloads.length > 0 && portfolioTopologyView === 'table' && (
+        <section aria-label="Systems Registry Table" className="stitch-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-[var(--emos-bg)] border-b border-[var(--emos-border-subtle)] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--emos-text-muted)]">
+                  <th className="py-3 px-4">System / Workload</th>
+                  <th className="py-3 px-4">Business Capability</th>
+                  <th className="py-3 px-4">Technology / Stack</th>
+                  <th className="py-3 px-4">Evidence Readiness</th>
+                  <th className="py-3 px-4">Recommended 6R</th>
+                  <th className="py-3 px-4">Gate Status</th>
+                  <th className="py-3 px-4 text-right">Primary Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--emos-border-subtle)]">
+                {filteredWorkloads.map((workload) => {
+                  const derived = deriveEvidenceDrivenRecommendation(workload);
+                  const isReady = derived.decisionReadiness === 'READY';
+                  const isImported = workload.source === 'imported';
+                  return (
+                    <tr
+                      key={workload.id}
+                      id={`portfolio-row-${workload.id}`}
+                      className="hover:bg-[var(--emos-surface-elevated)] transition-colors"
+                    >
+                      <td className="py-3.5 px-4">
+                        <div className="font-semibold text-[var(--emos-text-primary)]">{workload.name}</div>
+                        <div className="text-[11px] font-mono text-[var(--emos-text-muted)]">
+                          {workload.id} · {workload.businessCriticality}
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 text-[var(--emos-text-secondary)]">
+                        {workload.businessCapability}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="font-mono text-[11px] text-[var(--emos-text-primary)]">{workload.currentStack}</div>
+                        <div className="text-[11px] text-[var(--emos-text-muted)] truncate max-w-[200px]">{workload.hosting}</div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2 min-w-[110px]">
+                          <div className="flex-1 h-1.5 rounded-full bg-[var(--emos-bg-tertiary)] overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${isReady ? 'bg-emerald-500' : 'bg-[#4648D4]'}`}
+                              style={{ width: `${workload.evidenceCompleteness}%` }}
+                            />
+                          </div>
+                          <span className="font-mono text-[11px] font-semibold text-[var(--emos-text-primary)] tabular-nums">
+                            {workload.evidenceCompleteness}%
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="inline-flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded-full bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-[11px] font-semibold text-[var(--emos-accent-text)]">
+                            {derived.recommended6R}
+                          </span>
+                          <CapabilityCue cueId={derived.recommended6R.toLowerCase()} />
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-semibold ${
+                            isReady
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30'
+                              : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30'
+                          }`}
+                        >
+                          {isReady ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+                          <span>{derived.decisionReadiness}</span>
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5">
+                          <button
+                            id={`view-dna-btn-${workload.id}`}
+                            type="button"
+                            onClick={() => onSelectWorkload(workload)}
+                            className="h-8 px-2.5 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] hover:border-[#4648D4] text-xs font-semibold text-[var(--emos-text-primary)] inline-flex items-center gap-1 cursor-pointer transition-colors"
+                          >
+                            <Dna className="w-3.5 h-3.5 text-[#4648D4] dark:text-[#818CF8]" />
+                            <span>View Enterprise DNA</span>
+                          </button>
+                          <button
+                            id={`quick-assess-btn-${workload.id}`}
+                            type="button"
+                            onClick={() => onAssessWorkload(workload)}
+                            disabled={isProcessing}
+                            className="h-8 px-2.5 rounded-lg bg-[#4648D4] hover:bg-[#3B3DC2] text-white text-xs font-semibold cursor-pointer transition-colors disabled:opacity-50"
+                          >
+                            Assess
+                          </button>
+                          {isImported && onDeleteImportedWorkload && (
+                            <button
+                              type="button"
+                              onClick={(e) => handleDeleteWorkload(e, workload.id)}
+                              disabled={deletingId === workload.id}
+                              className="p-1.5 text-[var(--emos-text-muted)] hover:text-rose-500 rounded cursor-pointer"
+                              title="Remove workload"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* Optional Secondary View: Workload Cards Grid */}
+      {filteredWorkloads.length > 0 && portfolioTopologyView === 'cards' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {filteredWorkloads.map((workload) => {
             const isApp = workload.type === 'Application';
@@ -688,7 +755,7 @@ export const SamplePortfolioView: React.FC<SamplePortfolioViewProps> = ({
                     </div>
                     <div className="w-full h-1.5 bg-[var(--emos-bg-tertiary)] rounded-full overflow-hidden border border-[var(--emos-border-subtle)]">
                       <div
-                        className="h-full bg-gradient-to-r from-[#A88554] to-[#E5C492] rounded-full transition-all duration-500"
+                        className="h-full bg-[#4648D4] rounded-full transition-all duration-500"
                         style={{ width: `${workload.evidenceCompleteness}%` }}
                       />
                     </div>

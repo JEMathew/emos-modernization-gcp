@@ -117,7 +117,24 @@ export default function App() {
     }
   };
 
-  const renderContent = () => {
+  const [hasMountedWorkspace, setHasMountedWorkspace] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.pathname === '/workspace';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (currentUser || currentPath === '/workspace') {
+      setHasMountedWorkspace(true);
+    }
+  }, [currentUser, currentPath]);
+
+  const isWorkspaceRoute = currentPath === '/workspace' || (currentPath === '/' && Boolean(currentUser));
+  const shouldKeepWorkspaceMounted =
+    hasMountedWorkspace && (isWorkspaceRoute || currentPath === '/learn');
+
+  const renderNonWorkspaceContent = () => {
     if (currentPath === '/privacy') {
       return <PrivacyPolicyPage user={currentUser} onNavigate={navigateTo} />;
     }
@@ -127,26 +144,33 @@ export default function App() {
     }
 
     if (currentPath === '/learn') {
-      return <LearningCenterPage onNavigate={navigateTo} />;
+      return (
+        <LearningCenterPage
+          user={currentUser}
+          onNavigate={(path) => {
+            if (path === '/workspace' && currentUser) {
+              navigateTo('/');
+            } else {
+              navigateTo(path);
+            }
+          }}
+        />
+      );
     }
 
     if (currentPath === '/sandbox') {
-      return <PublicSandboxPage onNavigate={navigateTo} />;
+      return <PublicSandboxPage user={currentUser} onNavigate={navigateTo} />;
     }
 
     if (currentPath === '/trust') {
-      return <TrustCenterPage onNavigate={navigateTo} />;
-    }
-
-    if (currentPath === '/workspace') {
-      return <Dashboard user={currentUser} />;
+      return <TrustCenterPage user={currentUser} onNavigate={navigateTo} />;
     }
 
     if (isAuthChecking) {
       return (
         <div className="min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] flex flex-col items-center justify-center space-y-5">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#A88554] to-[#E5C492] text-black flex items-center justify-center shadow-2xl shadow-[#A88554]/20 animate-pulse">
-            <Sparkles className="w-6 h-6 text-black" />
+          <div className="w-12 h-12 rounded-xl bg-[#4648D4] text-white flex items-center justify-center shadow-lg shadow-indigo-500/20 animate-pulse">
+            <Sparkles className="w-6 h-6 text-white" />
           </div>
           <div className="space-y-1.5 text-center">
             <p className="font-serif font-bold text-lg text-[var(--emos-text-primary)] tracking-wider">
@@ -163,10 +187,6 @@ export default function App() {
       );
     }
 
-    if (currentUser) {
-      return <Dashboard user={currentUser} />;
-    }
-
     return (
       <LandingPage
         onOpenWalkthrough={() => setIsWalkthroughOpen(true)}
@@ -178,7 +198,15 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      {renderContent()}
+      {shouldKeepWorkspaceMounted && (
+        <div className={isWorkspaceRoute ? undefined : 'hidden'} aria-hidden={!isWorkspaceRoute}>
+          <Dashboard
+            user={currentUser}
+            onOpenLearningCenter={() => navigateTo('/learn')}
+          />
+        </div>
+      )}
+      {!isWorkspaceRoute && renderNonWorkspaceContent()}
 
       <TestWalkthroughModal
         isOpen={isWalkthroughOpen}
