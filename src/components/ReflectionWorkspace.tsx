@@ -17,12 +17,23 @@ import {
   Dna,
   ArrowRight,
   ChevronDown,
+  Bot,
+  Route,
 } from 'lucide-react';
-import type { Interaction, AssessmentMode, Disposition6R, DecisionReadiness } from '../types';
+import type { Interaction, AssessmentMode, Disposition6R, DecisionReadiness, EnterpriseWorkload } from '../types';
+import { SAMPLE_PORTFOLIO } from '../data/samplePortfolio';
+import { deriveEvidenceDrivenRecommendation } from '../data/enterpriseEstates';
+import { PLAIN_ENGLISH_6R } from '../config/capabilityCues';
 import { JourneyStage } from './JourneyStage';
+import { CapabilityCue } from './CapabilityCue';
 
 interface ReflectionWorkspaceProps {
   activeInteraction: Interaction | null;
+  selectedWorkload?: EnterpriseWorkload | null;
+  isGovernanceApproved?: boolean;
+  onApproveGovernance?: (workloadId: string, disposition: Disposition6R) => void;
+  onOpenPlanAndExecute?: () => void;
+  onToggleAgentPanel?: () => void;
   onSaveNew: (params: {
     content: string;
     mode: AssessmentMode;
@@ -38,7 +49,6 @@ interface ReflectionWorkspaceProps {
   errorKind?: 'reasoning' | 'persistence' | 'guardrail' | null;
 }
 
-// Canonical Prompt Starters specified in requirements
 const EMOS_PROMPT_STARTERS = [
   {
     title: 'Assess Legacy Application',
@@ -73,6 +83,11 @@ const FOLLOW_UP_SHORTCUTS = [
 
 export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
   activeInteraction,
+  selectedWorkload,
+  isGovernanceApproved = false,
+  onApproveGovernance,
+  onOpenPlanAndExecute,
+  onToggleAgentPanel,
   onSaveNew,
   onSendFollowUp,
   onRetrySave,
@@ -87,13 +102,14 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
   const [followUpInput, setFollowUpInput] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isEvidenceExpanded, setIsEvidenceExpanded] = useState(false);
+  const [showCompareAlternatives, setShowCompareAlternatives] = useState(false);
+  const [isFullReasoningExpanded, setIsFullReasoningExpanded] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const followUpInputRef = useRef<HTMLInputElement>(null);
   const previousThreadRef = useRef<{ id: string | null; turnCount: number }>({ id: null, turnCount: 0 });
 
-  // Open a selected assessment at its decision summary; scroll only for new activity in the same thread.
   useEffect(() => {
     const currentId = activeInteraction?.id || null;
     const currentTurnCount = activeInteraction?.turns?.length || 0;
@@ -108,9 +124,9 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
 
   useEffect(() => {
     setIsEvidenceExpanded(false);
+    setShowCompareAlternatives(false);
   }, [activeInteraction?.id]);
 
-  // Render only complete, persisted canonical metrics; never infer a second assessment.
   const metrics = useMemo(() => {
     if (!activeInteraction) return null;
     if (
@@ -128,7 +144,20 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
     return { disposition, confidence, completeness, readiness };
   }, [activeInteraction]);
 
-  // Handle draft submission
+  const resolvedWorkload = useMemo(() => {
+    if (selectedWorkload) return selectedWorkload;
+    if (activeInteraction?.workloadId) {
+      const found = SAMPLE_PORTFOLIO.find((w) => w.id === activeInteraction.workloadId);
+      if (found) return found;
+    }
+    return SAMPLE_PORTFOLIO[0];
+  }, [selectedWorkload, activeInteraction?.workloadId]);
+
+  const derivedSummary = useMemo(
+    () => deriveEvidenceDrivenRecommendation(resolvedWorkload),
+    [resolvedWorkload],
+  );
+
   const handleDraftSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!draftContent.trim() || isProcessing) return;
@@ -141,11 +170,10 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
       });
       setDraftContent('');
     } catch {
-      // Keep draft in buffer on error as mandated by directives
+      // Keep draft in buffer on error
     }
   };
 
-  // Handle follow up submission
   const handleFollowUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!followUpInput.trim() || !activeInteraction || isProcessing) return;
@@ -155,7 +183,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
       setFollowUpInput('');
       await onSendFollowUp(activeInteraction.id, message);
     } catch {
-      setFollowUpInput(message); // restore on error
+      setFollowUpInput(message);
     }
   };
 
@@ -230,6 +258,16 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {onToggleAgentPanel && (
+            <button
+              type="button"
+              onClick={onToggleAgentPanel}
+              className="px-2.5 py-1 rounded-lg border border-[var(--emos-accent-border)] bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] text-[11px] font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <Bot className="w-3.5 h-3.5" />
+              <span>Ask Agent</span>
+            </button>
+          )}
           {saveStatus === 'error' && errorKind !== 'reasoning' && errorKind !== 'guardrail' && activeInteraction && onRetrySave && (
             <button
               id="retry-save-btn"
@@ -266,7 +304,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                   title="View Structured Enterprise DNA Evidence Profile"
                 >
                   <Dna className="w-3.5 h-3.5 text-[var(--emos-accent)]" />
-                  <span className="hidden sm:inline">Enterprise DNA</span>
+                  <span className="hidden sm:inline">View Evidence</span>
                 </button>
               )}
 
@@ -286,7 +324,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
             </div>
           </div>
 
-          {/* Executive 6R Decision Bar (Visually Emphasized Metrics - Responsive Desktop/Tablet/Mobile) */}
+          {/* Executive 6R Decision Bar */}
           {metrics && (
             <div className="px-4 sm:px-8 py-3 bg-[var(--emos-bg-tertiary)] border-b border-[var(--emos-border-subtle)] shrink-0 transition-colors">
               <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-4 text-xs">
@@ -296,6 +334,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                   <span className={`px-2.5 py-1 rounded-md border font-bold text-xs uppercase tracking-wider ${get6RBadgeStyle(metrics.disposition)}`}>
                     {metrics.disposition}
                   </span>
+                  <CapabilityCue cueId={metrics.disposition.toLowerCase()} />
                 </div>
 
                 <div className="h-4 w-[1px] bg-[var(--emos-border-subtle)] hidden sm:block" />
@@ -354,8 +393,158 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
           )}
 
           {/* Conversation & Assessment Stream */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-3xl mx-auto w-full">
-            {/* User Modernization Scope / Evidence */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-7 max-w-3xl mx-auto w-full">
+            {/* DECISION WORKSPACE HERO CARD (Section U: Plain-English meaning, 6R term, Confidence, Top 3 reasons, Expected impact, ONE primary CTA, Secondary actions) */}
+            {metrics && (() => {
+              const plainInfo = PLAIN_ENGLISH_6R[metrics.disposition] || PLAIN_ENGLISH_6R.Replatform;
+              return (
+                <section
+                  aria-label="Executive Decision Summary"
+                  className="rounded-3xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-5 sm:p-7 shadow-lg space-y-5"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-[var(--emos-border-subtle)] pb-4">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--emos-accent-text)] font-bold">
+                        Recommended Action
+                      </span>
+                      <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[var(--emos-text-primary)] mt-1">
+                        {plainInfo.plainEnglish}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <span className={`px-2.5 py-0.5 rounded-md border font-bold text-xs uppercase tracking-wider ${get6RBadgeStyle(metrics.disposition)}`}>
+                          {metrics.disposition}
+                        </span>
+                        <span className="text-xs text-[var(--emos-text-secondary)]">
+                          {plainInfo.tagline}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-[var(--emos-bg-tertiary)] border border-[var(--emos-border-subtle)] text-center min-w-[130px] shrink-0">
+                      <span className="font-mono text-2xl font-bold text-[var(--emos-text-primary)] block">
+                        {metrics.confidence}%
+                      </span>
+                      <span className="text-[10px] uppercase tracking-wider text-[var(--emos-text-muted)]">
+                        Confidence
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Top 3 Reasons */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold uppercase tracking-wider text-[var(--emos-accent-text)]">
+                      Why? (Top 3 Evidence-Backed Reasons)
+                    </p>
+                    <ol className="space-y-2 text-xs sm:text-sm text-[var(--emos-text-primary)]">
+                      {derivedSummary.topReasons.map((reason, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--emos-bg-secondary)] border border-[var(--emos-border-subtle)]">
+                          <span className="w-5 h-5 rounded-full bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] text-[var(--emos-accent-text)] font-mono text-xs font-bold flex items-center justify-center shrink-0">
+                            {idx + 1}
+                          </span>
+                          <span className="leading-snug">{reason}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+
+                  {/* Expected Impact */}
+                  <div className="p-3.5 rounded-2xl bg-[var(--emos-accent-subtle)] border border-[var(--emos-accent-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--emos-accent-text)] font-bold block">
+                        Expected Business Impact
+                      </span>
+                      <span className="font-semibold text-[var(--emos-text-primary)] mt-0.5 block">
+                        {derivedSummary.expectedImpact}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* ONE Primary CTA + Max 2-3 Secondary Actions */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[var(--emos-border-subtle)]">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {metrics.readiness === 'READY' ? (
+                        !isGovernanceApproved ? (
+                          <button
+                            id="approve-governance-decision-btn"
+                            type="button"
+                            onClick={() => onApproveGovernance?.(resolvedWorkload.id, metrics.disposition)}
+                            className="px-4 py-2.5 rounded-xl bg-[#A88554] hover:bg-[#BCA075] text-black text-xs sm:text-sm font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer transition-all"
+                          >
+                            <ShieldCheck className="w-4 h-4" />
+                            <span>Approve Decision &amp; Proceed to Plan/Execute</span>
+                          </button>
+                        ) : (
+                          <button
+                            id="proceed-to-execution-btn"
+                            type="button"
+                            onClick={onOpenPlanAndExecute}
+                            className="px-4 py-2.5 rounded-xl bg-emerald-500 text-black text-xs sm:text-sm font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer transition-all"
+                          >
+                            <Route className="w-4 h-4" />
+                            <span>Approved · Open Transformation Execution</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </button>
+                        )
+                      ) : (
+                        <button
+                          id="remediate-evidence-cta-btn"
+                          type="button"
+                          onClick={() => onOpenDna?.(activeInteraction.workloadId || activeInteraction.workloadName || resolvedWorkload.id)}
+                          className="px-4 py-2.5 rounded-xl bg-[#A88554] hover:bg-[#BCA075] text-black text-xs sm:text-sm font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer transition-all"
+                        >
+                          <Dna className="w-4 h-4" />
+                          <span>Review Decision &amp; Verify Missing Evidence</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowCompareAlternatives((prev) => !prev)}
+                        className="px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] hover:border-[var(--emos-accent)] text-xs font-semibold text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] cursor-pointer"
+                      >
+                        {showCompareAlternatives ? 'Hide Options' : 'Compare All 6R Options'}
+                      </button>
+                      {onOpenPlanAndExecute && (
+                        <button
+                          type="button"
+                          onClick={onOpenPlanAndExecute}
+                          className="px-3 py-1.5 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] hover:border-[var(--emos-accent)] text-xs font-semibold text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] cursor-pointer"
+                        >
+                          Plan &amp; Execute →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Progressive Disclosure: Compare All 6R Alternatives */}
+                  {showCompareAlternatives && (
+                    <div className="pt-3 border-t border-[var(--emos-border-subtle)] space-y-2.5">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--emos-text-muted)]">
+                        Why Not the Alternative 6R Dispositions?
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {derivedSummary.alternatives.map((alt) => (
+                          <div
+                            key={alt.disposition}
+                            className="p-3 rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] text-xs space-y-1"
+                          >
+                            <div className="flex items-center justify-between">
+                              <strong className="text-[var(--emos-text-primary)]">{alt.plainEnglish}</strong>
+                              <span className="font-mono text-[10px] text-[var(--emos-accent-text)]">{alt.disposition}</span>
+                            </div>
+                            <p className="text-[11px] text-[var(--emos-text-secondary)] leading-snug">{alt.whyNot}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </section>
+              );
+            })()}
+
+            {/* User Modernization Scope / Evidence (Collapsed by default per tests/journey.ux.test.tsx) */}
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center gap-2">
                 <button
@@ -386,12 +575,19 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
               )}
             </div>
 
-            {/* Initial Gemini Modernization Assessment */}
+            {/* Full Gemini Modernization Assessment Narrative (Progressive Disclosure: 60/90-second layer) */}
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--emos-accent)] font-semibold">
-                  EMOS Modernization Assessment
-                </span>
+                <button
+                  id="toggle-full-reasoning-btn"
+                  type="button"
+                  onClick={() => setIsFullReasoningExpanded((prev) => !prev)}
+                  aria-expanded={isFullReasoningExpanded}
+                  className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--emos-accent)] transition-colors hover:text-[var(--emos-accent-text)] cursor-pointer"
+                >
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isFullReasoningExpanded ? 'rotate-180' : ''}`} aria-hidden="true" />
+                  <span>{isFullReasoningExpanded ? 'Hide' : 'Show'} Full Architectural Reasoning &amp; Audit Record</span>
+                </button>
                 <div className="h-[1px] flex-1 bg-[var(--emos-accent-border)]" />
                 <button
                   onClick={() => copyToClipboard(activeInteraction.geminiResponse, 'gemini-initial')}
@@ -402,10 +598,10 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                 </button>
               </div>
 
-              <div className="bg-[var(--emos-surface-elevated)] border border-[var(--emos-border-subtle)] p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-md relative">
+              <div className={`bg-[var(--emos-surface-elevated)] border border-[var(--emos-border-subtle)] p-5 sm:p-7 rounded-2xl sm:rounded-3xl shadow-md relative transition-all ${!isFullReasoningExpanded ? 'max-h-56 overflow-hidden' : ''}`}>
                 <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--emos-border-subtle)]">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[var(--emos-text-primary)]">Gemini 3.6 Flash</span>
+                    <span className="text-xs font-semibold text-[var(--emos-text-primary)]">Modernization Agent · Gemini</span>
                     <span className="text-[10px] bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] px-2.5 py-0.5 rounded-full border border-[var(--emos-accent-border)] font-medium uppercase tracking-wider">
                       {activeInteraction.mode === 'options' ? 'Options Comparison' : activeInteraction.mode === 'decision' ? 'Executive Decision' : '6R Assessment'}
                     </span>
@@ -416,6 +612,18 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                 <div className="text-sm sm:text-base leading-relaxed text-[var(--emos-text-primary)] font-sans space-y-3 prose dark:prose-invert max-w-none prose-headings:text-[var(--emos-text-primary)] prose-headings:font-serif prose-headings:tracking-tight prose-strong:text-[var(--emos-text-primary)] prose-a:text-[var(--emos-accent)] prose-p:text-[var(--emos-text-primary)] prose-li:text-[var(--emos-text-primary)]">
                   <SafeMarkdown>{activeInteraction.geminiResponse}</SafeMarkdown>
                 </div>
+
+                {!isFullReasoningExpanded && (
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[var(--emos-surface-elevated)] via-[var(--emos-surface-elevated)]/90 to-transparent flex items-end justify-center pb-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsFullReasoningExpanded(true)}
+                      className="px-3.5 py-1.5 rounded-xl border border-[var(--emos-accent-border)] bg-[var(--emos-surface)] text-xs font-semibold text-[var(--emos-accent-text)] shadow-sm cursor-pointer hover:bg-[var(--emos-surface-hover)]"
+                    >
+                      Expand Full 6-Part Architectural Analysis
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -424,7 +632,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
               <div className="space-y-5 pt-4 border-t border-[var(--emos-border-subtle)]">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--emos-text-muted)] font-semibold">
-                    Assessment Dialogue & Evidence Updates
+                    Assessment Dialogue &amp; Evidence Updates
                   </span>
                   <div className="h-[1px] flex-1 bg-[var(--emos-border-subtle)]" />
                 </div>
@@ -468,7 +676,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
               <div className="p-5 rounded-2xl bg-[var(--emos-surface-elevated)] border border-[var(--emos-border-subtle)] flex items-center gap-3 animate-pulse">
                 <div className="w-4 h-4 border-2 border-[var(--emos-border-subtle)] border-t-[var(--emos-accent)] rounded-full animate-spin shrink-0" />
                 <span className="text-xs text-[var(--emos-text-secondary)]">
-                  EMOS is synthesizing workload evidence and evaluating 6R modernization dispositions...
+                  EMOS Modernization Agent is synthesizing workload evidence and evaluating 6R dispositions...
                 </span>
               </div>
             )}
@@ -501,7 +709,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                 id="followup-input"
                 ref={followUpInputRef}
                 type="text"
-                placeholder="Provide additional modernization evidence or ask about this decision..."
+                placeholder="Ask Modernization Agent or provide additional modernization evidence..."
                 value={followUpInput}
                 onChange={(e) => setFollowUpInput(e.target.value)}
                 disabled={isProcessing}
@@ -556,7 +764,7 @@ export const ReflectionWorkspace: React.FC<ReflectionWorkspaceProps> = ({
                       Start from Structured Enterprise DNA
                     </h4>
                     <p className="text-[11px] text-[var(--emos-text-secondary)] mt-0.5 leading-relaxed">
-                      Explore 3 candidate workloads with deterministic evidence completeness profiles, missing evidence gap tracking, and 1-click assessment.
+                      Explore candidate workloads across Apex Aerospace and Financial Services with deterministic evidence completeness profiles, missing gap tracking, and 1-click assessment.
                     </p>
                   </div>
                 </div>

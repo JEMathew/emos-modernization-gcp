@@ -34,6 +34,7 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [validationResult, setValidationResult] = useState<ImportValidationResult | null>(null);
+  const [showDetailedTable, setShowDetailedTable] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -42,6 +43,7 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
   const resetState = () => {
     setErrorMessage(null);
     setValidationResult(null);
+    setShowDetailedTable(false);
     setIsParsing(false);
     setIsSubmitting(false);
     if (fileInputRef.current) {
@@ -244,46 +246,81 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
                 </div>
               )}
 
-              {/* Validation Result Preview */}
-              {validationResult && (
+              {/* Validation Result Preview: HERE'S WHAT EMOS UNDERSTOOD */}
+              {validationResult && (() => {
+                const valid = validationResult.validRecords;
+                const capabilities = new Set(valid.map((w) => w.businessCapability)).size;
+                const avgCompleteness = valid.length > 0
+                  ? Math.round(valid.reduce((acc, w) => acc + w.evidenceCompleteness, 0) / valid.length)
+                  : 0;
+                const readyCount = valid.filter((w) => w.evidenceCompleteness >= 70).length;
+                const needsEvidenceCount = valid.length - readyCount;
+
+                return (
                 <div className="space-y-5">
-                  {/* Summary Metric Cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="p-3.5 bg-[var(--emos-surface)] rounded-xl border border-[var(--emos-border-subtle)]">
-                      <div className="text-[11px] text-[var(--emos-text-muted)] uppercase font-mono tracking-wider">File Name</div>
-                      <div className="text-xs font-semibold text-[var(--emos-text-primary)] mt-1 truncate" title={validationResult.fileName}>
-                        {validationResult.fileName}
+                  <div className="p-5 rounded-2xl bg-[var(--emos-surface)] border border-[var(--emos-accent-border)] space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--emos-accent-text)] font-bold">
+                          Here&apos;s What EMOS Understood
+                        </span>
+                        <h3 className="text-base sm:text-lg font-serif font-semibold text-[var(--emos-text-primary)] mt-0.5">
+                          {validationResult.fileName} — Portfolio Discovery Summary
+                        </h3>
+                      </div>
+                      <button
+                        onClick={resetState}
+                        className="text-[var(--emos-accent)] hover:underline text-xs font-medium cursor-pointer self-start sm:self-auto"
+                      >
+                        Upload Different File
+                      </button>
+                    </div>
+
+                    {/* 5 Key Understanding Metrics */}
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                      <div className="p-3 bg-[var(--emos-bg-tertiary)] rounded-xl border border-[var(--emos-border-subtle)]">
+                        <div className="text-[10px] text-[var(--emos-text-muted)] uppercase font-mono">Systems Discovered</div>
+                        <div className="text-xl font-bold text-[var(--emos-text-primary)] mt-1">{valid.length}</div>
+                      </div>
+
+                      <div className="p-3 bg-[var(--emos-bg-tertiary)] rounded-xl border border-[var(--emos-border-subtle)]">
+                        <div className="text-[10px] text-[var(--emos-text-muted)] uppercase font-mono">Business Capabilities</div>
+                        <div className="text-xl font-bold text-[var(--emos-text-primary)] mt-1">{capabilities}</div>
+                      </div>
+
+                      <div className="p-3 bg-[var(--emos-bg-tertiary)] rounded-xl border border-[var(--emos-border-subtle)]">
+                        <div className="text-[10px] text-[var(--emos-text-muted)] uppercase font-mono">Evidence Completeness</div>
+                        <div className="text-xl font-bold text-[var(--emos-accent-text)] mt-1">{avgCompleteness}%</div>
+                      </div>
+
+                      <div className="p-3 bg-[var(--emos-bg-tertiary)] rounded-xl border border-[var(--emos-border-subtle)]">
+                        <div className="text-[10px] text-[var(--emos-text-muted)] uppercase font-mono">Ready for Assessment</div>
+                        <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1.5">
+                          <CheckCircle2 className="w-4 h-4" />
+                          {readyCount}
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-[var(--emos-bg-tertiary)] rounded-xl border border-[var(--emos-border-subtle)] col-span-2 sm:col-span-1">
+                        <div className="text-[10px] text-[var(--emos-text-muted)] uppercase font-mono">Need More Evidence</div>
+                        <div className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1.5">
+                          <AlertTriangle className="w-4 h-4" />
+                          {needsEvidenceCount}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="p-3.5 bg-[var(--emos-surface)] rounded-xl border border-[var(--emos-border-subtle)]">
-                      <div className="text-[11px] text-[var(--emos-text-muted)] uppercase font-mono tracking-wider">Valid Workloads</div>
-                      <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4" />
-                        {validationResult.validRecords.length}
-                      </div>
-                    </div>
-
-                    <div className="p-3.5 bg-[var(--emos-surface)] rounded-xl border border-[var(--emos-border-subtle)]">
-                      <div className="text-[11px] text-[var(--emos-text-muted)] uppercase font-mono tracking-wider">Invalid Rows</div>
-                      <div className={`text-lg font-bold mt-0.5 flex items-center gap-1.5 ${
-                        validationResult.invalidRecords.length > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--emos-text-muted)]'
-                      }`}>
-                        {validationResult.invalidRecords.length > 0 ? (
-                          <XCircle className="w-4 h-4" />
-                        ) : (
-                          <CheckCircle2 className="w-4 h-4 text-[var(--emos-text-muted)]" />
-                        )}
-                        {validationResult.invalidRecords.length}
-                      </div>
-                    </div>
-
-                    <div className="p-3.5 bg-[var(--emos-surface)] rounded-xl border border-[var(--emos-border-subtle)]">
-                      <div className="text-[11px] text-[var(--emos-text-muted)] uppercase font-mono tracking-wider">Evidence Gaps</div>
-                      <div className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1.5">
-                        <AlertTriangle className="w-4 h-4" />
-                        {validationResult.totalEvidenceGaps}
-                      </div>
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[var(--emos-border-subtle)]">
+                      <p className="text-xs text-[var(--emos-text-secondary)]">
+                        EMOS extracted 18 Enterprise DNA attributes per system and identified <strong>{validationResult.totalEvidenceGaps}</strong> evidence gaps. No pre-assigned 6R dispositions were assumed.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowDetailedTable((prev) => !prev)}
+                        className="px-3.5 py-1.5 rounded-xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface-elevated)] hover:bg-[var(--emos-surface-hover)] text-xs font-semibold text-[var(--emos-text-primary)] cursor-pointer transition-colors"
+                      >
+                        {showDetailedTable ? 'Hide System Table' : 'Inspect Discovered Systems'}
+                      </button>
                     </div>
                   </div>
 
@@ -313,18 +350,8 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
                     </div>
                   )}
 
-                  {/* Workload Preview Table */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-[var(--emos-text-primary)]">Workload Preview & DNA Extraction</span>
-                      <button
-                        onClick={resetState}
-                        className="text-[var(--emos-accent)] hover:underline text-[11px] cursor-pointer"
-                      >
-                        Upload Different File
-                      </button>
-                    </div>
-
+                  {/* Progressive Disclosure: Workload Preview Table */}
+                  {showDetailedTable && (
                     <div className="border border-[var(--emos-border-subtle)] rounded-xl overflow-x-auto max-h-64">
                       <table className="w-full text-left text-xs border-collapse">
                         <thead className="bg-[var(--emos-bg-tertiary)] text-[var(--emos-text-muted)] font-mono text-[11px] border-b border-[var(--emos-border-subtle)] sticky top-0">
@@ -379,9 +406,10 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
                         </tbody>
                       </table>
                     </div>
-                  </div>
+                  )}
                 </div>
-              )}
+                );
+              })()}
             </>
           )}
 
@@ -445,11 +473,7 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
               <div className="p-3.5 bg-[var(--emos-surface)] rounded-xl border border-[var(--emos-border-subtle)] text-xs text-[var(--emos-text-secondary)] flex items-start gap-2.5">
                 <FileText className="w-4 h-4 text-[var(--emos-accent)] shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-[var(--emos-text-primary)] font-medium">Evaluation Metadata Note:</span> The sample CSVs include{' '}
-                  <code className="text-[var(--emos-accent-text)] font-mono">expected_6r</code> and{' '}
-                  <code className="text-[var(--emos-accent-text)] font-mono">expected_reason</code> columns for reference and evaluation.
-                  In accordance with strict neutrality and decision fidelity, these fields are{' '}
-                  <span className="text-[var(--emos-text-primary)] font-medium">never</span> passed to Gemini or included in the Enterprise DNA assessment payload.
+                  <span className="text-[var(--emos-text-primary)] font-medium">Evidence-Only Input Contract:</span> Sample CSVs contain strictly factual enterprise evidence (technology stack, dependencies, costs, risks, and target constraints). EMOS never reads pre-labeled dispositions from input files; it derives the 6R recommendation from the evidence.
                 </div>
               </div>
               <div className="rounded-xl border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] p-3.5 text-xs leading-5 text-[var(--emos-text-secondary)]"><strong className="text-[var(--emos-text-primary)]">Current Beta Boundary:</strong> Header capitalization, spaces and hyphens are normalized automatically. Arbitrary ServiceNow, LeanIX or spreadsheet column names still need to be mapped to the EMOS template before upload.</div>
@@ -492,7 +516,7 @@ export const ImportPortfolioModal: React.FC<ImportPortfolioModalProps> = ({
                   </>
                 ) : (
                   <>
-                    Import Portfolio ({validationResult.validRecords.length})
+                    Review Portfolio ({validationResult.validRecords.length})
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}

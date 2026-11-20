@@ -289,14 +289,6 @@ export function buildWorkloadFromRawRecord(
     source: 'imported',
   };
 
-  // Evaluation metadata (isolated for testing, never sent to Gemini)
-  if (record.expected_6r || record.expected_reason) {
-    workload.evaluationMeta = {
-      expected6r: sanitizeInputString(record.expected_6r),
-      expectedReason: sanitizeInputString(record.expected_reason),
-    };
-  }
-
   return workload;
 }
 
@@ -320,7 +312,14 @@ export async function parseAndValidatePortfolioFile(
     );
   }
 
-  const text = await file.text();
+  const text = typeof file.text === 'function'
+    ? await file.text()
+    : await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result ?? ''));
+        reader.onerror = () => reject(reader.error || new Error('Failed to read file.'));
+        reader.readAsText(file);
+      });
 
   if (extension === '.csv') {
     return parseCsvPortfolio(text, fileName, userId);

@@ -1,6 +1,18 @@
 import React from 'react';
 
-export type JourneyStageName = 'Discover' | 'Understand' | 'Decide' | 'Plan' | 'Mobilize';
+export type JourneyStageName =
+  | 'Strategy'
+  | 'Discover'
+  | 'Understand'
+  | 'Enterprise DNA'
+  | 'Assess'
+  | 'Decide'
+  | 'Govern'
+  | 'Plan'
+  | 'Mobilize'
+  | 'Execute'
+  | 'Measure'
+  | 'Learn';
 
 interface JourneyStageProps {
   stage: JourneyStageName;

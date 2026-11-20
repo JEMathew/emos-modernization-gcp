@@ -28,6 +28,25 @@ interface LearningCenterPageProps {
   videos?: readonly LearningVideo[];
 }
 
+const LIFECYCLE_TOPIC_GUIDES = [
+  { id: 'what-is-emos', title: 'What is EMOS?', duration: '1:30', summary: 'Overview of the vendor-neutral Enterprise Modernization Operating System.', videoSeq: '00', transcript: 'EMOS connects fragmented estate evidence, deterministic readiness scoring, governed 6R decisions, wave planning, execution tracking, and outcome measurement in one operating system.' },
+  { id: 'product-vision', title: 'Product Vision', duration: '1:45', summary: 'How EMOS governs the full Strategy → Discover → DNA → Decide → Execute → Measure → Learn loop.', videoSeq: '00', transcript: 'Rather than stopping at static assessment decks, EMOS treats the 6R disposition as a routing decision into governed execution, benefit realization, and continuous learning.' },
+  { id: 'getting-started', title: 'Getting Started', duration: '1:15', summary: 'Choose Apex Aerospace, Financial Services, or upload your own CSV/JSON portfolio.', videoSeq: 'F01', transcript: 'Start immediately with the 10,000+ asset Apex Aerospace estate, the Financial Services estate, or upload a sanitized CSV/JSON inventory.' },
+  { id: 'portfolio-upload', title: 'Portfolio Upload', duration: '1:30', summary: 'How EMOS validates CSV/JSON facts and summarizes what it understood before showing tables.', videoSeq: 'F13', transcript: 'EMOS checks required schema keys, neutralizes spreadsheet formula injection, and displays Systems Discovered, Business Capabilities, Completeness, Ready count, and Missing Evidence.' },
+  { id: 'enterprise-dna', title: 'Enterprise DNA', duration: '1:40', summary: '18 attributes across 6 dimensions in 2D list and interactive Spatial Relationship views.', videoSeq: 'F11', transcript: 'Enterprise DNA structures Business, Technology, Dependency, Economics, Data & Risk, and Target-State evidence and lets you verify high-value attributes.' },
+  { id: 'modernization-agent', title: 'Modernization Agent', duration: '1:50', summary: 'How one governed Modernization Agent investigates evidence and answers contextual questions.', videoSeq: 'F03', transcript: 'The Modernization Agent inspects DNA, evaluates the readiness gate, compares all 6 dispositions, and returns 1 concise conclusion, up to 3 bullets, and 1 next action.' },
+  { id: '6r-overview', title: '6R Overview', duration: '1:35', summary: 'Plain-English actions mapped to Retain, Retire, Rehost, Replatform, Refactor, and Repurchase.', videoSeq: 'F18', transcript: 'Every recommendation is presented in plain English first—Keep it as-is, Safely shut it down, Move it largely unchanged, Move it to a better platform, Redesign parts of it, or Replace it.' },
+  { id: 'retain', title: 'Retain (Keep it as-is)', duration: '1:20', summary: 'Keep → Optimize → Monitor → Review Outcome → Learn workflow for hardware-bound or stable systems.', videoSeq: 'F08', transcript: 'Retain protects mission-critical shop-floor MES and vault systems where migration introduces latency risk or negative ROI.' },
+  { id: 'retire', title: 'Retire (Safely shut it down)', duration: '1:30', summary: 'Approve → Consumer Transition → Archive → Decommission → Validate Closure → Measure Savings → Learn.', videoSeq: 'F04', transcript: 'Retire verifies downstream consumers are transitioned and historical archives are secured before shutting down redundant servers.' },
+  { id: 'rehost', title: 'Rehost (Move it largely unchanged)', duration: '1:25', summary: 'Approve → Prepare Destination → Move → Validate → Cutover → Stabilize → Measure → Learn.', videoSeq: 'F03', transcript: 'Rehost accelerates data-center and colocation exits for modern Linux/VM workloads without risky code rewrites.' },
+  { id: 'replatform', title: 'Replatform (Move it to a better platform)', duration: '1:45', summary: 'Approve → Prepare Target Platform → Transform/Migrate → Validate → Cutover → Optimize → Measure → Learn.', videoSeq: 'F04', transcript: 'Replatform shifts legacy data warehouses and databases to managed cloud platforms like Google Cloud BigQuery once target-state evidence is verified.' },
+  { id: 'refactor', title: 'Refactor (Redesign parts of it)', duration: '1:40', summary: 'Approve → Redesign/Decompose → Implement → Test → Transition → Stabilize → Measure → Learn.', videoSeq: 'F05', transcript: 'Refactor decomposes high-criticality monoliths into cloud-native and event-driven services with strangler-fig safety gates.' },
+  { id: 'repurchase', title: 'Repurchase (Replace it with another product)', duration: '1:25', summary: 'Approve → Select Replacement → Configure → Migrate Data/Users → Transition → Retire Previous → Measure → Learn.', videoSeq: 'F04', transcript: 'Repurchase replaces high-maintenance custom commodity tools with compliant commercial SaaS platforms.' },
+  { id: 'governance', title: 'Governance', duration: '1:30', summary: 'Agent Recommends → EMOS Validates → Human Approves → Action Proceeds.', videoSeq: 'F06', transcript: 'Model confidence cannot override the deterministic 70% completeness and zero-critical-gap readiness gate.' },
+  { id: 'execution', title: 'Execution', duration: '1:40', summary: 'Track disposition-specific transformation stages, active blockers, and checkpoint gates.', videoSeq: 'F19', transcript: 'The Execution Workspace highlights the current transformation phase, surfaces blockers, and recedes completed milestones.' },
+  { id: 'outcomes-learning', title: 'Outcomes & Learning', duration: '1:45', summary: 'Compare Baseline vs. Target vs. Observed metrics and record lessons for future waves.', videoSeq: 'F19', transcript: 'Measure compares expected and observed results, while Learn captures assumption variances into the governance playbook.' },
+] as const;
+
 type CategoryFilter = 'All Categories' | LearningCategory;
 
 export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
@@ -37,6 +56,7 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<CategoryFilter>('All Categories');
   const [selectedVideo, setSelectedVideo] = useState<LearningVideo | null>(null);
+  const [activeTranscriptId, setActiveTranscriptId] = useState<string | null>(null);
   const playbackTriggerRef = useRef<HTMLElement | null>(null);
   const reduceMotion = useReducedMotion();
 
@@ -302,6 +322,72 @@ export const LearningCenterPage: React.FC<LearningCenterPageProps> = ({
                 </p>
               </div>
             )}
+          </div>
+        </section>
+
+        <section aria-label="90-Second Capability and 6R Topic Guides" className="mx-auto max-w-[88rem] px-4 pb-12 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-[var(--emos-border-strong)] bg-[var(--emos-surface)] p-6 space-y-5">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--emos-accent-text)]">
+                90-Second Capability &amp; 6R Topic Guides
+              </p>
+              <h2 className="mt-1 font-serif text-2xl font-bold">
+                Full Lifecycle &amp; 6R Reference (With Captions &amp; Transcripts)
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+              {LIFECYCLE_TOPIC_GUIDES.map((guide) => {
+                const matchedVideo = videos.find((v) => v.sequence === guide.videoSeq) || videos[0];
+                const isTranscriptOpen = activeTranscriptId === guide.id;
+                return (
+                  <div
+                    key={guide.id}
+                    className="rounded-2xl border border-[var(--emos-border-subtle)] bg-[var(--emos-bg-secondary)] p-4 flex flex-col justify-between space-y-3"
+                  >
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-[10px] font-mono text-[var(--emos-text-muted)]">
+                        <span className="px-2 py-0.5 rounded bg-[var(--emos-accent-subtle)] text-[var(--emos-accent-text)] font-bold">
+                          CC · Captions
+                        </span>
+                        <span>{guide.duration}</span>
+                      </div>
+                      <h3 className="text-sm font-bold text-[var(--emos-text-primary)]">{guide.title}</h3>
+                      <p className="text-xs text-[var(--emos-text-secondary)] leading-relaxed">{guide.summary}</p>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t border-[var(--emos-border-subtle)]">
+                      <div className="flex items-center justify-between gap-2">
+                        {matchedVideo?.driveFileId && (
+                          <button
+                            type="button"
+                            onClick={(e) => openVideo(matchedVideo, e.currentTarget)}
+                            className="px-2.5 py-1 rounded-lg bg-[#A88554] text-black text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer"
+                          >
+                            <Play className="w-3 h-3" />
+                            <span>Watch</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setActiveTranscriptId(isTranscriptOpen ? null : guide.id)}
+                          aria-expanded={isTranscriptOpen}
+                          className="px-2.5 py-1 rounded-lg border border-[var(--emos-border-subtle)] bg-[var(--emos-surface)] text-[11px] font-semibold text-[var(--emos-text-secondary)] hover:text-[var(--emos-text-primary)] cursor-pointer"
+                        >
+                          {isTranscriptOpen ? 'Hide Transcript' : 'Transcript'}
+                        </button>
+                      </div>
+
+                      {isTranscriptOpen && (
+                        <p className="p-2.5 rounded-xl bg-[var(--emos-surface)] border border-[var(--emos-border-subtle)] text-[11px] text-[var(--emos-text-secondary)] leading-relaxed">
+                          {guide.transcript}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
 

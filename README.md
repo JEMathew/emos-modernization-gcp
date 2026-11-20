@@ -1,25 +1,23 @@
 # EMOS — Enterprise Modernization Operating System
 
-> **Beta v1.0: Evidence, Decision and Planning Foundation**
+> **EMOS v2: Full-Lifecycle Enterprise Modernization Operating System**
 >
 > **One operating system for the entire enterprise modernization journey.**
 >
-> **Available today: governed evidence → 6R decision → implementation-ready plan.**
+> **Available today: Strategy → Discover → Enterprise DNA → Assess → Decide → Govern → Plan → Execute → Measure → Learn.**
 
-EMOS is a vendor-neutral operating system for enterprise modernization, designed to govern the entire journey—from the business initiative that triggers modernization, through portfolio evidence and the 6R decision, into sequencing, delivery and proof that the promised outcome was achieved.
+EMOS is a vendor-neutral operating system for enterprise modernization, designed to govern the entire journey—from the business initiative that triggers modernization, through portfolio evidence and the 6R decision, into human governance approval, wave sequencing, disposition-specific transformation execution, outcome measurement (`Baseline vs. Target vs. Observed`) and institutional learning.
 
-Beta v1.0 delivers the evidence, decision and planning foundation today using deterministic scoring, governed Gemini analysis and synthetic reference data. Its governance architecture is designed to remain model-agnostic as EMOS expands toward execution governance and outcome measurement.
-
-The broader EMOS vision extends an approved modernization disposition through governance, prioritization, delivery, validation, benefit realization and continuous learning. See the [canonical messaging source](claude/messaging-source.md) for the shared capability and vision language.
+EMOS v2 delivers the full modernization lifecycle today using deterministic evidence scoring, a governed Modernization Agent (`Agent Recommends → EMOS Validates → Human Approves`), disposition-specific transformation workflows across all six canonical 6R paths (`Retain`, `Retire`, `Rehost`, `Replatform`, `Refactor`, `Repurchase`), and synthetic enterprise estates (**Apex Aerospace** with 10,420+ assets across 6 domains and **Global Financial Services** with 6,850+ assets across 5 domains). See the [canonical messaging source](claude/messaging-source.md) for the shared capability and vision language.
 
 Enterprise modernization teams routinely make multi-million dollar application and data-platform decisions using information fragmented across legacy inventories, architectural tribal knowledge, partial dependency maps, operational cost signals, compliance constraints, and subjective expert judgment.
 
-**EMOS Decision Intelligence** addresses this critical bottleneck. This Beta release proves a secure, production-deployed vertical slice of EMOS focused on modernization Decision Intelligence. It structures legacy workload evidence into a rigorous **Enterprise DNA**, calculates deterministic evidence completeness, and leverages **Google Gemini** to produce explainable, vendor-neutral modernization assessments governed by the canonical **6R framework**.
+**EMOS v2** addresses this critical bottleneck end-to-end. It structures legacy workload evidence into a rigorous **Enterprise DNA** (in both 2D structured and Spatial Relationship Graph views), calculates deterministic evidence completeness, leverages a single governed **Modernization Agent** powered by **Google Gemini** to produce explainable, vendor-neutral modernization assessments governed by the canonical **6R framework**, enforces human governance approval gates, sequences delivery waves, tracks disposition-specific transformation execution and blockers, measures realized outcomes against targets, and captures lessons learned for future waves.
 
 ### The Modernization Principle
 > **“The modernization disposition is not the end of the EMOS journey. It is the routing decision that determines which governed modernization path should follow.”**
 
-The current Decision Intelligence capability determines *what* should happen based on evidence. Future EMOS capabilities will govern, plan, orchestrate, validate, and measure *what happens after* that decision.
+EMOS determines *what* should happen based on evidence, and then governs, plans, tracks execution checkpoints, measures realized outcomes, and captures institutional learning for *what happens after* that decision.
 
 ---
 
@@ -69,82 +67,73 @@ The long-term objective of EMOS is **continuous enterprise modernization**—shi
 Conceptually, EMOS organizes enterprise modernization capabilities into an integrated operating system:
 
 ```
-EMOS (Enterprise Modernization Operating System)
+EMOS (Enterprise Modernization Operating System — v2)
+│
+├── Strategy & Align
+│   Program Sponsor, Business Outcomes, Constraints & Target Platform Context
 │
 ├── Discover
-│   Portfolio Discovery (Representative Seeded Workloads + BYOP CSV/JSON Ingestion)
+│   Portfolio Discovery & Command Center (Apex Aerospace 10,420+ Assets, Financial Services 6,850+ Assets + BYOP CSV/JSON Ingestion + Spatial Portfolio Topology)
 │
-├── Understand
-│   Enterprise DNA (6 Architectural Dimensions & Deterministic Completeness)
+├── Enterprise DNA
+│   Structured 18-Attribute Evidence Model across 6 Dimensions (2D Structured View + Spatial DNA Relationship Graph + Controlled Verification & Editing)
 │
-├── Decide
-│   Decision Intelligence (Canonical 6R Reasoning, Explainability, Decision Readiness)
+├── Assess & Decide
+│   Canonical 6R Decision Intelligence (Plain-English Hero Summary, Top 3 Reasons, Compare All 6R Options, Governed Modernization Agent with Tool Trace)
 │
 ├── Govern
-│   [Future Scope: Architectural Review Board Sign-offs & Policy Enforcement]
+│   Deterministic 70% + Zero-Critical-Gap Readiness Gate & Explicit Human Governance Approval Sign-Off
 │
-├── Prioritize
-│   [Future Scope: Portfolio-wide Value vs. Complexity Prioritization]
-│
-├── Plan
-│   Deterministic, Evidence-Gated Modernization Wave Planning
-│
-├── Mobilize
-│   Program Alignment, Readiness Controls & Executive Decision Export
-│
-├── Define Target State
-│   [Future Scope: Target Architecture Decomposition & Blueprinting]
+├── Plan & Mobilize
+│   Deterministic, Evidence-Gated Modernization Wave Planning, Mobilization Readiness Controls & Executive Decision Export
 │
 ├── Execute
-│   [Future Scope: Disposition-Specific Governed Migration & Transform Agents]
-│
-├── Validate
-│   [Future Scope: Synthetic Testing, Functional Parity & Benchmark Verification]
+│   Disposition-Specific Transformation Workflows, Spatial Current → Decision → Target Story, Stage Timelines, Blockers & Checkpoint Gates across all 6 Rs
 │
 ├── Measure
-│   [Future Scope: Post-Cutover Benefit Realization & Run-Rate TCO Tracking]
+│   Outcome Realization Scorecards comparing Baseline vs. Target vs. Observed Cost, Performance & Risk Metrics
 │
 └── Learn
-    [Future Scope: Continuous Modernization Feedback Loop & Reassessment]
+    Structured 5-Part Learning Capture (Original Assumption vs. Actual Result vs. Variance vs. Lesson vs. Future Wave Applicability)
 ```
 
 ---
 
 ## Current vs. Future Scope
 
-| Capability | Beta v1.0 (Implemented) | Full EMOS Vision (Future Scope) |
+| Capability | EMOS v2 (Implemented) | Full EMOS Vision (Future Scope) |
 | :--- | :--- | :--- |
-| **Portfolio Discovery** | Sample + user-imported portfolio (CSV/JSON) | Automated enterprise discovery & live CMDB sync |
-| **Enterprise DNA** | Structured 18-attribute evidence model | Continuously refreshed enterprise evidence from telemetry |
-| **Assessment** | Implemented (Gemini 3.6 Flash + fallback ladder) | Deeper multi-domain intelligence & agentic reasoning |
-| **Modernization Disposition** | Canonical 6R (Retain, Retire, Rehost, Replatform, Refactor, Repurchase) | Configurable 6R/7R enterprise models |
-| **Explainability** | Implemented (Rationale, Alternatives, Risks) | Evidence lineage & corporate policy traceability |
-| **Trust Readiness** | Implemented (READY vs. NEEDS EVIDENCE) | Automated enterprise trust & compliance policies |
-| **Risk Identification** | Basic implemented capability (DNA risk factors) | Autonomous Risk & Governance Agent |
-| **Governance / Approval** | Future | HITL governed workflow & ARB approval gates |
-| **Portfolio Prioritization** | Future | Autonomous Portfolio Intelligence |
-| **Program Alignment** | Implemented (owner-isolated program context) | Policy hierarchy and multi-stakeholder approvals |
-| **Wave Planning** | Implemented (deterministic preliminary sequencing) | Live dependency graph and capacity-aware optimization |
-| **Mobilization Readiness** | Implemented (governance, people, platform, security, delivery gates) | Workflow automation across delivery organizations |
-| **Executive Decision Export** | Implemented (portable HTML decision pack) | Signed PDF, evidence lineage, and portfolio BI feeds |
-| **Target-State Architecture** | Future | Autonomous Enterprise Architect Agent |
-| **Execution** | Future | Disposition-specific governed agents & workflows |
-| **Validation** | Future | Autonomous Validation Agents & parity verification |
-| **Benefit Realization** | Future | Continuous outcome & cost tracking |
-| **Continuous Learning** | Future | Closed-loop continuous modernization |
+| **Portfolio Discovery** | Sample estates (Apex Aerospace, Financial Services) + user-imported CSV/JSON + `"Here's What EMOS Understood"` summary + Spatial Topology | Automated enterprise discovery & live CMDB sync |
+| **Enterprise DNA** | Structured 18-attribute evidence model in 2D + Spatial Relationship Graph + controlled evidence verification/editing | Continuously refreshed enterprise evidence from live runtime telemetry |
+| **Assessment & Modernization Agent** | Implemented (Single governed Modernization Agent with tool traces + Gemini fallback ladder) | Multi-system live telemetry agents |
+| **Modernization Disposition** | Canonical 6R (`Retain`, `Retire`, `Rehost`, `Replatform`, `Refactor`, `Repurchase`) with plain-English-first actions | Configurable 6R/7R enterprise models |
+| **Explainability** | Implemented (Plain-English Hero, Top 3 Reasons, Compare All 6R Options, progressive disclosure) | Automated corporate policy lineage |
+| **Trust Readiness** | Implemented (`READY` vs. `NEEDS EVIDENCE` — 70% threshold + zero critical gaps) | Automated enterprise compliance policy engines |
+| **Risk Identification** | Implemented (DNA risk factors & transformation stage blockers) | Autonomous live vulnerability scanning |
+| **Governance / Approval** | Implemented (`Agent Recommends → EMOS Validates → Human Approves` gate & sign-off) | Multi-team organization-wide ARB hierarchy & RBAC |
+| **Portfolio Prioritization** | Implemented (Command Center attention KPIs, hotspot & domain clustering) | Autonomous capacity-aware portfolio optimization |
+| **Program Alignment** | Implemented (owner-isolated program context) | Enterprise policy hierarchy and multi-stakeholder approvals |
+| **Wave Planning** | Implemented (deterministic evidence-gated wave sequencing) | Live dependency graph and capacity-aware scheduling |
+| **Mobilization Readiness** | Implemented (governance, people, platform, security, delivery gates) | Workflow automation across external ticketing systems |
+| **Executive Decision Export** | Implemented (portable HTML/printable decision brief & evidence action plan) | Signed PDF and enterprise BI feeds |
+| **Target-State Architecture** | Implemented (`1. Current State → 2. Governed EMOS Decision → 3. Target State` spatial transformation story) | Autonomous infrastructure-as-code synthesis |
+| **Execution** | Implemented (Disposition-specific stage timelines, checkpoint gates & blocker resolution across all 6 Rs) | Direct automated production cloud mutation |
+| **Validation** | Implemented (Stage checkpoint verification gates) | Synthetic load generation & automated parity testing |
+| **Benefit Realization (Measure)** | Implemented (`Baseline vs. Target vs. Observed` outcome scorecards for all 6 Rs) | Live post-cutover cloud billing & APM ingestion |
+| **Continuous Learning (Learn)** | Implemented (5-part assumption vs. outcome variance & reusable lesson playbook capture) | Closed-loop automated portfolio reassessment |
 
 ---
 
 ## Current 6R vs. Future Configurable 7R Framework
 
-### Current Beta Implementation: Canonical 6R
-The active application implements strictly the **canonical 6R modernization taxonomy**:
-- **Retain**: Keep workload in its current operational state; monitor tech debt and lifecycle risks.
-- **Retire**: Decommission workloads that no longer provide business value or duplicate functionality.
-- **Rehost**: Lift-and-shift infrastructure to cloud virtual machines without code or architectural changes.
-- **Replatform**: Migrate to managed cloud platforms (containers, managed databases) without altering core application code.
-- **Refactor**: Re-architect into cloud-native microservices or event-driven patterns to maximize agility and scale.
-- **Repurchase**: Replace custom software with a modern commercial-off-the-shelf SaaS solution.
+### Current Release Implementation: Canonical 6R
+The active application implements strictly the **canonical 6R modernization taxonomy** paired with plain-English-first actions:
+- **Retain (`Keep it as-is`)**: Keep workload in its current operational state; optimize, monitor tech debt, and review outcomes.
+- **Retire (`Safely shut it down`)**: Transition downstream consumers, archive required compliance data, decommission servers, and validate cost/risk removal.
+- **Rehost (`Move it largely unchanged`)**: Lift-and-shift infrastructure to modern cloud compute without core code changes.
+- **Replatform (`Move it to a better platform`)**: Migrate to managed cloud platforms (containers, managed data platforms/databases) while preserving core application logic.
+- **Refactor (`Redesign parts of it`)**: Re-architect bottlenecked monoliths into cloud-native or event-driven services for scale and agility.
+- **Repurchase (`Replace it with another product`)**: Replace custom commodity software with a modern commercial or SaaS platform and retire the previous system.
 
 *(Note: The current application does NOT claim to implement 7R).*
 
@@ -160,28 +149,28 @@ In enterprise environments with specialized hypervisor migrations, the dispositi
 
 ---
 
-## Disposition-Specific Execution Journeys (Broader EMOS Concept)
+## Disposition-Specific Execution Journeys (Implemented in EMOS v2)
 
-In the EMOS operating philosophy, the modernization disposition is a **routing decision** that determines which specialized, governed journey executes next:
+In EMOS v2, the modernization disposition is a **routing decision** that activates a disposition-specific governed transformation workflow across **Execute → Measure → Learn**:
 
-- **RETAIN** → Optimize → Remediate risk → Maintain lifecycle → Monitor
-- **RETIRE** → Verify dependencies → Migrate consumers → Archive/retain required data → Decommission → Validate cost removal
-- **REHOST** → Prepare landing environment → Map dependencies → Migrate infrastructure/workload → Cut over → Validate
-- **RELOCATE** *(Future)* → Prepare target environment → Relocate workload/platform with minimal application redesign → Cut over → Validate
-- **REPLATFORM** → Select target platform → Validate compatibility → Adapt configuration/code where necessary → Migrate data/platform → Test → Cut over
-- **REFACTOR** → Define target architecture → Decompose/redesign → Transform application/data → Incrementally migrate → Test → Deploy → Validate
-- **REPURCHASE** → Product/SaaS evaluation → Fit-gap assessment → Procurement → Integration → Data migration → User transition → Retire legacy capability
+- **RETAIN (`Keep it as-is`)** → `Keep → Optimize → Monitor → Review Outcome → Learn`
+- **RETIRE (`Safely shut it down`)** → `Approve → Consumer Transition → Archive → Decommission → Validate Closure → Measure Savings/Risk → Learn`
+- **REHOST (`Move it largely unchanged`)** → `Approve → Prepare Destination → Move → Validate → Cutover → Stabilize → Measure → Learn`
+- **RELOCATE** *(Future 7R Scope)* → `Prepare target environment → Relocate workload/platform with minimal application redesign → Cut over → Validate`
+- **REPLATFORM (`Move it to a better platform`)** → `Approve → Prepare Target Platform → Transform/Migrate → Validate → Cutover → Optimize → Measure → Learn`
+- **REFACTOR (`Redesign parts of it`)** → `Approve → Redesign/Decompose → Implement → Test → Transition → Stabilize → Measure → Learn`
+- **REPURCHASE (`Replace it with another product`)** → `Approve → Select Replacement → Configure → Migrate Data/Users → Transition → Retire Previous Product → Measure → Learn`
 
-> **Scope Note**: These execution workflows represent the broader EMOS vision. They are intentionally **not implemented** in the current Beta release, which focuses on providing the trusted **Decision Intelligence** foundation that routes workloads into these journeys.
+> **Scope Note**: EMOS v2 implements and tracks these disposition-specific transformation workflows, checkpoint gates, blockers, outcome scorecards (`Baseline vs. Target vs. Observed`), and learning playbooks inside the product experience. It does not directly mutate external production cloud infrastructure.
 
 ---
 
-## The Implemented Capability: EMOS Decision Intelligence
+## The Implemented Capability: Full-Lifecycle EMOS v2
 
-The current release proves a production-minded vertical slice of EMOS spanning **modernization Decision Intelligence through mobilization readiness**:
+The current release implements the complete governed modernization lifecycle:
 
 ```
-Align  ➔  Discover  ➔  Understand  ➔  Assess  ➔  Decide  ➔  Plan  ➔  Mobilize
+Strategy/Align ➔ Discover ➔ Enterprise DNA ➔ Assess ➔ Decide ➔ Govern ➔ Plan & Mobilize ➔ Execute ➔ Measure ➔ Learn
 ```
 
 More specifically:
@@ -460,46 +449,37 @@ The application enforces defense-in-depth principles for enterprise data protect
 
 ---
 
-## Current Beta Scope: A Production-Deployed Vertical Slice
+## Current Release Scope: Full-Lifecycle Governed Modernization
 
-This release proves a **secure, production-deployed vertical slice of EMOS focused on modernization Decision Intelligence**.
+EMOS v2 delivers a **secure, production-deployed full-lifecycle operating system spanning Strategy, Discovery, Enterprise DNA, 6R Decision Intelligence, Human Governance, Wave Planning, Transformation Execution, Outcome Measurement, and Continuous Learning**:
 
-It implements the trusted progression that must precede any automated or governed execution:
 ```
-Portfolio Discovery  ➔  Enterprise DNA  ➔  Deterministic Completeness  ➔  Gemini 6R Assessment  ➔  Explainability  ➔  Decision Readiness
+Portfolio Discovery ➔ Enterprise DNA ➔ Deterministic Completeness ➔ Governed 6R Assessment ➔ Human Governance Approval ➔ Wave Plan & Mobilize ➔ Transformation Execution ➔ Outcome Measurement ➔ Institutional Learning
 ```
 
-By proving this critical vertical slice on Google Cloud Run with real Firebase Authentication, owner-bound Cloud Firestore storage, and multi-model Gemini fallback, EMOS establishes the trusted foundation required for continuous enterprise modernization.
+By combining deterministic readiness gates, real Firebase Authentication, owner-bound Cloud Firestore storage, and a single governed Modernization Agent backed by a multi-model Gemini fallback ladder, EMOS v2 establishes an accountable operating system for enterprise modernization.
 
 ---
 
-## Future Agentic EMOS Roadmap
+## Future Autonomous Infrastructure Roadmap
 
-The following capabilities represent the broader EMOS vision and are **strictly future scope** (not implemented in this release):
+The following capabilities represent external infrastructure automation beyond the current EMOS v2 release:
 
 - **Automated Enterprise Discovery & Connectors**: Live CMDB, Git repository, and cloud infrastructure metadata ingestion pipelines.
 - **Continuously Refreshed Enterprise DNA**: Dynamic architectural telemetry and automated runtime dependency observation.
-- **Google ADK Specialist Agents**:
-  - *Risk & Governance Agent*: Automated regulatory compliance checks, threat modeling, and audit trails.
-  - *Business Value Agent*: ROI calculation, cost-benefit modeling, and NPV estimation.
-  - *Enterprise Architect Agent*: Target-state blueprinting, cloud-native architecture decomposition.
-  - *Wave Planning Agent*: Automated dependency-aware wave scheduling and cutover sequencing.
-  - *Execution Agents*: Automated code transforms, schema migration, and infrastructure-as-code synthesis.
-  - *Validation Agents*: Synthetic load generation, parity verification, and automated rollback testing.
-- **A2A (Agent-to-Agent) Interoperability & Agent Cards**: Governed multi-agent collaboration protocols for cross-domain modernization.
-- **Governed Human Approvals**: HITL approval gates, Architectural Review Board (ARB) sign-offs, and compliance audit stamps.
-- **Benefit Realization**: Continuous post-migration cost tracking and run-rate TCO verification.
-- **Ecosystem Distribution**: Google Cloud Marketplace listings and Gemini Enterprise extension integrations.
+- **Direct Cloud Infrastructure Mutation**: Automated code refactoring commits, live schema migration execution, and automated Terraform/IaC provisioning in customer cloud accounts.
+- **Live Post-Cutover Billing & APM Telemetry**: Direct ingestion of real-time cloud billing exports and production APM metrics into the Measure workspace.
+- **Organization-Wide Multi-Tenant RBAC**: Enterprise tenant workspaces and multi-team Architectural Review Board (ARB) role hierarchies.
 
 ---
 
-## Current Limitations
+## Current Boundaries
 
-- **Sample & User-Imported Portfolio**: Workload discovery uses representative seeded enterprise datasets or user-imported CSV/JSON files; automated real-time discovery via CMDB/cloud agent ingestion is future scope.
-- **Predefined Evidence Schema**: Enterprise DNA currently uses a structured 18-attribute model rather than continuous dynamic repository analysis.
-- **Canonical 6R Taxonomy**: The current release evaluates canonical 6R dispositions; extensible 7R (including a separate Relocate disposition) is planned for the broader EMOS roadmap.
-- **Single-Phase Decision Intelligence**: Upstream automated discovery connectors, ARB governance workflows, migration wave scheduling, automated code execution, and benefit realization are outside the current Beta scope.
-- **User-Bound Multi-Tenancy**: Data isolation is currently enforced at the authenticated user level (`/users/{userId}`); organization-wide role-based access control (RBAC) and enterprise tenant workspaces are planned for future releases.
+- **Sample & User-Imported Portfolio**: Workload discovery uses synthetic reference estates (Apex Aerospace and Global Financial Services) or user-imported CSV/JSON files; automated real-time discovery via live CMDB/cloud agent ingestion is future scope.
+- **Structured 18-Attribute Evidence Schema**: Enterprise DNA uses a structured 18-attribute model across 6 dimensions with controlled verification and editing rather than continuous dynamic repository analysis.
+- **Canonical 6R Taxonomy**: The current release evaluates and executes canonical 6R dispositions (`Retain`, `Retire`, `Rehost`, `Replatform`, `Refactor`, `Repurchase`); extensible 7R (including a separate `Relocate` disposition) is future scope.
+- **Bounded Execution Scope**: EMOS v2 governs and tracks disposition-specific transformation stages, blockers, checkpoint gates, outcome scorecards, and learning playbooks, but does not directly mutate external production cloud infrastructure.
+- **User-Bound Multi-Tenancy**: Authenticated data isolation is enforced at the user level (`/users/{userId}`); organization-wide role-based access control (RBAC) is planned for future releases.
 
 ---
 

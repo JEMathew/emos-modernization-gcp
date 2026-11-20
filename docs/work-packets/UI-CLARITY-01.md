@@ -37,7 +37,7 @@ constrained desktop widths without changing assessment data or decision logic.
 
 - No Firestore data migration or stored category mutation.
 - No change to canonical 6R scoring, evidence completeness, readiness, or recommendations.
-- No removal of evaluator evidence required for the current hackathon review.
+- No removal of evaluator evidence required for enterprise architectural review.
 - No authentication, authorization, persistence, deployment, or infrastructure change.
 - No redesign of the landing page, product tour, or authenticated navigation.
 
