@@ -59,12 +59,25 @@ export const assessmentAttributesSchema = z.object({
   }).strict(),
 }).strict();
 
+export const agentToolTraceSchema = z.object({
+  toolName: z.enum([
+    'inspect_workload_dna',
+    'evaluate_readiness_gate',
+    'compare_6r_dispositions',
+    'build_transformation_stages',
+    'evaluate_outcomes_and_learning',
+  ]),
+  status: z.literal('verified'),
+  summary: z.string().max(400),
+}).strict();
+
 export const assessmentResponseSchema = z.object({
   type: z.literal('assessment'),
   response: z.string().min(1).max(50_000),
   sanitizedInput: z.string().max(MAX_PROMPT_LENGTH + 100),
   modelUsed: z.string().min(1).max(100),
   attributes: assessmentAttributesSchema,
+  toolTrace: z.array(agentToolTraceSchema).max(6).optional(),
   trustIndicators: assessmentAttributesSchema.shape.trustIndicators,
 }).strict();
 
@@ -73,6 +86,7 @@ export const followUpResponseSchema = z.object({
   response: z.string().min(1).max(50_000),
   sanitizedInput: z.string().max(MAX_PROMPT_LENGTH + 100),
   modelUsed: z.string().min(1).max(100),
+  toolTrace: z.array(agentToolTraceSchema).max(6).optional(),
   trustIndicators: z.object({
     inputValidated: z.literal(true),
     evidenceGrounded: z.boolean(),

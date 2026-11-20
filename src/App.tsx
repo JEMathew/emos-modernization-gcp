@@ -138,6 +138,10 @@ export default function App() {
       return <TrustCenterPage onNavigate={navigateTo} />;
     }
 
+    if (currentPath === '/workspace') {
+      return <Dashboard user={currentUser} />;
+    }
+
     if (isAuthChecking) {
       return (
         <div className="min-h-screen bg-[var(--emos-bg)] text-[var(--emos-text-primary)] flex flex-col items-center justify-center space-y-5">

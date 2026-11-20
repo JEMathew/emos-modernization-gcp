@@ -15,7 +15,7 @@ Target length: 3–4 minutes.
 - Preload one representative imported portfolio and at least one completed assessment.
 - Record in both light and dark mode only if it does not interrupt narrative flow.
 - Avoid exposing keys, browser account lists, email notifications, or unrelated tabs.
-- End with the public URL, repository, CI status, and `#AccelerateAIwithCloudRun` submission callout.
+- End with the public URL, repository, and CI status.
 
 ## Video alignment policy
 

@@ -78,10 +78,10 @@ const PRODUCT_TOUR_STEPS = [
   {
     step: 7,
     stage: 'Mobilize',
-    title: 'Prepare accountable mobilization',
+    title: 'Mobilize into Execute, Measure, and Learn',
     icon: ArrowRight,
-    description: 'Review ownership, governance, platform, security, people, and delivery actions before implementation begins.',
-    action: 'Open Mobilize and export the Executive Pack. Trust controls remain active throughout every stage.',
+    description: 'Review ownership, governance, platform, security, people, and delivery actions, then progress through governed transformation Execution, Outcome Measurement, and Institutional Learning.',
+    action: 'Open Mobilize, Execute, Measure, and Learn or export the Executive Pack. Trust controls remain active throughout every stage.',
   },
 ];
 
